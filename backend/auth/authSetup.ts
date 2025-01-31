@@ -1,8 +1,13 @@
 import * as jose from "jose";
+import { join } from "jsr:@std/path";
 import { load } from "../dependencies/depsMod.ts";
+
+// Obtains the absolute path to the .env file
+const envPath = join(Deno.cwd(), ".env");
 
 const env = await load({
   export: true,
+  envPath: envPath,
 });
 
 // Create a secret key for signing and verifying JWTs

@@ -1,6 +1,16 @@
 import { Database } from "jsr:@db/sqlite";
+import { join } from "jsr:@std/path";
+import { exists } from "jsr:@std/fs";
 
-const db = new Database("megafonito.db");
+// Obtains the abosulte path to the SQLite database file
+const dbPath = join(Deno.cwd(), "megafonito.db");
+console.log(`dbPath: ${dbPath}`);
+
+if (!(await exists(dbPath))) {
+  await Deno.writeFile(dbPath, new Uint8Array());
+}
+
+const db = new Database(dbPath);
 
 export interface DatabaseRow {
   [key: string]: string | number | boolean | null | Uint8Array;
