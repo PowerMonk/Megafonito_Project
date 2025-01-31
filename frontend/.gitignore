@@ -7,16 +7,27 @@ build/
 *.iml
 
 # Android
-android/.gradle/
-android/app/key.jks
-android/local.properties
+/android/.gradle/
+/android/.idea/
+/android/local.properties
+/android/app/
+/android/gradle/wrapper/
+
 
 # iOS
-ios/Pods/
-ios/.symlinks/
-ios/Flutter/Flutter.podspec
-ios/.dart_tool/
+ios/
+
+# MacOS
+macos/
 
 # Web
-web/.dart_tool/
-web/.firebase/
+web/
+
+# Windows
+windows/
+
+# Linux
+linux/
+
+# Test
+test/
