@@ -16,7 +16,8 @@ class MyApp extends StatelessWidget {
         primaryColor: Color(0xFF14213D), // Azul oscuro
         scaffoldBackgroundColor: Color(0xFF14213D), // Fondo azul oscuro
         textTheme: TextTheme(
-          bodyText2: TextStyle(color: Color(0xFF000000)), // Negro
+          // Aparentemente bodyText está deprecado en algunas versiones y bodyLarge funciona igual, puede ser que haya algun cambio en el tamaño de la fuente
+          bodyLarge: TextStyle(color: Color(0xFF000000)), // Negro
         ),
       ),
       home: SplashScreen(),
