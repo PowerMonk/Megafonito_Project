@@ -52,4 +52,4 @@ flutter run
 
 ## About Github Actions
 
-They have been enabled for generating an apk every time the frontend folder is changed, this lines of the md are created just to test that.
+Funciona carajo

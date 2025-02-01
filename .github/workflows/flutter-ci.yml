@@ -33,7 +33,9 @@ jobs:
         run: flutter build apk --release # Genera el APK en modo release
 
       - name: Upload APK
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: app-release.apk
           path: frontend/build/app/outputs/flutter-apk/app-release.apk # Ruta del APK generado
+          retention-days: 90 # Optional: Set retention period (default is 90 days)
+          compression-level: 9 # Optional: Enable compression (0 = no compression, 9 = max compression)
