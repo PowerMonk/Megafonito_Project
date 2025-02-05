@@ -6,6 +6,7 @@ export function initializeDatabase() {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       username TEXT UNIQUE NOT NULL,
       email TEXT UNIQUE NOT NULL,
+      role TEXT NOT NULL DEFAULT 'user',
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
   `;
@@ -27,9 +28,35 @@ export function initializeDatabase() {
     CREATE INDEX IF NOT EXISTS idx_notices_user_id ON notices(user_id);
   `;
 
+  //   // First check if the role column exists
+  //   const checkRoleColumn = `
+  // SELECT COUNT(*) as count
+  // FROM pragma_table_info('users')
+  // WHERE name='role';
+  // `;
+
+  //   const addRoleColumn = `
+  // ALTER TABLE users
+  // ADD COLUMN role TEXT NOT NULL DEFAULT 'user';
+  // `;
+
+  //   const updateAdminUsers = `
+  // UPDATE users
+  // SET role = 'admin'
+  // WHERE username IN ('Alexandra', 'Corinaa', 'Murci', 'Corina', 'Heloisa', 'Karol');
+  // `;
+
   execute(createUsersTable);
   execute(createNoticesTable);
   execute(createIndexes);
+
+  // // Only add the role column if it doesn't exist
+  // const result = execute(checkRoleColumn);
+  // if (result === 0) {
+  //   execute(addRoleColumn);
+  // }
+
+  // execute(updateAdminUsers);
 
   console.log("Database initialized successfully!");
 }
