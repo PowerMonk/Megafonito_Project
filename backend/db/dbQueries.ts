@@ -116,6 +116,29 @@ export function executeTransaction(
   }
 }
 
+export function paginatedQuery(
+  query: string,
+  page: number = 1,
+  limit: number = 12,
+  ...params: (string | number | null | Uint8Array | boolean)[]
+): { data: DatabaseRow[]; total: object | undefined } {
+  const offset = (page - 1) * limit;
+
+  // Get total count
+  const countQuery = query.replace(
+    /SELECT (.+?) FROM/i,
+    "SELECT COUNT(*) as total FROM"
+  );
+  const total = db.prepare(countQuery).get(...params);
+
+  // Get paginated data
+  const paginatedQuery = `${query} LIMIT ? OFFSET ?`;
+  const data = db.prepare(paginatedQuery).all(...params, limit, offset);
+
+  // Revisar porque total no puede convertirse en un numero
+  return { data, total };
+}
+
 /**
  * Closes the database connection.
  * Should be called when the application is shutting down to ensure all resources are released.
