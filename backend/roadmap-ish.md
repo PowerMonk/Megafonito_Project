@@ -1,6 +1,6 @@
 # Features to implement:
 
-1. **Atomic Rate Limiting:** Improve the rate limiter with in-memory locks.
+1. **Atomic Rate Limiting:** Mimmicks in memory locks, could use Deno workers in future updates.
 
 2. **RBAC:** Currently a 7/10, future improvements:
 
