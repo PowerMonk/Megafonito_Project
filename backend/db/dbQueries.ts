@@ -121,7 +121,7 @@ export function paginatedQuery(
   page: number = 1,
   limit: number = 12,
   ...params: (string | number | null | Uint8Array | boolean)[]
-): { data: DatabaseRow[]; total: object | undefined } {
+): { data: DatabaseRow[]; total: number } {
   const offset = (page - 1) * limit;
 
   // Get total count
@@ -129,13 +129,20 @@ export function paginatedQuery(
     /SELECT (.+?) FROM/i,
     "SELECT COUNT(*) as total FROM"
   );
-  const total = db.prepare(countQuery).get(...params);
+  const totalResult = db.prepare(countQuery).get(...params) as {
+    total: number;
+  };
+  const total = totalResult.total;
 
   // Get paginated data
   const paginatedQuery = `${query} LIMIT ? OFFSET ?`;
-  const data = db.prepare(paginatedQuery).all(...params, limit, offset);
 
-  // Revisar porque total no puede convertirse en un numero
+  // If there are no params, only pass limit and offset
+  const paginatedParams =
+    params.length > 0 ? [...params, limit, offset] : [limit, offset];
+
+  const data = db.prepare(paginatedQuery).all(...paginatedParams);
+
   return { data, total };
 }
 
