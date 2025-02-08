@@ -7,6 +7,7 @@ import {
   getNoticeByUserIdAndNoticeId,
   getNoticesByNoticeId,
   getAllNotices,
+  getPaginatedNotices,
 } from "../models/modelsMod.ts";
 import {
   checkNoticeExistsByNoticeId,
@@ -90,4 +91,12 @@ export function noticeDeleterHandler(ctx: RouterContext<string>) {
 export function getAllNoticesHandler(ctx: RouterContext<string>) {
   const allNotices = getAllNotices();
   ctx.response.body = allNotices;
+}
+
+export function getPaginatedNoticesHandler(ctx: RouterContext<string>) {
+  const page = parseInt(ctx.request.url.searchParams.get("page") ?? "1");
+  const limit = parseInt(ctx.request.url.searchParams.get("limit") ?? "2");
+
+  const paginatedNotices = getPaginatedNotices(page, limit);
+  ctx.response.body = paginatedNotices;
 }

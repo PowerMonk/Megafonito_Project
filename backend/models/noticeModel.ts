@@ -5,7 +5,29 @@ import {
   safeQueryAll,
   safeExecute,
   queryOne,
+  DatabaseRow,
+  paginatedQuery,
 } from "../db/dbMod.ts";
+
+// In your noticeModel.ts, you can now use it like this:
+export interface Notice extends DatabaseRow {
+  id: number;
+  title: string;
+  content: string;
+  user_id: number;
+  created_at: string;
+  // Add any other notice-specific fields
+}
+
+export interface PaginatedResponse<T extends DatabaseRow> {
+  data: T[];
+  pagination: {
+    currentPage: number;
+    pageSize: number;
+    totalItems: number;
+    totalPages: number;
+  };
+}
 
 export function createNotice(title: string, content: string, userId: number) {
   const query = `
@@ -53,4 +75,30 @@ export function getAllNotices() {
       SELECT * FROM notices;
     `;
   return safeQueryAll(() => queryAll(query));
+}
+
+// DESC makes them come from last to first
+export function getPaginatedNotices(
+  page: number = 1,
+  limit: number = 12
+): PaginatedResponse<Notice> {
+  const query = `
+    SELECT n.*, u.username as author 
+    FROM notices n 
+    LEFT JOIN users u ON n.user_id = u.id 
+    ORDER BY n.created_at DESC
+  `;
+
+  const { data, total } = paginatedQuery(query, page, limit);
+
+  return {
+    // Since Notice inherits from DatabaseRow, the conversion is safe.
+    data: data as Notice[],
+    pagination: {
+      currentPage: page,
+      pageSize: limit,
+      totalItems: total,
+      totalPages: Math.ceil(total / limit),
+    },
+  };
 }

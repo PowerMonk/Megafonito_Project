@@ -7,12 +7,14 @@ import {
   getNoticeByUserAndIdHandler,
   getNoticesByNoticeIdHandler,
   getAllNoticesHandler,
+  getPaginatedNoticesHandler,
 } from "../controllers/controllersMod.ts";
 import { authMiddleware } from "../auth/authMod.ts";
 
 router
   .post("/notices", validation.validateNoticeCreation, createNoticeHandler)
-  .get("/notices", authMiddleware, getAllNoticesHandler)
+  .get("/allnotices", authMiddleware, getAllNoticesHandler)
+  .get("/notices", getPaginatedNoticesHandler)
   .get("/notices/:userId", authMiddleware, getNoticesByUserHandler)
   .get(
     "/notices/anuncio/:noticeId",
