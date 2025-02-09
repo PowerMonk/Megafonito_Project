@@ -3,6 +3,7 @@ import 'CrearNuvAnuncio.dart'; // Asegúrate de que la ruta sea correcta
 import 'ContactoEscolar.dart'; // Asegúrate de que la ruta sea correcta
 import 'InfoUsuario.dart'; // Asegúrate de que la ruta sea correcta
 import 'ProcesosEscolares.dart'; // Asegúrate de que la ruta sea correcta
+import 'Beneficios.dart'; // Asegúrate de que la ruta sea correcta
 
 class AnunciosScreen extends StatefulWidget {
   final bool isSuperUser;
@@ -26,6 +27,8 @@ class _AnunciosScreenState extends State<AnunciosScreen>
   late Animation<double> _animation;
   List<Map<String, dynamic>> _anuncios = []; // Lista para almacenar anuncios
   Set<int> _expandedIndices = {}; // Para rastrear índices expandidos
+  String? _selectedImportance; // Filtro de importancia
+  DateTime? _selectedDate; // Filtro de fecha
 
   @override
   void initState() {
@@ -57,8 +60,14 @@ class _AnunciosScreenState extends State<AnunciosScreen>
         builder: (context) => CrearNuevoAnuncioScreen(
           onAnuncioCreado: (titulo, texto, color) {
             setState(() {
-              _anuncios.add({'titulo': titulo, 'texto': texto, 'color': color});
+              _anuncios.add({
+                'titulo': titulo,
+                'texto': texto,
+                'color': color,
+                'importancia': _selectedImportance, // Añadir importancia
+              });
             });
+            _filterAnuncios(); // Filtrar después de añadir un nuevo anuncio
           },
         ),
       ),
@@ -111,6 +120,19 @@ class _AnunciosScreenState extends State<AnunciosScreen>
     });
   }
 
+  void _navigateToBeneficios() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => BeneficiosScreen(),
+      ),
+    ).then((_) {
+      if (_isMenuOpen) {
+        _toggleMenu();
+      }
+    });
+  }
+
   void _toggleExpansion(int index) {
     setState(() {
       if (_expandedIndices.contains(index)) {
@@ -121,6 +143,22 @@ class _AnunciosScreenState extends State<AnunciosScreen>
       if (_isMenuOpen) {
         _toggleMenu();
       }
+    });
+  }
+
+  void _filterAnuncios() {
+    print(
+        'Filtrar por importancia: $_selectedImportance, fecha: $_selectedDate');
+    List<Map<String, dynamic>> filteredAnuncios = _anuncios.where((anuncio) {
+      bool matchesImportance = _selectedImportance == null ||
+          anuncio['importancia'] == _selectedImportance;
+      bool matchesDate = _selectedDate == null ||
+          (anuncio['fecha'] != null &&
+              (anuncio['fecha'] as DateTime).isAtSameMomentAs(_selectedDate!));
+      return matchesImportance && matchesDate;
+    }).toList();
+    setState(() {
+      _anuncios = filteredAnuncios;
     });
   }
 
@@ -136,52 +174,103 @@ class _AnunciosScreenState extends State<AnunciosScreen>
       ),
       body: Container(
         color: Color(0xFFE5E5E5), // Fondo gris claro
-        child: Center(
-          child: ListView(
-            padding: EdgeInsets.all(16.0),
-            children: _anuncios.asMap().entries.map((entry) {
-              int index = entry.key;
-              Map<String, dynamic> anuncio = entry.value;
-              bool isExpanded = _expandedIndices.contains(index);
+        child: Column(
+          children: [
+            // Filtros
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  DropdownButton<String>(
+                    hint: Text('Importancia'),
+                    value: _selectedImportance,
+                    items: ['Normal', 'Medio Importante', 'Importante']
+                        .map((importance) => DropdownMenuItem(
+                              value: importance,
+                              child: Text(importance),
+                            ))
+                        .toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedImportance = value;
+                      });
+                      _filterAnuncios();
+                    },
+                  ),
+                  TextButton(
+                    onPressed: () async {
+                      DateTime? pickedDate = await showDatePicker(
+                        context: context,
+                        initialDate: _selectedDate ?? DateTime.now(),
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime(2101),
+                      );
+                      if (pickedDate != null) {
+                        setState(() {
+                          _selectedDate = pickedDate;
+                        });
+                        _filterAnuncios();
+                      }
+                    },
+                    child: Text(
+                      _selectedDate == null
+                          ? 'Seleccionar Fecha'
+                          : 'Fecha: ${_selectedDate!.toLocal()}'.split(' ')[0],
+                      style: TextStyle(color: Color(0xFF14213D)),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: ListView(
+                padding: EdgeInsets.all(16.0),
+                children: _anuncios.asMap().entries.map((entry) {
+                  int index = entry.key;
+                  Map<String, dynamic> anuncio = entry.value;
+                  bool isExpanded = _expandedIndices.contains(index);
 
-              return GestureDetector(
-                onTap: () => _toggleExpansion(index),
-                child: AnimatedContainer(
-                  duration: Duration(milliseconds: 300),
-                  margin: EdgeInsets.symmetric(vertical: 10),
-                  padding: EdgeInsets.all(16.0),
-                  decoration: BoxDecoration(
-                    color: anuncio['color'] ?? Color(0xFFFFFFFF),
-                    borderRadius: BorderRadius.circular(15),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black26,
-                        blurRadius: 10,
-                        offset: Offset(0, 5),
+                  return GestureDetector(
+                    onTap: () => _toggleExpansion(index),
+                    child: AnimatedContainer(
+                      duration: Duration(milliseconds: 300),
+                      margin: EdgeInsets.symmetric(vertical: 10),
+                      padding: EdgeInsets.all(16.0),
+                      decoration: BoxDecoration(
+                        color: anuncio['color'] ?? Color(0xFFFFFFFF),
+                        borderRadius: BorderRadius.circular(15),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black26,
+                            blurRadius: 10,
+                            offset: Offset(0, 5),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        anuncio['titulo'],
-                        style:
-                            TextStyle(color: Color(0xFF000000), fontSize: 18),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            anuncio['titulo'],
+                            style: TextStyle(
+                                color: Color(0xFF000000), fontSize: 18),
+                          ),
+                          if (isExpanded) ...[
+                            SizedBox(height: 8),
+                            Text(
+                              anuncio['texto'],
+                              style: TextStyle(color: Color(0xFF000000)),
+                            ),
+                          ],
+                        ],
                       ),
-                      if (isExpanded) ...[
-                        SizedBox(height: 8),
-                        Text(
-                          anuncio['texto'],
-                          style: TextStyle(color: Color(0xFF000000)),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              );
-            }).toList(),
-          ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -242,6 +331,11 @@ class _AnunciosScreenState extends State<AnunciosScreen>
                         // Lógica para "Soporte"
                       },
                       child: _buildMenuOption(Icons.support, 'Soporte'),
+                    ),
+                    // Botón para navegar a la pantalla de beneficios
+                    GestureDetector(
+                      onTap: _navigateToBeneficios,
+                      child: _buildMenuOption(Icons.star, 'Beneficios'),
                     ),
                   ],
                 ),
