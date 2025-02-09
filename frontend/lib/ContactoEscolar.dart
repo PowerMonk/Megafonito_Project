@@ -1,6 +1,41 @@
 import 'package:flutter/material.dart';
 
-class ContactosEscolaresScreen extends StatelessWidget {
+class ContactosEscolaresScreen extends StatefulWidget {
+  @override
+  _ContactosEscolaresScreenState createState() =>
+      _ContactosEscolaresScreenState();
+}
+
+class _ContactosEscolaresScreenState extends State<ContactosEscolaresScreen> {
+  final List<Map<String, String>> contactos = [
+    {
+      'name': 'Profesor Juan Pérez',
+      'phone': '555-1234',
+      'email': 'juan.perez@escuela.edu',
+      'website': 'www.escuela.edu/profesor-juan',
+    },
+    {
+      'name': 'Administradora María López',
+      'phone': '555-5678',
+      'email': 'maria.lopez@escuela.edu',
+      'website': 'www.escuela.edu/administradora-maria',
+    },
+    {
+      'name': 'Profesor Carlos García',
+      'phone': '555-8765',
+      'email': 'carlos.garcia@escuela.edu',
+      'website': 'www.escuela.edu/profesor-carlos',
+    },
+    {
+      'name': 'Administrativa Ana Torres',
+      'phone': '555-4321',
+      'email': 'ana.torres@escuela.edu',
+      'website': 'www.escuela.edu/administrativa-ana',
+    },
+  ];
+
+  String query = '';
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -12,31 +47,34 @@ class ContactosEscolaresScreen extends StatelessWidget {
       body: Container(
         color: Colors.white, // Fondo blanco
         padding: EdgeInsets.all(16.0),
-        child: ListView(
+        child: Column(
           children: [
-            _buildContactCard(
-              name: 'Profesor Juan Pérez',
-              phone: '555-1234',
-              email: 'juan.perez@escuela.edu',
-              website: 'www.escuela.edu/profesor-juan',
+            TextField(
+              onChanged: (value) {
+                setState(() {
+                  query = value.toLowerCase();
+                });
+              },
+              decoration: InputDecoration(
+                labelText: 'Buscar por nombre',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.search),
+              ),
             ),
-            _buildContactCard(
-              name: 'Administradora María López',
-              phone: '555-5678',
-              email: 'maria.lopez@escuela.edu',
-              website: 'www.escuela.edu/administradora-maria',
-            ),
-            _buildContactCard(
-              name: 'Profesor Carlos García',
-              phone: '555-8765',
-              email: 'carlos.garcia@escuela.edu',
-              website: 'www.escuela.edu/profesor-carlos',
-            ),
-            _buildContactCard(
-              name: 'Administrativa Ana Torres',
-              phone: '555-4321',
-              email: 'ana.torres@escuela.edu',
-              website: 'www.escuela.edu/administrativa-ana',
+            SizedBox(height: 10),
+            Expanded(
+              child: ListView(
+                children: contactos
+                    .where((contacto) =>
+                        contacto['name']!.toLowerCase().contains(query))
+                    .map((contacto) => _buildContactCard(
+                          name: contacto['name']!,
+                          phone: contacto['phone']!,
+                          email: contacto['email']!,
+                          website: contacto['website']!,
+                        ))
+                    .toList(),
+              ),
             ),
           ],
         ),
@@ -82,6 +120,3 @@ class ContactosEscolaresScreen extends StatelessWidget {
     );
   }
 }
-
-
-// Hola soy pablo probando esto
