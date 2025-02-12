@@ -30,6 +30,16 @@ export const authMiddleware: Middleware = async (ctx, next) => {
   await next();
 };
 
+/**
+ * Creates a middleware that checks if the user has required role(s).
+ * @param roles - Array of roles allowed to access the route
+ * @returns Middleware that validates user role against allowed roles
+ * @throws 403 if user lacks required role
+ *
+ * @example
+ * router.get("/admin", requireRole([UserRole.ADMIN]))
+ */
+
 export const requireRole = (roles: UserRole[]): Middleware => {
   return async (ctx, next) => {
     const user = ctx.state.user; // Gets user from context state and checks if user exists and has required role
