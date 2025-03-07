@@ -13,6 +13,10 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false, // Eliminar el banner de debug
       title: 'Login Demo',
       theme: ThemeData(
+        appBarTheme: AppBarTheme(
+          iconTheme: IconThemeData(color: Colors.white),
+          actionsIconTheme: IconThemeData(color: Colors.white),
+        ),
         primaryColor: Color(0xFF14213D), // Azul oscuro
         scaffoldBackgroundColor: Color(0xFF14213D), // Fondo azul oscuro
         textTheme: TextTheme(
@@ -122,6 +126,7 @@ class _LoginScreenState extends State<LoginScreen> {
         name: 'Usuario Alumno',
         email: 'alumno@example.com',
         password: '123456'),
+    User(name: 'Karol', email: 'karol@mgf.com', password: '123456'),
   ];
 
   void _login() {

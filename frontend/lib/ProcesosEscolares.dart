@@ -4,91 +4,90 @@ import 'package:photo_view/photo_view.dart';
 class ProcesosEscolaresScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Procesos Escolares',
-          style: TextStyle(color: Colors.white), // Título en blanco
-        ),
-        backgroundColor: Color(0xFF14213D), // Color del AppBar
-        iconTheme:
-            IconThemeData(color: Colors.white), // Icono de regreso en blanco
-      ),
-      body: Container(
-        color: Color(0xFFF0F0F0), // Fondo gris claro
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ImageScreen(
-                        title: 'Proceso de Reinscripción',
-                        imagePaths: [
-                          'assets/Reins_1.png',
-                          'assets/Reins_2.png',
-                          'assets/Reins_3.png',
-                        ],
-                      ),
+    // return Scaffold(
+    //   appBar: AppBar(
+    //     title: Text(
+    //       'Procesos Escolares',
+    //       style: TextStyle(color: Colors.white), // Título en blanco
+    //     ),
+    //     backgroundColor: Color(0xFF14213D), // Color del AppBar
+    //     iconTheme:
+    //         IconThemeData(color: Colors.white), // Icono de regreso en blanco
+    //   ),
+    // Return just the content without Scaffold or AppBar
+    return Container(
+      color: Color(0xFFF0F0F0), // Fondo gris claro
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ImageScreen(
+                      title: 'Proceso de Reinscripción',
+                      imagePaths: [
+                        'assets/Reins_1.png',
+                        'assets/Reins_2.png',
+                        'assets/Reins_3.png',
+                      ],
                     ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFFFCA311), // Color del botón
-                  padding: EdgeInsets.symmetric(
-                      vertical: 16, horizontal: 30), // Aumentar padding
-                  shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(10), // Bordes redondeados
                   ),
-                ),
-                child: Text(
-                  'Proceso de Reinscripción',
-                  style: TextStyle(
-                      fontSize: 20,
-                      color: Colors.black), // Aumentar tamaño de texto
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xFFFCA311), // Color del botón
+                padding: EdgeInsets.symmetric(
+                    vertical: 16, horizontal: 30), // Aumentar padding
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10), // Bordes redondeados
                 ),
               ),
-              SizedBox(height: 20), // Espacio entre botones
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ImageScreen(
-                        title: 'Calendario de Reinscripción',
-                        imagePaths: [
-                          'assets/Imag1.png',
-                          'assets/Imag2.png',
-                        ],
-                      ),
+              child: Text(
+                'Proceso de Reinscripción',
+                style: TextStyle(
+                    fontSize: 20,
+                    color: Colors.black), // Aumentar tamaño de texto
+              ),
+            ),
+            SizedBox(height: 20), // Espacio entre botones
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ImageScreen(
+                      title: 'Calendario de Reinscripción',
+                      imagePaths: [
+                        'assets/Imag1.png',
+                        'assets/Imag2.png',
+                      ],
                     ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFFFCA311), // Color del botón
-                  padding: EdgeInsets.symmetric(
-                      vertical: 16, horizontal: 30), // Aumentar padding
-                  shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(10), // Bordes redondeados
                   ),
-                ),
-                child: Text(
-                  'Calendario de Reinscripción',
-                  style: TextStyle(
-                      fontSize: 20,
-                      color: Colors.black), // Aumentar tamaño de texto
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xFFFCA311), // Color del botón
+                padding: EdgeInsets.symmetric(
+                    vertical: 16, horizontal: 30), // Aumentar padding
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10), // Bordes redondeados
                 ),
               ),
-            ],
-          ),
+              child: Text(
+                'Calendario de Reinscripción',
+                style: TextStyle(
+                    fontSize: 20,
+                    color: Colors.black), // Aumentar tamaño de texto
+              ),
+            ),
+          ],
         ),
       ),
     );
+    // );
   }
 }
 

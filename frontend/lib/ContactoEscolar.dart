@@ -38,46 +38,46 @@ class _ContactosEscolaresScreenState extends State<ContactosEscolaresScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Contactos Escolares',
-            style: TextStyle(color: Colors.white)), // Título en blanco
-        backgroundColor: Color(0xFF14213D), // Azul oscuro
-      ),
-      body: Container(
-        color: Colors.white, // Fondo blanco
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(
-              onChanged: (value) {
-                setState(() {
-                  query = value.toLowerCase();
-                });
-              },
-              decoration: InputDecoration(
-                labelText: 'Buscar por nombre',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.search),
-              ),
+    // return Scaffold(
+    //   appBar: AppBar(
+    //     title: Text('Contactos Escolares',
+    //         style: TextStyle(color: Colors.white)), // Título en blanco
+    //     backgroundColor: Color(0xFF14213D), // Azul oscuro
+    //   ),
+    // Return just the content without Scaffold or AppBar
+    return Container(
+      color: Colors.white,
+      padding: EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          TextField(
+            onChanged: (value) {
+              setState(() {
+                query = value.toLowerCase();
+              });
+            },
+            decoration: InputDecoration(
+              labelText: 'Buscar por nombre',
+              border: OutlineInputBorder(),
+              prefixIcon: Icon(Icons.search),
             ),
-            SizedBox(height: 10),
-            Expanded(
-              child: ListView(
-                children: contactos
-                    .where((contacto) =>
-                        contacto['name']!.toLowerCase().contains(query))
-                    .map((contacto) => _buildContactCard(
-                          name: contacto['name']!,
-                          phone: contacto['phone']!,
-                          email: contacto['email']!,
-                          website: contacto['website']!,
-                        ))
-                    .toList(),
-              ),
+          ),
+          SizedBox(height: 10),
+          Expanded(
+            child: ListView(
+              children: contactos
+                  .where((contacto) =>
+                      contacto['name']!.toLowerCase().contains(query))
+                  .map((contacto) => _buildContactCard(
+                        name: contacto['name']!,
+                        phone: contacto['phone']!,
+                        email: contacto['email']!,
+                        website: contacto['website']!,
+                      ))
+                  .toList(),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
