@@ -9,14 +9,15 @@ import {
   paginatedQuery,
 } from "../db/dbMod.ts";
 
-// In your noticeModel.ts, you can now use it like this:
 export interface Notice extends DatabaseRow {
   id: number;
   title: string;
   content: string;
   user_id: number;
+  category: string;
+  has_file: number;
+  file_url: string | null;
   created_at: string;
-  // Add any other notice-specific fields
 }
 
 export interface PaginatedResponse<T extends DatabaseRow> {
@@ -29,11 +30,21 @@ export interface PaginatedResponse<T extends DatabaseRow> {
   };
 }
 
-export function createNotice(title: string, content: string, userId: number) {
+export function createNotice(
+  title: string,
+  content: string,
+  userId: number,
+  category: string = "Clases",
+  hasFile: boolean = false,
+  fileUrl: string | null = null
+) {
   const query = `
-      INSERT INTO notices (title, content, user_id) VALUES (?, ?, ?);
-    `;
-  return safeExecute(() => execute(query, title, content, userId));
+    INSERT INTO notices (title, content, user_id, category, has_file, file_url) 
+    VALUES (?, ?, ?, ?, ?, ?);
+  `;
+  return safeExecute(() =>
+    execute(query, title, content, userId, category, hasFile ? 1 : 0, fileUrl)
+  );
 }
 
 export function getNoticesByUser(userId: number) {
@@ -57,11 +68,41 @@ export function getNoticesByNoticeId(noticeId: number) {
   return safeQuery(() => queryOne(query, noticeId));
 }
 
-export function updateNotice(noticeId: number, title: string, content: string) {
-  const query = `
-      UPDATE notices SET title = ?, content = ? WHERE id = ?;
-    `;
-  return safeExecute(() => execute(query, title, content, noticeId));
+// export function updateNotice(noticeId: number, title: string, content: string) {
+//   const query = `
+//       UPDATE notices SET title = ?, content = ? WHERE id = ?;
+//     `;
+//   return safeExecute(() => execute(query, title, content, noticeId));
+// }
+
+// Update the updateNotice function to include new fields
+export function updateNotice(
+  noticeId: number,
+  title: string,
+  content: string,
+  category: string,
+  hasFile?: boolean,
+  fileUrl?: string
+) {
+  let query = ` UPDATE notices SET title = ?, content = ? WHERE id = ?`;
+  const params = [title, content, noticeId];
+
+  if (category !== undefined) {
+    query += `, category = ?`;
+    params.push(category);
+  }
+
+  if (hasFile !== undefined) {
+    query += `, has_file = ?`;
+    params.push(hasFile ? 1 : 0);
+  }
+
+  if (fileUrl !== undefined) {
+    query += `, file_url = ?`;
+    params.push(fileUrl);
+  }
+
+  return safeExecute(() => execute(query, ...params));
 }
 
 export function deleteNotice(noticeId: number) {
@@ -78,21 +119,70 @@ export function getAllNotices() {
 }
 
 // DESC makes them come from last to first
+// export function getPaginatedNotices(
+//   page: number = 1,
+//   limit: number = 12
+// ): PaginatedResponse<Notice> {
+//   const query = `
+//     SELECT n.*, u.username as author
+//     FROM notices n
+//     LEFT JOIN users u ON n.user_id = u.id
+//     ORDER BY n.created_at DESC
+//   `;
+
+//   const { data, total } = paginatedQuery(query, page, limit);
+
+//   return {
+//     // Since Notice inherits from DatabaseRow, the conversion is safe.
+//     data: data as Notice[],
+//     pagination: {
+//       currentPage: page,
+//       pageSize: limit,
+//       totalItems: total,
+//       totalPages: Math.ceil(total / limit),
+//     },
+//   };
+// }
+// Update the getPaginatedNotices function to include filters
 export function getPaginatedNotices(
   page: number = 1,
-  limit: number = 12
+  limit: number = 12,
+  category?: string,
+  hasFiles?: boolean
 ): PaginatedResponse<Notice> {
-  const query = `
+  let baseQuery = `
     SELECT n.*, u.username as author 
     FROM notices n 
     LEFT JOIN users u ON n.user_id = u.id 
-    ORDER BY n.created_at DESC
   `;
 
-  const { data, total } = paginatedQuery(query, page, limit);
+  const whereConditions: string[] = [];
+  const queryParams: (string | number | null | boolean)[] = [];
+
+  if (category) {
+    whereConditions.push(`n.category = ?`);
+    queryParams.push(category);
+  }
+
+  if (hasFiles !== undefined) {
+    whereConditions.push(`n.has_file = ?`);
+    queryParams.push(hasFiles ? 1 : 0);
+  }
+
+  if (whereConditions.length > 0) {
+    baseQuery += ` WHERE ${whereConditions.join(" AND ")}`;
+  }
+
+  baseQuery += ` ORDER BY n.created_at DESC`;
+
+  const { data, total } = paginatedQuery(
+    baseQuery,
+    page,
+    limit,
+    ...queryParams
+  );
 
   return {
-    // Since Notice inherits from DatabaseRow, the conversion is safe.
     data: data as Notice[],
     pagination: {
       currentPage: page,
