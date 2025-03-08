@@ -71,3 +71,39 @@ body: _currentIndex == 0
 ---
 
 # Backend
+
+---
+
+# Implementations
+
+## Frontend
+
+### Enhanced Filtering System
+
+- Created dedicated NoticesFilter component for better separation of concerns
+- Implemented horizontal scrollable category chips for better UX
+- Added dropdown menu for sorting options (newest, oldest, with attachments)
+- Fixed layout to properly align filter button with category list
+- Ensured proper spacing and visual hierarchy in filter UI
+
+### File Attachment Feature
+
+- Added file attachment capability to announcement creation
+- Implemented "Agregar archivo" button with paperclip icon
+- Added visual feedback when files are attached
+- Updated announcement model to track file attachment status
+- Integrated file attachment status with filtering system
+
+### Category-based Filtering
+
+- Standardized categories across creation and filtering interfaces
+- Replaced importance-based coloring with category-based filtering
+- Updated filter logic to properly handle category selection
+- Implemented visual indicators for active filters
+- Ensured consistent category options between screens
+
+---
+
+## Backend
+
+_Backend implementations pending_

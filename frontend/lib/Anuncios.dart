@@ -5,6 +5,7 @@ import 'ContactoEscolar.dart'; // Asegúrate de que la ruta sea correcta
 import 'InfoUsuario.dart'; // Asegúrate de que la ruta sea correcta
 import 'ProcesosEscolares.dart'; // Asegúrate de que la ruta sea correcta
 import 'Beneficios.dart'; // Asegúrate de que la ruta sea correcta
+import 'NoticesFilter.dart'; // Importar el nuevo archivo
 
 class AnunciosScreen extends StatefulWidget {
   final bool isSuperUser;
@@ -28,18 +29,21 @@ class _AnunciosScreenState extends State<AnunciosScreen>
   late Animation<double> _animation;
   List<Map<String, dynamic>> _anuncios = []; // Lista para almacenar anuncios
   Set<int> _expandedIndices = {}; // Para rastrear índices expandidos
-  String? _selectedImportance; // Filtro de importancia
+  // String? _selectedImportance; // Filtro de importancia
   DateTime? _selectedDate; // Filtro de fecha
+  // Filtros de categoría y orden de la parte superior
+  String? _selectedCategory;
+  String? _selectedSortOption;
   // Lista para las pantallas de la aplicación
   int _currentIndex = 0;
-  late List<Widget> _screens;
+  // late List<Widget> _screens;
 
   final List<String> _screenTitles = [
     'Megafonito',
     'Contactos Escolares',
+    'Beneficios',
     'Procesos Escolares',
     'Soporte Megafonito',
-    'Beneficios'
   ];
 
   @override
@@ -74,36 +78,26 @@ class _AnunciosScreenState extends State<AnunciosScreen>
     });
   }
 
+// Update the navigateToCrearNuevoAnuncio method in Anuncios.dart
   void _navigateToCrearNuevoAnuncio() {
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => CrearNuevoAnuncioScreen(
-          onAnuncioCreado: (titulo, texto, color) {
+          onAnuncioCreado: (titulo, texto, color, categoria, tieneArchivos) {
             setState(() {
               _anuncios.add({
                 'titulo': titulo,
                 'texto': texto,
                 'color': color,
-                'importancia': _selectedImportance, // Añadir importancia
+                'categoria': categoria,
+                'tieneArchivos': tieneArchivos,
+                'fecha': DateTime.now(), // Add current date
               });
             });
-            _filterAnuncios(); // Filtrar después de añadir un nuevo anuncio
+            _filterAnuncios();
           },
         ),
-      ),
-    ).then((_) {
-      if (_isMenuOpen) {
-        _toggleMenu();
-      }
-    });
-  }
-
-  void _navigateToContactosEscolares() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ContactosEscolaresScreen(),
       ),
     ).then((_) {
       if (_isMenuOpen) {
@@ -128,44 +122,59 @@ class _AnunciosScreenState extends State<AnunciosScreen>
     });
   }
 
-  void _navigateToProcesosEscolares() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ProcesosEscolaresScreen(),
-      ),
-    ).then((_) {
-      if (_isMenuOpen) {
-        _toggleMenu();
-      }
-    });
-  }
+// FUNCIONES COMENTADAS PORQUE NO SE USAN POR AHORA Y PARA AHORRAR MEMORIA
 
-  void _navigateToBeneficios() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => BeneficiosScreen(),
-      ),
-    ).then((_) {
-      if (_isMenuOpen) {
-        _toggleMenu();
-      }
-    });
-  }
+  // void _navigateToContactosEscolares() {
+  //   Navigator.push(
+  //     context,
+  //     MaterialPageRoute(
+  //       builder: (context) => ContactosEscolaresScreen(),
+  //     ),
+  //   ).then((_) {
+  //     if (_isMenuOpen) {
+  //       _toggleMenu();
+  //     }
+  //   });
+  // }
 
-  void _navigateToSoporte() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => SoporteMegafonitoScreen(),
-      ),
-    ).then((_) {
-      if (_isMenuOpen) {
-        _toggleMenu();
-      }
-    });
-  }
+  //  void _navigateToProcesosEscolares() {
+  //   Navigator.push(
+  //     context,
+  //     MaterialPageRoute(
+  //       builder: (context) => ProcesosEscolaresScreen(),
+  //     ),
+  //   ).then((_) {
+  //     if (_isMenuOpen) {
+  //       _toggleMenu();
+  //     }
+  //   });
+  // }
+
+  // void _navigateToBeneficios() {
+  //   Navigator.push(
+  //     context,
+  //     MaterialPageRoute(
+  //       builder: (context) => BeneficiosScreen(),
+  //     ),
+  //   ).then((_) {
+  //     if (_isMenuOpen) {
+  //       _toggleMenu();
+  //     }
+  //   });
+  // }
+
+  // void _navigateToSoporte() {
+  //   Navigator.push(
+  //     context,
+  //     MaterialPageRoute(
+  //       builder: (context) => SoporteMegafonitoScreen(),
+  //     ),
+  //   ).then((_) {
+  //     if (_isMenuOpen) {
+  //       _toggleMenu();
+  //     }
+  //   });
+  // }
 
   void _toggleExpansion(int index) {
     setState(() {
@@ -180,17 +189,34 @@ class _AnunciosScreenState extends State<AnunciosScreen>
     });
   }
 
+// Update the _filterAnuncios method in Anuncios.dart
   void _filterAnuncios() {
-    print(
-        'Filtrar por importancia: $_selectedImportance, fecha: $_selectedDate');
     List<Map<String, dynamic>> filteredAnuncios = _anuncios.where((anuncio) {
-      bool matchesImportance = _selectedImportance == null ||
-          anuncio['importancia'] == _selectedImportance;
+      // Remove importance filter as we're not using it anymore
       bool matchesDate = _selectedDate == null ||
           (anuncio['fecha'] != null &&
               (anuncio['fecha'] as DateTime).isAtSameMomentAs(_selectedDate!));
-      return matchesImportance && matchesDate;
+
+      // Use the category from the new filter
+      bool matchesCategory = _selectedCategory == null ||
+          _selectedCategory == '' ||
+          anuncio['categoria'] == _selectedCategory;
+
+      return matchesDate && matchesCategory;
     }).toList();
+
+    if (_selectedSortOption == 'Más recientes') {
+      filteredAnuncios.sort(
+          (a, b) => (b['fecha'] as DateTime).compareTo(a['fecha'] as DateTime));
+    } else if (_selectedSortOption == 'Más antiguos') {
+      filteredAnuncios.sort(
+          (a, b) => (a['fecha'] as DateTime).compareTo(b['fecha'] as DateTime));
+    } else if (_selectedSortOption == 'Con archivos') {
+      filteredAnuncios = filteredAnuncios
+          .where((anuncio) => anuncio['tieneArchivos'] == true)
+          .toList();
+    }
+
     setState(() {
       _anuncios = filteredAnuncios;
     });
@@ -216,9 +242,9 @@ class _AnunciosScreenState extends State<AnunciosScreen>
               index: _currentIndex - 1, // Adjust index
               children: [
                 ContactosEscolaresScreen(),
+                BeneficiosScreen(),
                 ProcesosEscolaresScreen(),
                 SoporteMegafonitoScreen(),
-                BeneficiosScreen(),
               ],
             ),
       floatingActionButton: _currentIndex == 0 && widget.isSuperUser
@@ -244,16 +270,16 @@ class _AnunciosScreenState extends State<AnunciosScreen>
             label: 'Contactos',
           ),
           BottomNavigationBarItem(
+            icon: Icon(Icons.star),
+            label: 'Beneficios',
+          ),
+          BottomNavigationBarItem(
             icon: Icon(Icons.school),
             label: 'Procesos',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.support),
             label: 'Soporte',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.star),
-            label: 'Beneficios',
           ),
         ],
         onTap: (index) {
@@ -270,52 +296,19 @@ class _AnunciosScreenState extends State<AnunciosScreen>
       color: Color(0xFFE5E5E5),
       child: Column(
         children: [
-          // Filtros
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                DropdownButton<String>(
-                  hint: Text('Importancia'),
-                  value: _selectedImportance,
-                  items: ['Normal', 'Medio Importante', 'Importante']
-                      .map((importance) => DropdownMenuItem(
-                            value: importance,
-                            child: Text(importance),
-                          ))
-                      .toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedImportance = value;
-                    });
-                    _filterAnuncios();
-                  },
-                ),
-                TextButton(
-                  onPressed: () async {
-                    DateTime? pickedDate = await showDatePicker(
-                      context: context,
-                      initialDate: _selectedDate ?? DateTime.now(),
-                      firstDate: DateTime(2000),
-                      lastDate: DateTime(2101),
-                    );
-                    if (pickedDate != null) {
-                      setState(() {
-                        _selectedDate = pickedDate;
-                      });
-                      _filterAnuncios();
-                    }
-                  },
-                  child: Text(
-                    _selectedDate == null
-                        ? 'Seleccionar Fecha'
-                        : 'Fecha: ${_selectedDate!.toLocal()}'.split(' ')[0],
-                    style: TextStyle(color: Color(0xFF14213D)),
-                  ),
-                ),
-              ],
-            ),
+          NoticesFilter(
+            onCategorySelected: (category) {
+              setState(() {
+                _selectedCategory = category;
+              });
+              _filterAnuncios();
+            },
+            onSortOptionSelected: (sortOption) {
+              setState(() {
+                _selectedSortOption = sortOption;
+              });
+              _filterAnuncios();
+            },
           ),
           Expanded(
             child: ListView(
