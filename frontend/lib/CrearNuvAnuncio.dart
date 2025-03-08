@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class CrearNuevoAnuncioScreen extends StatefulWidget {
-  final Function(String, String, Color) onAnuncioCreado;
+  final Function(String, String, Color, String, bool) onAnuncioCreado;
 
   CrearNuevoAnuncioScreen({required this.onAnuncioCreado});
 
@@ -13,27 +13,41 @@ class CrearNuevoAnuncioScreen extends StatefulWidget {
 class _CrearNuevoAnuncioScreenState extends State<CrearNuevoAnuncioScreen> {
   final TextEditingController _tituloController = TextEditingController();
   final TextEditingController _textoController = TextEditingController();
-  String? _importanciaSeleccionada = 'Normal';
-  final Map<String, Color> _importanciaColores = {
-    'Normal': Colors.blue,
-    'Medio Importante': Colors.yellow,
-    'Importante': Colors.red,
-  };
+  String _categoriaSeleccionada = 'Clases';
+  bool _tieneArchivos = false;
+
+  // Lista de categorías (misma que en NoticesFilter)
+  final List<String> _categorias = [
+    'Clases',
+    'Convocatorias',
+    'Eventos',
+    'Deportes',
+    'Comunidad',
+  ];
 
   void _crearAnuncio() {
     final String titulo = _tituloController.text;
     final String texto = _textoController.text;
-    final Color color = _importanciaColores[_importanciaSeleccionada!]!;
+    final Color color = Color(0xFFFFFFFF); // Color blanco por defecto
 
     if (titulo.isNotEmpty && texto.isNotEmpty) {
-      widget.onAnuncioCreado(titulo, texto, color);
-      Navigator.pop(context); // Regresar a la pantalla anterior
+      widget.onAnuncioCreado(
+          titulo, texto, color, _categoriaSeleccionada, _tieneArchivos);
+      Navigator.pop(context);
     } else {
-      // Muestra un mensaje de error si el título o texto están vacíos
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Por favor, completa todos los campos.')),
       );
     }
+  }
+
+  void _agregarArchivo() {
+    setState(() {
+      _tieneArchivos = true;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Archivo adjuntado correctamente')),
+    );
   }
 
   @override
@@ -42,29 +56,45 @@ class _CrearNuevoAnuncioScreenState extends State<CrearNuevoAnuncioScreen> {
       appBar: AppBar(
         title: Text(
           'Crear Nuevo Anuncio',
-          style: TextStyle(color: Colors.white), // Texto claro en el encabezado
+          style: TextStyle(color: Colors.white),
         ),
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () =>
-              Navigator.pop(context), // Regresar a la pantalla anterior
+          onPressed: () => Navigator.pop(context),
         ),
-        backgroundColor: Color(0xFF14213D), // Azul oscuro
+        backgroundColor: Color(0xFF14213D),
       ),
       body: Container(
-        color: Color(0xFFE5E5E5), // Fondo gris claro
+        color: Color(0xFFE5E5E5),
         padding: const EdgeInsets.all(16.0),
         child: Center(
-          // Centrar el contenido
           child: SingleChildScrollView(
             child: Column(
-              mainAxisSize: MainAxisSize.min, // Ajustar el tamaño del contenido
+              mainAxisSize: MainAxisSize.min,
               children: [
                 _buildTextField(_tituloController, 'Título'),
                 SizedBox(height: 16),
                 _buildTextField(_textoController, 'Texto', maxLines: 4),
                 SizedBox(height: 16),
-                _buildDropdown(),
+
+                // Botón para adjuntar archivos
+                ElevatedButton.icon(
+                  onPressed: _agregarArchivo,
+                  icon: Icon(Icons.attach_file, color: Colors.black),
+                  label: Text(
+                    'Agregar archivo',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFFFCA311),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                  ),
+                ),
+
+                SizedBox(height: 16),
+                _buildCategoryDropdown(),
                 SizedBox(height: 20),
                 _buildElevatedButton('Crear Anuncio', _crearAnuncio),
               ],
@@ -82,40 +112,38 @@ class _CrearNuevoAnuncioScreenState extends State<CrearNuevoAnuncioScreen> {
       maxLines: maxLines,
       decoration: InputDecoration(
         labelText: label,
-        labelStyle:
-            TextStyle(color: Color(0xFF000000)), // Texto negro para la etiqueta
+        labelStyle: TextStyle(color: Color(0xFF000000)),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(15),
-          borderSide: BorderSide(color: Color(0xFF14213D)), // Azul oscuro
+          borderSide: BorderSide(color: Color(0xFF14213D)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(15),
-          borderSide: BorderSide(color: Color(0xFFFCA311)), // Naranja
+          borderSide: BorderSide(color: Color(0xFFFCA311)),
         ),
       ),
     );
   }
 
-  Widget _buildDropdown() {
+  Widget _buildCategoryDropdown() {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(15),
         border: Border.all(color: Color(0xFF14213D)),
       ),
       child: DropdownButton<String>(
-        value: _importanciaSeleccionada,
+        value: _categoriaSeleccionada,
         onChanged: (String? newValue) {
           setState(() {
-            _importanciaSeleccionada = newValue;
+            _categoriaSeleccionada = newValue!;
           });
         },
-        items: _importanciaColores.keys.map((String key) {
+        items: _categorias.map((String category) {
           return DropdownMenuItem<String>(
-            value: key,
+            value: category,
             child: Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Text(key,
-                  style: TextStyle(color: Color(0xFF000000))), // Texto negro
+              child: Text(category, style: TextStyle(color: Color(0xFF000000))),
             ),
           );
         }).toList(),
@@ -129,7 +157,7 @@ class _CrearNuevoAnuncioScreenState extends State<CrearNuevoAnuncioScreen> {
     return ElevatedButton(
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
-        backgroundColor: Color(0xFFFCA311), // Naranja
+        backgroundColor: Color(0xFFFCA311),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(15),
         ),
@@ -137,7 +165,7 @@ class _CrearNuevoAnuncioScreenState extends State<CrearNuevoAnuncioScreen> {
       ),
       child: Text(
         label,
-        style: TextStyle(color: Color(0xFF000000)), // Texto negro
+        style: TextStyle(color: Color(0xFF000000)),
       ),
     );
   }
