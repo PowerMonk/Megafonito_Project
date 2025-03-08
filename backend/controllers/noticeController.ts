@@ -15,7 +15,8 @@ import {
 } from "../utils/utilsMod.ts";
 
 export async function createNoticeHandler(ctx: RouterContext<string>) {
-  const { title, content, userId } = await ctx.request.body.json();
+  const { title, content, userId, category, hasFile, fileUrl } =
+    await ctx.request.body.json();
 
   // These will throw if not found
   checkNoticeExistsByUserId(userId);
@@ -23,7 +24,7 @@ export async function createNoticeHandler(ctx: RouterContext<string>) {
   // This guard clause is not needed since the  function will throw an error if the user is not found
   // if (!user) return;
 
-  createNotice(title, content, userId);
+  createNotice(title, content, userId, category, hasFile, fileUrl);
   ctx.response.status = 201;
   ctx.response.body = {
     message: `Notice created successfully! at ${new Date()}`,
@@ -66,11 +67,12 @@ export function getNoticesByNoticeIdHandler(ctx: RouterContext<string>) {
 export async function noticeUpdaterHandler(ctx: RouterContext<string>) {
   const noticeId = +ctx.params.noticeId;
   //   const { title, content, noticeId } = await ctx.request.body.json();
-  const { title, content } = await ctx.request.body.json();
+  const { title, content, category, hasFile, fileUrl } =
+    await ctx.request.body.json();
 
   checkNoticeExistsByNoticeId(noticeId);
 
-  updateNotice(noticeId, title, content);
+  updateNotice(noticeId, title, content, category, hasFile, fileUrl);
   ctx.response.status = 200;
   ctx.response.body = {
     message: `Notice updated successfully! at ${new Date()}`,
@@ -95,8 +97,12 @@ export function getAllNoticesHandler(ctx: RouterContext<string>) {
 
 export function getPaginatedNoticesHandler(ctx: RouterContext<string>) {
   const page = parseInt(ctx.request.url.searchParams.get("page") ?? "1");
-  const limit = parseInt(ctx.request.url.searchParams.get("limit") ?? "2");
+  const limit = parseInt(ctx.request.url.searchParams.get("limit") ?? "3");
+  const category = ctx.request.url.searchParams.get("category") || undefined;
+  const hasFiles = ctx.request.url.searchParams.has("hasFiles")
+    ? ctx.request.url.searchParams.get("hasFiles") === "true"
+    : undefined;
 
-  const paginatedNotices = getPaginatedNotices(page, limit);
+  const paginatedNotices = getPaginatedNotices(page, limit, category, hasFiles);
   ctx.response.body = paginatedNotices;
 }

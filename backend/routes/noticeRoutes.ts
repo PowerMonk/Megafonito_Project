@@ -8,6 +8,8 @@ import {
   getNoticesByNoticeIdHandler,
   getAllNoticesHandler,
   getPaginatedNoticesHandler,
+  uploadFileHandler,
+  serveFileHandler,
 } from "../controllers/controllersMod.ts";
 import { authMiddleware } from "../auth/authMod.ts";
 
@@ -27,4 +29,6 @@ router
     getNoticeByUserAndIdHandler
   )
   .put("/notices/:noticeId", authMiddleware, noticeUpdaterHandler)
-  .delete("/notices/:noticeId", authMiddleware, noticeDeleterHandler);
+  .delete("/notices/:noticeId", authMiddleware, noticeDeleterHandler)
+  .post("/upload", authMiddleware, uploadFileHandler)
+  .get("/files/:fileName", serveFileHandler);

@@ -17,6 +17,9 @@ export function initializeDatabase() {
       title TEXT NOT NULL,
       content TEXT NOT NULL,
       user_id INTEGER,
+      category TEXT DEFAULT 'Clases',
+      has_file BOOLEAN DEFAULT 0,
+      file_url TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (user_id) REFERENCES users(id)
     );
@@ -26,6 +29,7 @@ export function initializeDatabase() {
     CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
     CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
     CREATE INDEX IF NOT EXISTS idx_notices_user_id ON notices(user_id);
+    CREATE INDEX IF NOT EXISTS idx_notices_category ON notices(category);
   `;
 
   //   // First check if the role column exists
