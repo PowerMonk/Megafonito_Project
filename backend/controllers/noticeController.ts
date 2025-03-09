@@ -13,9 +13,10 @@ import {
   checkNoticeExistsByNoticeId,
   checkNoticeExistsByUserId,
 } from "../utils/utilsMod.ts";
+import { getS3Service } from "../proxy/proxyMod.ts";
 
 export async function createNoticeHandler(ctx: RouterContext<string>) {
-  const { title, content, userId, category, hasFile, fileUrl } =
+  const { title, content, userId, category, hasFile, fileUrl, fileKey } =
     await ctx.request.body.json();
 
   // These will throw if not found
@@ -24,7 +25,7 @@ export async function createNoticeHandler(ctx: RouterContext<string>) {
   // This guard clause is not needed since the  function will throw an error if the user is not found
   // if (!user) return;
 
-  createNotice(title, content, userId, category, hasFile, fileUrl);
+  createNotice(title, content, userId, category, hasFile, fileUrl, fileKey);
   ctx.response.status = 201;
   ctx.response.body = {
     message: `Notice created successfully! at ${new Date()}`,
@@ -66,23 +67,38 @@ export function getNoticesByNoticeIdHandler(ctx: RouterContext<string>) {
 
 export async function noticeUpdaterHandler(ctx: RouterContext<string>) {
   const noticeId = +ctx.params.noticeId;
-  //   const { title, content, noticeId } = await ctx.request.body.json();
-  const { title, content, category, hasFile, fileUrl } =
+  const { title, content, category, hasFile, fileUrl, fileKey } =
     await ctx.request.body.json();
 
   checkNoticeExistsByNoticeId(noticeId);
 
-  updateNotice(noticeId, title, content, category, hasFile, fileUrl);
+  // Update notice with all fields, including file information
+  updateNotice(noticeId, title, content, category, hasFile, fileUrl, fileKey);
   ctx.response.status = 200;
   ctx.response.body = {
     message: `Notice updated successfully! at ${new Date()}`,
   };
 }
 
-export function noticeDeleterHandler(ctx: RouterContext<string>) {
+export async function noticeDeleterHandler(ctx: RouterContext<string>) {
   const noticeId = +ctx.params.noticeId;
 
   checkNoticeExistsByNoticeId(noticeId);
+
+  // Get notice to check if it has attached files
+  const notice = getNoticesByNoticeId(noticeId);
+
+  // If notice has files, delete them from S3
+  if (notice && notice.has_file && notice.file_key) {
+    try {
+      const fileKey = String(notice.file_key);
+      const s3Service = getS3Service();
+      await s3Service.deleteFile(fileKey);
+    } catch (error) {
+      console.error("Failed to delete file from S3:", error);
+      // Continue with notice deletion even if file deletion fails
+    }
+  }
 
   deleteNotice(noticeId);
   ctx.response.status = 200;
@@ -90,12 +106,14 @@ export function noticeDeleterHandler(ctx: RouterContext<string>) {
     message: `Notice deleted successfully! at ${new Date()}`,
   };
 }
+
 export function getAllNoticesHandler(ctx: RouterContext<string>) {
   const allNotices = getAllNotices();
   ctx.response.body = allNotices;
 }
 
 export function getPaginatedNoticesHandler(ctx: RouterContext<string>) {
+  // Parse query parameters
   const page = parseInt(ctx.request.url.searchParams.get("page") ?? "1");
   const limit = parseInt(ctx.request.url.searchParams.get("limit") ?? "3");
   const category = ctx.request.url.searchParams.get("category") || undefined;
@@ -103,6 +121,7 @@ export function getPaginatedNoticesHandler(ctx: RouterContext<string>) {
     ? ctx.request.url.searchParams.get("hasFiles") === "true"
     : undefined;
 
+  // Get notices with filters
   const paginatedNotices = getPaginatedNotices(page, limit, category, hasFiles);
   ctx.response.body = paginatedNotices;
 }
