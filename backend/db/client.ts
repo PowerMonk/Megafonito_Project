@@ -20,6 +20,7 @@ export function initializeDatabase() {
       category TEXT DEFAULT 'Clases',
       has_file BOOLEAN DEFAULT 0,
       file_url TEXT,
+      file_key TEXT,  
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (user_id) REFERENCES users(id)
     );

@@ -9,14 +9,16 @@ import {
   paginatedQuery,
 } from "../db/dbMod.ts";
 
+// Notice interface with added file-related fields
 export interface Notice extends DatabaseRow {
   id: number;
   title: string;
   content: string;
   user_id: number;
   category: string;
-  has_file: number;
+  has_file: boolean;
   file_url: string | null;
+  file_key: string | null; // Added this field to store S3 keys
   created_at: string;
 }
 
@@ -34,16 +36,26 @@ export function createNotice(
   title: string,
   content: string,
   userId: number,
-  category: string = "Clases",
+  category: string = "General",
   hasFile: boolean = false,
-  fileUrl: string | null = null
+  fileUrl: string | null = null,
+  fileKey: string | null = null // Add file key parameter
 ) {
   const query = `
-    INSERT INTO notices (title, content, user_id, category, has_file, file_url) 
-    VALUES (?, ?, ?, ?, ?, ?);
+    INSERT INTO notices (title, content, user_id, category, has_file, file_url, file_key) 
+    VALUES (?, ?, ?, ?, ?, ?, ?);
   `;
   return safeExecute(() =>
-    execute(query, title, content, userId, category, hasFile ? 1 : 0, fileUrl)
+    execute(
+      query,
+      title,
+      content,
+      userId,
+      category,
+      hasFile ? 1 : 0,
+      fileUrl,
+      fileKey
+    )
   );
 }
 
@@ -82,7 +94,8 @@ export function updateNotice(
   content: string,
   category: string,
   hasFile?: boolean,
-  fileUrl?: string
+  fileUrl?: string,
+  fileKey?: string // Add file key parameter
 ) {
   let query = ` UPDATE notices SET title = ?, content = ? WHERE id = ?`;
   const params = [title, content, noticeId];
@@ -100,6 +113,10 @@ export function updateNotice(
   if (fileUrl !== undefined) {
     query += `, file_url = ?`;
     params.push(fileUrl);
+  }
+  if (fileKey !== undefined) {
+    query += `, file_key = ?`;
+    params.push(fileKey);
   }
 
   return safeExecute(() => execute(query, ...params));
