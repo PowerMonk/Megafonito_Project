@@ -11,6 +11,7 @@ import { s3Config } from "./s3config.ts";
 export class S3Service {
   private s3Client: S3Client;
   private bucketName: string;
+  private baseFolder: string = s3Config.testFolder;
   // private folder: string = s3Config.testFolder;
   private folderPrefix: string = `${s3Config.testFolder}/`;
 
@@ -45,12 +46,12 @@ export class S3Service {
   /**
    * Uploads a file to S3
    * @param file - The file object to upload
-   * @param customPrefix - Optional custom folder path within the bucket
+   * @param subfolder - Optional subfolder name (will be added under baseFolder)
    * @returns Promise with the uploaded file's URL and key
    */
   async uploadFile(
     file: File,
-    customPrefix?: string
+    subfolder?: string
   ): Promise<{ url: string; key: string }> {
     try {
       // Generate a unique key for the file
@@ -59,13 +60,18 @@ export class S3Service {
       const originalName = file.name;
       const sanitizedName = originalName.replace(/[^a-zA-Z0-9.-]/g, "_");
 
-      // Determine file prefix (folder structure)
-      const prefix = customPrefix
-        ? `${this.folderPrefix}${customPrefix}/`
-        : this.folderPrefix;
+      // Build the S3 key with a simplified structure
+      // Format: baseFolder/subfolder/timestamp_random_filename.ext
+      // Make sure baseFolder is just "mgf-tests" without any duplicated parts
+      let key = `${this.baseFolder}`;
 
-      // Create the full S3 key (path)
-      const key = `${prefix}${timestamp}_${randomString}_${sanitizedName}`;
+      // Add subfolder only if provided
+      if (subfolder) {
+        key += `/${subfolder}`;
+      }
+
+      // Add unique filename to prevent collisions
+      key += `/${timestamp}_${randomString}_${sanitizedName}`;
 
       // Convert file to ArrayBuffer and then to Uint8Array for upload
       const fileContent = await file.arrayBuffer();
@@ -74,7 +80,6 @@ export class S3Service {
       // Determine content type
       let contentType = file.type;
       if (!contentType || contentType === "application/octet-stream") {
-        // Try to infer content type from file extension if not provided
         const extension = sanitizedName.split(".").pop()?.toLowerCase();
         contentType = this.getContentTypeFromExtension(extension || "");
       }
@@ -82,7 +87,8 @@ export class S3Service {
       // Upload the file to S3
       await this.s3Client.putObject(key, fileBytes);
 
-      // Generate a URL for the uploaded file
+      // Generate a URL for the uploaded file - FIXED URL GENERATION HERE
+      // Don't include the bucket name in the path part since it's already in the domain
       const url = `https://${this.bucketName}.s3.${s3Config.region}.amazonaws.com/${key}`;
 
       console.log(`File uploaded successfully: ${url}`);

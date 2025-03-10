@@ -13,5 +13,5 @@ services:
       - ./backend/megafonito.db:/app/megafonito.db:rw
       - ./backend:/app
       # Set environment variables needed for the application
-    environment:
-      - SECRET_JWT=${SECRET_JWT} # Pass the JWT secret from host environment
+    # environment:
+    #   - SECRET_JWT=${SECRET_JWT} -> JWT NOT NEEDED APPARENTLY

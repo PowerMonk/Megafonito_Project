@@ -1,5 +1,5 @@
 import { RouterContext } from "@oak/oak";
-import { getS3Service, s3Config } from "./proxyMod.ts";
+import { getS3Service } from "./proxyMod.ts";
 
 /**
  * Handler for uploading files to S3
@@ -37,14 +37,20 @@ export async function s3UploadHandler(ctx: RouterContext<string>) {
       throw new Error("The uploaded file is empty");
     }
 
-    const category = (formData.get("category") as string) || "uploads";
+    // const category = (formData.get("category") as string) || "uploads";
 
     // Define custom prefix based on category
     // This organizes files by category in the S3 bucket
-    const customPrefix = `${s3Config.testFolder}/${category}`;
+    // const customPrefix = `${s3Config.testFolder}/${category}`;
+
+    // Use a simpler subfolder structure - just "tests"
+    // This will create files in: mgf-tests/tests/filename.ext
+    const subfolder = "tests";
+
+    // Upload the file to S3 with the simplified folder structure
+    const { url, key } = await s3Service.uploadFile(file, subfolder);
 
     // Upload the file to S3
-    const { url, key } = await s3Service.uploadFile(file, customPrefix);
 
     // Return success response with file details
     ctx.response.status = 201;
