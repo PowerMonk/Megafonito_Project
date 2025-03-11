@@ -77,7 +77,7 @@ class _CrearNuevoAnuncioScreenState extends State<CrearNuevoAnuncioScreen> {
                 _buildTextField(_textoController, 'Texto', maxLines: 4),
                 SizedBox(height: 16),
 
-                // Botón para adjuntar archivos
+                // Botón para adjuntar archivos centrado
                 ElevatedButton.icon(
                   onPressed: _agregarArchivo,
                   icon: Icon(Icons.attach_file, color: Colors.black),
@@ -92,6 +92,25 @@ class _CrearNuevoAnuncioScreenState extends State<CrearNuevoAnuncioScreen> {
                     ),
                   ),
                 ),
+
+                // Botón para adjuntar archivos del lado izquierdo
+                // Align(
+                //   alignment: Alignment.centerLeft, // Lo alinea a la izquierda
+                //   child: ElevatedButton.icon(
+                //     onPressed: _agregarArchivo,
+                //     icon: Icon(Icons.attach_file, color: Colors.black),
+                //     label: Text(
+                //       'Agregar archivo',
+                //       style: TextStyle(color: Colors.black),
+                //     ),
+                //     style: ElevatedButton.styleFrom(
+                //       backgroundColor: Color(0xFFFCA311),
+                //       shape: RoundedRectangleBorder(
+                //         borderRadius: BorderRadius.circular(15),
+                //       ),
+                //     ),
+                //   ),
+                // ),
 
                 SizedBox(height: 16),
                 _buildCategoryDropdown(),
