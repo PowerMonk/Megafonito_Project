@@ -5,7 +5,8 @@ import 'ContactoEscolar.dart'; // Asegúrate de que la ruta sea correcta
 import 'InfoUsuario.dart'; // Asegúrate de que la ruta sea correcta
 import 'ProcesosEscolares.dart'; // Asegúrate de que la ruta sea correcta
 import 'Beneficios.dart'; // Asegúrate de que la ruta sea correcta
-import 'NoticesFilter.dart'; // Importar el nuevo archivo
+import 'NoticesFilter.dart'; // Importar el filtro de anuncios de la parte superior
+import "NoticesTags.dart"; // Importar los tags de los anuncios
 
 class AnunciosScreen extends StatefulWidget {
   final bool isSuperUser;
@@ -338,11 +339,32 @@ class _AnunciosScreenState extends State<AnunciosScreen>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          anuncio['titulo'],
-                          style:
-                              TextStyle(color: Color(0xFF000000), fontSize: 18),
+                        // Row with title and icons/tags
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Título with Expanded to take available space
+                            Expanded(
+                              child: Text(
+                                anuncio['titulo'],
+                                style: TextStyle(
+                                    color: Color(0xFF000000), fontSize: 18),
+                              ),
+                            ),
+                            // Category tag and file icon if exists
+                            Row(
+                              children: [
+                                NoticeTag(category: anuncio['categoria'] ?? ''),
+                                if (anuncio['tieneArchivos'] == true)
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 4),
+                                    child: FileAttachmentIcon(),
+                                  ),
+                              ],
+                            ),
+                          ],
                         ),
+                        // Expanded content
                         if (isExpanded) ...[
                           SizedBox(height: 8),
                           Text(
