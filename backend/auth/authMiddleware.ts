@@ -2,32 +2,38 @@ import { Middleware } from "@oak/oak";
 import { verifyJWT, UserRole } from "./authMod.ts";
 
 export const authMiddleware: Middleware = async (ctx, next) => {
-  // Get the Authorization header from the request
-  const authorization = ctx.request.headers.get("Authorization");
+  try {
+    // Get token from header
+    const authHeader = ctx.request.headers.get("Authorization");
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      ctx.response.status = 401;
+      ctx.response.body = { message: "Unauthorized: No token provided" };
+      return;
+    }
 
-  // If the Authorization header is missing, return a 401 Unauthorized error
-  if (!authorization) {
+    const token = authHeader.split(" ")[1];
+    const payload = await verifyJWT(token);
+
+    // Check if payload has the expected structure
+    if (!payload || typeof payload !== "object") {
+      ctx.response.status = 401;
+      ctx.response.body = { message: "Invalid token payload" };
+      throw new Error("Invalid token payload");
+    }
+
+    // Set the user in state with the correct role from the token
+    ctx.state.user = {
+      id: payload.id,
+      username: payload.username,
+      role: payload.role, // Make sure this is setting the literal string "admin"
+    };
+
+    await next();
+  } catch (error) {
     ctx.response.status = 401;
-    ctx.response.body = { error: "Authorization header is missing" };
-    return;
+    ctx.response.body = { message: "Unauthorized: Invalid token" };
+    throw new Error(error + "Unauthorized: Invalid token");
   }
-
-  // Extract the JWT token from the Authorization header by removing the "Bearer " prefix
-  const token = authorization.replace("Bearer ", "");
-
-  // Verify the JWT token using the verifyJWT function
-  const payload = await verifyJWT(token);
-
-  // If the token is invalid or expired, return a 401 Unauthorized error
-  if (!payload) {
-    ctx.response.status = 401;
-    ctx.response.body = { error: "Invalid or expired token" };
-    return;
-  }
-
-  // If the token is valid, attach the payload (user data) to the context state
-  ctx.state.user = payload; // payload includes {id, username, role}
-  await next();
 };
 
 /**

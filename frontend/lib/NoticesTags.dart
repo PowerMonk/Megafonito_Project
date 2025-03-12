@@ -27,14 +27,16 @@ class NoticeTag extends StatelessWidget {
   Color _getCategoryColor() {
     // Return different colors based on category
     switch (category) {
-      case 'Clases':
+      case 'Materias':
         return Colors.blue;
       case 'Convocatorias':
         return Colors.purple;
       case 'Eventos':
         return Colors.orange;
-      case 'Deportes':
+      case 'Deportivos':
         return Colors.green;
+      case 'Culturales':
+        return Colors.pink;
       case 'Comunidad':
         return Colors.red;
       default:

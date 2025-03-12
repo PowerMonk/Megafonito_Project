@@ -15,7 +15,12 @@ export const validation = new Validation();
 export const router = new Router();
 
 router
-  .post("/users", validation.validateUserCreation, userCreatorHandler)
+  .post(
+    "/users",
+    authMiddleware,
+    validation.validateUserCreation,
+    userCreatorHandler
+  )
   .post("/login", loginHandler)
   .get(
     "/users",

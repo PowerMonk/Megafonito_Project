@@ -15,10 +15,11 @@ class NoticesFilter extends StatefulWidget {
 
 class _NoticesFilterState extends State<NoticesFilter> {
   final List<String> categories = [
-    'Clases',
+    'Materias',
     'Convocatorias',
     'Eventos',
-    'Deportes',
+    'Deportivos',
+    'Culturales',
     'Comunidad',
   ];
 

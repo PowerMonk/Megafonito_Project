@@ -28,7 +28,7 @@ export async function generateJWT(
 
 export async function verifyJWT(
   token: string // The JWT to verify
-): Promise<Record<string, unknown> | null> {
+): Promise<Record<string, unknown>> {
   try {
     const { payload } = await jose.jwtVerify(token, secretKey);
 
@@ -37,6 +37,6 @@ export async function verifyJWT(
   } catch (error) {
     // If verification fails (e.g., token is invalid or expired), log the error and return null
     console.error("JWT verification failed:", error);
-    return null;
+    throw error;
   }
 }

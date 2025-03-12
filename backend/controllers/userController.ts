@@ -23,15 +23,16 @@ export async function loginHandler(ctx: RouterContext<string>) {
     role: user!.role as UserRole,
   });
   ctx.response.status = 200;
-  ctx.response.body = { token };
+  ctx.response.body = { token, role: user!.role };
 }
 
 export async function userCreatorHandler(ctx: RouterContext<string>) {
-  const {
-    username,
-    email,
-    role = UserRole.USER,
-  } = await ctx.request.body.json();
+  // const {
+  //   username,
+  //   email,
+  //   role = UserRole.USER,
+  // } = await ctx.request.body.json();
+  const { username, email, role } = await ctx.request.body.json();
 
   // If someone is trying to create an admin account AND they're either not logged in or not an admin themselves, return a 403 error
   if (
@@ -39,13 +40,17 @@ export async function userCreatorHandler(ctx: RouterContext<string>) {
     (!ctx.state.user || ctx.state.user.role !== UserRole.ADMIN)
   ) {
     ctx.response.status = 403;
-    ctx.response.body = { error: "Only admins can create admin users" };
+    ctx.response.body = {
+      error: "Only admins can create admin users",
+      details: ctx.state.user,
+    };
+    console.log(ctx.state.user);
     return;
   }
 
-  createUser(username, email);
+  createUser(username, email, role);
 
-  const token = await generateJWT({ username, email });
+  const token = await generateJWT({ username, email, role });
   ctx.response.status = 201;
   ctx.response.body = {
     message: `User created successfully! at ${new Date()}`,

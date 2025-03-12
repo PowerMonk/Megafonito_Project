@@ -1,9 +1,7 @@
 import { AppError } from "../utils/utilsMod.ts";
 import { DatabaseRow } from "./dbMod.ts";
 
-export function safeQuery<T extends DatabaseRow>(
-  queryFn: () => T | null
-): T | null {
+export function safeQuery<T extends DatabaseRow>(queryFn: () => T): T {
   try {
     return queryFn();
   } catch (error) {
