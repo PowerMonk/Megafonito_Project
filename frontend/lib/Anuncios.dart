@@ -42,7 +42,7 @@ class _AnunciosScreenState extends State<AnunciosScreen>
   final List<String> _screenTitles = [
     'Megafonito',
     'Contactos Escolares',
-    'Beneficios',
+    'Becas',
     'Procesos Escolares',
     'Soporte Megafonito',
   ];
@@ -272,7 +272,7 @@ class _AnunciosScreenState extends State<AnunciosScreen>
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.star),
-            label: 'Beneficios',
+            label: 'Becas',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.school),

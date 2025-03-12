@@ -73,7 +73,7 @@ export function queryAll<T extends DatabaseRow>(
 export function queryOne<T extends DatabaseRow>(
   query: string,
   ...params: (string | number | null | Uint8Array | boolean)[]
-): T | null {
+): T {
   try {
     // Prepare the SQL query and execute it with the provided parameters
     const row = db.prepare(query).get(...params);

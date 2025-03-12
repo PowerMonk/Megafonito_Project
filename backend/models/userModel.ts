@@ -7,13 +7,14 @@ import {
   safeQueryAll,
   safeExecute,
   safeExecuteTransaction,
+  DatabaseRow,
 } from "../db/dbMod.ts";
 
-export function createUser(username: string, email: string) {
+export function createUser(username: string, email: string, role: string) {
   const query = `
-      INSERT INTO users (username, email) VALUES (?, ?);
+      INSERT INTO users (username, email, role) VALUES (?, ?, ?);
     `;
-  return safeExecute(() => execute(query, username, email));
+  return safeExecute(() => execute(query, username, email, role));
 }
 
 // Neccessary safe query function
@@ -30,11 +31,22 @@ export function getAllUsers() {
 //     `;
 //   return queryOne(query, username);
 // }
-export function getUserByUsername(username: string) {
-  const query = `
-      SELECT * FROM users WHERE username = ?;
-    `;
-  return safeQuery(() => queryOne(query, username));
+/**
+ * Looks up a user by username
+ * @param username The username to search for
+ * @returns User record if found, null if no matching user exists
+ * @throws Error if database query fails
+ */
+export function getUserByUsername(username: string): DatabaseRow | null {
+  const query = `SELECT * FROM users WHERE username = ?;`;
+  try {
+    const result = safeQuery(() => queryOne(query, username));
+    // Check if the result is an empty object (no user found)
+    return Object.keys(result).length === 0 ? null : result;
+  } catch (error) {
+    // This catches actual DB errors
+    throw new Error(`Database error looking up user: ${error}` + 500);
+  }
 }
 export function getUserById(userId: number) {
   const query = `

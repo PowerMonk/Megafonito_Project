@@ -13,15 +13,16 @@ class CrearNuevoAnuncioScreen extends StatefulWidget {
 class _CrearNuevoAnuncioScreenState extends State<CrearNuevoAnuncioScreen> {
   final TextEditingController _tituloController = TextEditingController();
   final TextEditingController _textoController = TextEditingController();
-  String _categoriaSeleccionada = 'Clases';
+  String _categoriaSeleccionada = 'Materias';
   bool _tieneArchivos = false;
 
   // Lista de categorías (misma que en NoticesFilter)
   final List<String> _categorias = [
-    'Clases',
+    'Materias',
     'Convocatorias',
     'Eventos',
-    'Deportes',
+    'Deportivos',
+    'Culturales',
     'Comunidad',
   ];
 
