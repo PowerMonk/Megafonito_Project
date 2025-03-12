@@ -31,3 +31,6 @@ linux/
 
 # Test
 test/
+
+.flutter-plugins
+.flutter-plugins-dependencies

@@ -1,109 +1,136 @@
-# Bugs and Fixes - Megafonito App
+# Agregar al Android Manifest para poder usar los archivos
 
-This document tracks significant bugs discovered during development and their solutions.
+## Ruta: android/app/src/main/AndroidManifest.xml
 
----
+Dentro del tag <manifest>
 
-# Frontend
-
-## Navigation System Overhaul
-
-### Issue: Bottom Navigation Bar Implementation
-
-**Problem:** Converting from FAB menu to bottom navigation bar required restructuring screen rendering.
-
-**Solution:**
-
-- Implemented BottomNavigationBar with fixed navigation items
-- Added IndexedStack for efficient tab switching
-- Created a current index tracker to manage active tab
-
-### Issue: AppBar Redundancy
-
-**Problem:** Each screen had its own AppBar, causing duplicate headers when integrated with tab navigation.
-
-**Solution:**
-
-- Removed individual AppBars from tab content screens
-- Maintained single AppBar in main screen with dynamic title
-- Preserved AppBars only in screens accessed via Navigator.push()
-- Converted tab content screens to return Container instead of Scaffold
-
-### Issue: Navigation Back Arrows Inconsistency
-
-**Problem:** Some screens had white back arrows while others had black ones.
-
-**Solution:**
-
-- Added global AppBar theme in main.dart:
-
-```dart
-theme: ThemeData(
-  appBarTheme: AppBarTheme(
-    iconTheme: IconThemeData(color: Colors.white),
-    actionsIconTheme: IconThemeData(color: Colors.white),
-  ),
-),
+```xml
+<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 ```
 
-## State Management Issues
+**Adjunto el mio de ejemplo**
 
-### Issue: Announcements Not Displaying After Creation
+```xml
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <application
+        android:label="flutter_megafonito"
+        android:name="${applicationName}"
+        android:icon="@mipmap/ic_launcher">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:taskAffinity=""
+            android:theme="@style/LaunchTheme"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:hardwareAccelerated="true"
+            android:windowSoftInputMode="adjustResize">
+            <!-- Specifies an Android theme to apply to this Activity as soon as
+                 the Android process has started. This theme is visible to the user
+                 while the Flutter UI initializes. After that, this theme continues
+                 to determine the Window background behind the Flutter UI. -->
+            <meta-data
+              android:name="io.flutter.embedding.android.NormalTheme"
+              android:resource="@style/NormalTheme"
+              />
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <!-- Don't delete the meta-data below.
+             This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
+        <meta-data
+            android:name="flutterEmbedding"
+            android:value="2" />
+    </application>
+    <!-- Required to query activities that can process text, see:
+         https://developer.android.com/training/package-visibility and
+         https://developer.android.com/reference/android/content/Intent#ACTION_PROCESS_TEXT.
 
-**Problem:** New announcements weren't appearing after creation because the announcements screen was built once during initialization and stored in an IndexedStack.
+         In particular, this is used by the Flutter engine in io.flutter.plugin.text.ProcessTextPlugin. -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.PROCESS_TEXT"/>
+            <data android:mimeType="text/plain"/>
+        </intent>
+    </queries>
+</manifest>
 
-**Solution:**
-
-- Removed static initialization of screens in initState()
-- Dynamically built the announcements content in the build method:
-
-```dart
-body: _currentIndex == 0
-    ? _buildAnunciosContent()  // Dynamically build when selected
-    : IndexedStack(
-        index: _currentIndex - 1,
-        children: [
-          // Other screens...
-        ],
-      ),
 ```
 
 ---
 
-# Backend
+# Agregar al ios Runner
 
----
+## Ruta: ios/Runner/Info.plist
 
-# Implementations
+### NOTA SEMI IMPORTANTE
 
-## Frontend
+Sé que el Info.plist no es en formato xml, pero por **razones de legibilidad** en este markdown, le puse _xml_, ya que **VSCode le coloca los mismos colores al plist y al xml.**
 
-### Enhanced Filtering System
+```xml
+<key>NSPhotoLibraryUsageDescription</key>
+<string>This app needs access to photos and files for attaching documents.</string>
+<key>NSDocumentPickerUsageDescription</key>
+<string>This app needs access to documents for attaching files.</string>
+```
 
-- Created dedicated NoticesFilter component for better separation of concerns
-- Implemented horizontal scrollable category chips for better UX
-- Added dropdown menu for sorting options (newest, oldest, with attachments)
-- Fixed layout to properly align filter button with category list
-- Ensured proper spacing and visual hierarchy in filter UI
+**Adjunto el mio de ejemplo**
 
-### File Attachment Feature
-
-- Added file attachment capability to announcement creation
-- Implemented "Agregar archivo" button with paperclip icon
-- Added visual feedback when files are attached
-- Updated announcement model to track file attachment status
-- Integrated file attachment status with filtering system
-
-### Category-based Filtering
-
-- Standardized categories across creation and filtering interfaces
-- Replaced importance-based coloring with category-based filtering
-- Updated filter logic to properly handle category selection
-- Implemented visual indicators for active filters
-- Ensured consistent category options between screens
-
----
-
-## Backend
-
-_Backend implementations pending_
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleDisplayName</key>
+	<string>Flutter Megafonito</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>flutter_megafonito</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(FLUTTER_BUILD_NAME)</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	<key>UILaunchStoryboardName</key>
+	<string>LaunchScreen</string>
+	<key>UIMainStoryboardFile</key>
+	<string>Main</string>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+	<key>UISupportedInterfaceOrientations~ipad</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
+	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<true/>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app needs access to photos and files for attaching documents.</string>
+	<key>NSDocumentPickerUsageDescription</key>
+	<string>This app needs access to documents for attaching files.</string>
+</dict>
+</plist>
+```

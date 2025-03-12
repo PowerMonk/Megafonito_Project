@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:file_picker/file_picker.dart'; // Add this import
+import 'dart:io'; // For File operations
 
 class CrearNuevoAnuncioScreen extends StatefulWidget {
   final Function(String, String, Color, String, bool) onAnuncioCreado;
@@ -42,13 +44,35 @@ class _CrearNuevoAnuncioScreenState extends State<CrearNuevoAnuncioScreen> {
     }
   }
 
-  void _agregarArchivo() {
-    setState(() {
-      _tieneArchivos = true;
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Archivo adjuntado correctamente')),
-    );
+  void _agregarArchivo() async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles();
+
+      if (result != null) {
+        // File was picked
+        File file = File(result.files.single.path!);
+
+        setState(() {
+          _tieneArchivos = true;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text(
+                  'Archivo "${result.files.single.name}" adjuntado correctamente')),
+        );
+      } else {
+        // User canceled the picker
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('No se seleccionó ningún archivo')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text('Error al seleccionar archivo: ${e.toString()}')),
+      );
+    }
   }
 
   @override
