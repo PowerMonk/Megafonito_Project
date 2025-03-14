@@ -20,7 +20,12 @@ import {
 } from "../proxy/proxyMod.ts";
 
 router
-  .post("/notices", validation.validateNoticeCreation, createNoticeHandler)
+  .post(
+    "/notices",
+    authMiddleware,
+    validation.validateNoticeCreation,
+    createNoticeHandler
+  )
   .get("/allnotices", authMiddleware, getAllNoticesHandler)
   .get("/notices", getPaginatedNoticesHandler)
   .get("/notices/:userId", authMiddleware, getNoticesByUserHandler)

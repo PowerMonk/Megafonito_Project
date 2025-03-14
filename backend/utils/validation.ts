@@ -65,7 +65,8 @@ export class Validation {
     if (!this.#validateMinLength(title, 4)) {
       ctx.response.status = 400;
       ctx.response.body = { error: "Title must be at least 4 characters long" };
-      return;
+      throw new Error("Title must be at least 4 characters long");
+      // return;
     }
 
     if (!this.#validateMinLength(content, 10)) {
@@ -73,13 +74,15 @@ export class Validation {
       ctx.response.body = {
         error: "Content must be at least 10 characters long",
       };
-      return;
+      throw new Error("Content must be at least 10 characters long");
+      // return;
     }
 
     if (!this.#validatePositiveNumber(userId)) {
       ctx.response.status = 400;
       ctx.response.body = { error: "Invalid userId" };
-      return;
+      throw new Error("Invalid userId");
+      // return;
     }
 
     await next();

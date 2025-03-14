@@ -7,6 +7,7 @@ import 'ProcesosEscolares.dart'; // Asegúrate de que la ruta sea correcta
 import 'Beneficios.dart'; // Asegúrate de que la ruta sea correcta
 import 'NoticesFilter.dart'; // Importar el filtro de anuncios de la parte superior
 import "NoticesTags.dart"; // Importar los tags de los anuncios
+import 'service.dart';
 
 class AnunciosScreen extends StatefulWidget {
   final bool isSuperUser;
@@ -14,7 +15,7 @@ class AnunciosScreen extends StatefulWidget {
   final String userEmail; // Correo del usuario
 
   AnunciosScreen({
-    required this.isSuperUser,
+    this.isSuperUser = false,
     required this.userName,
     required this.userEmail,
   });
@@ -85,26 +86,52 @@ class _AnunciosScreenState extends State<AnunciosScreen>
       context,
       MaterialPageRoute(
         builder: (context) => CrearNuevoAnuncioScreen(
-          onAnuncioCreado: (titulo, texto, color, categoria, tieneArchivos) {
-            setState(() {
-              _anuncios.add({
-                'titulo': titulo,
-                'texto': texto,
-                'color': color,
-                'categoria': categoria,
-                'tieneArchivos': tieneArchivos,
-                'fecha': DateTime.now(), // Add current date
-              });
-            });
-            _filterAnuncios();
+          onAnuncioCreado:
+              (titulo, texto, color, categoria, tieneArchivos) async {
+            try {
+              // Send announcement to backend
+              final response = await ApiService.authenticatedRequest(
+                '/notices', // Update this to your actual endpoint
+                'POST',
+                body: {
+                  'title': titulo,
+                  'content': texto,
+                  'userId': 1, // Temporary value until you fix auth
+                  'category': categoria,
+                  'hasFile': 0, // Changed from hasFiles to hasFile
+                  'fileUrl': null,
+                  'fileKey': null,
+                },
+              );
+
+              if (response.statusCode == 201) {
+                // If created successfully, add to local list and update UI
+                setState(() {
+                  _anuncios.add({
+                    'titulo': titulo,
+                    'texto': texto,
+                    'color': color,
+                    'categoria': categoria,
+                    'tieneArchivos': tieneArchivos,
+                    'fecha': DateTime.now(), // Add date for filtering
+                  });
+                });
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Anuncio creado con éxito')),
+                );
+              } else {
+                throw Exception('Error creating announcement');
+              }
+            } catch (e) {
+              print('Error creating announcement: $e');
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Error al crear el anuncio')),
+              );
+            }
           },
         ),
       ),
-    ).then((_) {
-      if (_isMenuOpen) {
-        _toggleMenu();
-      }
-    });
+    );
   }
 
   void _navigateToUserInfo() {

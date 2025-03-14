@@ -36,7 +36,7 @@ export function createNotice(
   title: string,
   content: string,
   userId: number,
-  category: string = "General",
+  category: string = "Clases",
   hasFile: boolean = false,
   fileUrl: string | null = null,
   fileKey: string | null = null // Add file key parameter
