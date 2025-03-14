@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'Anuncios.dart';
+import 'service.dart'; // Update path to match your structure
 
 void main() {
   runApp(MyApp());
@@ -10,18 +11,17 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false, // Eliminar el banner de debug
+      debugShowCheckedModeBanner: false,
       title: 'Login Demo',
       theme: ThemeData(
         appBarTheme: AppBarTheme(
           iconTheme: IconThemeData(color: Colors.white),
           actionsIconTheme: IconThemeData(color: Colors.white),
         ),
-        primaryColor: Color(0xFF14213D), // Azul oscuro
-        scaffoldBackgroundColor: Color(0xFF14213D), // Fondo azul oscuro
+        primaryColor: Color(0xFF14213D),
+        scaffoldBackgroundColor: Color(0xFF14213D),
         textTheme: TextTheme(
-          // Aparentemente bodyText está deprecado en algunas versiones y bodyLarge funciona igual, puede ser que haya algun cambio en el tamaño de la fuente
-          bodyLarge: TextStyle(color: Color(0xFF000000)), // Negro
+          bodyLarge: TextStyle(color: Color(0xFF000000)),
         ),
       ),
       home: SplashScreen(),
@@ -61,7 +61,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF14213D), // Fondo azul oscuro
+      backgroundColor: Color(0xFF14213D),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -77,7 +77,7 @@ class _SplashScreenState extends State<SplashScreen> {
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFFFCA311), // Naranja
+                color: Color(0xFFFCA311),
               ),
             ),
             SizedBox(height: 20),
@@ -86,9 +86,8 @@ class _SplashScreenState extends State<SplashScreen> {
               child: LinearProgressIndicator(
                 value: progress,
                 minHeight: 20,
-                backgroundColor: Color(0xFFE5E5E5), // Gris claro
-                valueColor:
-                    AlwaysStoppedAnimation<Color>(Color(0xFFFCA311)), // Naranja
+                backgroundColor: Color(0xFFE5E5E5),
+                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFFCA311)),
               ),
             ),
           ],
@@ -113,47 +112,44 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  String? email;
+  String? username;
   String? password;
+  bool _isLoading = false;
+// Remove the hardcoded user list since we'll get this from backend
 
-  // Lista para almacenar los usuarios registrados
-  List<User> registeredUsers = [
-    User(
-        name: 'Super Usuario',
-        email: 'superusuario@example.com',
-        password: '123456'),
-    User(
-        name: 'Usuario Alumno',
-        email: 'alumno@example.com',
-        password: '123456'),
-    User(name: 'Karol', email: 'karol@mgf.com', password: '123456'),
-  ];
-
-  void _login() {
+  void _login() async {
     if (_formKey.currentState!.validate()) {
-      // Validar credenciales
-      User? foundUser = registeredUsers.firstWhere(
-        (user) => user.email == email && user.password == password,
-        orElse: () => User(name: '', email: '', password: ''),
-      );
+      setState(() {
+        _isLoading = true;
+      });
 
-      if (foundUser.email.isNotEmpty) {
-        // Redirigir a la pantalla de anuncios
+      try {
+        // Call backend API to login
+        final result = await ApiService.login(username!);
+
+        // Successfully logged in
+        setState(() {
+          _isLoading = false;
+        });
+
+        // Navigate to AnunciosScreen with the user role info
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
             builder: (context) => AnunciosScreen(
-              isSuperUser: foundUser.name ==
-                  'Super Usuario', // Determinar si es super usuario
-              userName: foundUser.name, // Pasar el nombre del usuario
-              userEmail:
-                  foundUser.email, // Pasar el correo electrónico del usuario
+              userName: username!, // Added user name
+              userEmail: username!, // Using username as email for now
+              isSuperUser: ApiService.userRole == 'admin',
             ),
           ),
         );
-      } else {
-        // Mostrar mensaje de error
+      } catch (e) {
+        setState(() {
+          _isLoading = false;
+        });
+
+        // Show error message
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Credenciales incorrectas')),
+          SnackBar(content: Text('Error de inicio de sesión: $e')),
         );
       }
     }
@@ -169,8 +165,8 @@ class _LoginScreenState extends State<LoginScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Image.asset(
-                'assets/LogoMegafon_V2.png', // Cambia el nombre de la imagen
-                width: 150, // Tamaño aumentado
+                'assets/LogoMegafon_V2.png',
+                width: 150,
                 height: 150,
               ),
               SizedBox(height: 20),
@@ -202,17 +198,17 @@ class _LoginScreenState extends State<LoginScreen> {
                           style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF14213D), // Azul oscuro
+                            color: Color(0xFF14213D),
                           ),
                         ),
                         SizedBox(height: 20),
                         TextFormField(
                           decoration: InputDecoration(
-                            labelText: 'Correo Electrónico',
-                            labelStyle: TextStyle(
-                                color: Color(0xFF14213D)), // Azul oscuro
+// labelText: 'Correo Electrónico',
+                            labelText: 'Nombre de Usuario',
+                            labelStyle: TextStyle(color: Color(0xFF14213D)),
                             filled: true,
-                            fillColor: Color(0xFFE5E5E5), // Gris claro
+                            fillColor: Color(0xFFE5E5E5),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8.0),
                               borderSide: BorderSide(color: Color(0xFF14213D)),
@@ -220,84 +216,77 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Por favor ingresa tu correo electrónico';
+                              return 'Por favor ingresa tu nombre de usuario';
                             }
                             return null;
                           },
                           onChanged: (value) {
-                            email = value;
+                            username = value;
                           },
                         ),
                         SizedBox(height: 20),
                         TextFormField(
                           decoration: InputDecoration(
                             labelText: 'Contraseña',
-                            labelStyle: TextStyle(
-                                color: Color(0xFF14213D)), // Azul oscuro
+                            labelStyle: TextStyle(color: Color(0xFF14213D)),
                             filled: true,
-                            fillColor: Color(0xFFE5E5E5), // Gris claro
+                            fillColor: Color(0xFFE5E5E5),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8.0),
                               borderSide: BorderSide(color: Color(0xFF14213D)),
                             ),
                           ),
                           obscureText: true,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Por favor ingresa tu contraseña';
-                            }
-                            return null;
-                          },
+                          // validator: (value) {
+                          //   if (value == null || value.isEmpty) {
+                          //     return 'Por favor ingresa tu contraseña';
+                          //   }
+                          //   return null;
+                          // },
                           onChanged: (value) {
                             password = value;
                           },
                         ),
                         SizedBox(height: 20),
-                        ElevatedButton(
-                          onPressed: _login,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFFFCA311), // Naranja
-                            padding: EdgeInsets.symmetric(
-                                vertical: 12, horizontal: 20),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: Text(
-                            'Iniciar Sesión',
-                            style: TextStyle(fontSize: 16),
-                          ),
-                        ),
+                        _isLoading
+                            ? CircularProgressIndicator(
+                                color: Color(0xFFFCA311))
+                            : ElevatedButton(
+                                onPressed: _login,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Color(0xFFFCA311),
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: 12, horizontal: 20),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                                child: Text(
+                                  'Iniciar Sesión',
+                                  style: TextStyle(fontSize: 16),
+                                ),
+                              ),
                         SizedBox(height: 20),
                         TextButton(
                           onPressed: () {
-                            // Acción para olvidar contraseña
+                            // Password recovery action
                           },
                           child: Text(
                             '¿Olvidaste tu contraseña?',
-                            style: TextStyle(
-                                color: Color(0xFF14213D)), // Azul oscuro
+                            style: TextStyle(color: Color(0xFF14213D)),
                           ),
                         ),
                         TextButton(
                           onPressed: () {
-                            // Navegar a la pantalla de registro
                             Navigator.of(context).push(
                               MaterialPageRoute(
-                                builder: (context) => RegisterScreen(
-                                  onUserRegistered: (User user) {
-                                    setState(() {
-                                      registeredUsers.add(user);
-                                    });
-                                  },
-                                ),
+                                builder: (context) => RegisterScreen(),
                               ),
                             );
                           },
                           child: Text(
                             '¿Quieres registrarte?',
-                            style: TextStyle(
-                                color: Color(0xFF14213D)), // Azul oscuro
+                            style: TextStyle(color: Color(0xFF14213D)),
                           ),
                         ),
                       ],
@@ -314,10 +303,6 @@ class _LoginScreenState extends State<LoginScreen> {
 }
 
 class RegisterScreen extends StatefulWidget {
-  final Function(User) onUserRegistered;
-
-  RegisterScreen({required this.onUserRegistered});
-
   @override
   _RegisterScreenState createState() => _RegisterScreenState();
 }
@@ -327,17 +312,37 @@ class _RegisterScreenState extends State<RegisterScreen> {
   String? name;
   String? email;
   String? password;
+  bool _isLoading = false;
 
-  void _register() {
+  void _register() async {
     if (_formKey.currentState!.validate()) {
-      // Crear un nuevo usuario
-      User newUser = User(name: name!, email: email!, password: password!);
-      widget.onUserRegistered(newUser); // Llamar al callback
+      setState(() {
+        _isLoading = true;
+      });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Usuario registrado con éxito')),
-      );
-      Navigator.of(context).pop(); // Volver a la pantalla de inicio de sesión
+      try {
+        // Here you would call your API service to register the user
+        // Example: await ApiService.register(name!, email!, password!);
+
+        // For now we'll just simulate success
+        await Future.delayed(Duration(seconds: 1));
+        setState(() {
+          _isLoading = false;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Usuario registrado con éxito')),
+        );
+        Navigator.of(context).pop(); // Return to login screen
+      } catch (e) {
+        setState(() {
+          _isLoading = false;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al registrar usuario: $e')),
+        );
+      }
     }
   }
 
@@ -346,7 +351,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Registrar Usuario'),
-        backgroundColor: Color(0xFF14213D), // Azul oscuro
+        backgroundColor: Color(0xFF14213D),
       ),
       body: Center(
         child: SingleChildScrollView(
@@ -355,7 +360,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Image.asset(
-                'assets/LogoMegafon_V2.png', // Cambia el nombre de la imagen
+                'assets/LogoMegafon_V2.png',
                 width: 150,
                 height: 150,
               ),
@@ -388,17 +393,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF14213D), // Azul oscuro
+                            color: Color(0xFF14213D),
                           ),
                         ),
                         SizedBox(height: 20),
                         TextFormField(
                           decoration: InputDecoration(
                             labelText: 'Nombre',
-                            labelStyle: TextStyle(
-                                color: Color(0xFF14213D)), // Azul oscuro
+                            labelStyle: TextStyle(color: Color(0xFF14213D)),
                             filled: true,
-                            fillColor: Color(0xFFE5E5E5), // Gris claro
+                            fillColor: Color(0xFFE5E5E5),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8.0),
                               borderSide: BorderSide(color: Color(0xFF14213D)),
@@ -418,10 +422,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         TextFormField(
                           decoration: InputDecoration(
                             labelText: 'Correo Electrónico',
-                            labelStyle: TextStyle(
-                                color: Color(0xFF14213D)), // Azul oscuro
+                            labelStyle: TextStyle(color: Color(0xFF14213D)),
                             filled: true,
-                            fillColor: Color(0xFFE5E5E5), // Gris claro
+                            fillColor: Color(0xFFE5E5E5),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8.0),
                               borderSide: BorderSide(color: Color(0xFF14213D)),
@@ -441,10 +444,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         TextFormField(
                           decoration: InputDecoration(
                             labelText: 'Contraseña',
-                            labelStyle: TextStyle(
-                                color: Color(0xFF14213D)), // Azul oscuro
+                            labelStyle: TextStyle(color: Color(0xFF14213D)),
                             filled: true,
-                            fillColor: Color(0xFFE5E5E5), // Gris claro
+                            fillColor: Color(0xFFE5E5E5),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8.0),
                               borderSide: BorderSide(color: Color(0xFF14213D)),
@@ -462,21 +464,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           },
                         ),
                         SizedBox(height: 20),
-                        ElevatedButton(
-                          onPressed: _register,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFFFCA311), // Naranja
-                            padding: EdgeInsets.symmetric(
-                                vertical: 12, horizontal: 20),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: Text(
-                            'Registrar',
-                            style: TextStyle(fontSize: 16),
-                          ),
-                        ),
+                        _isLoading
+                            ? CircularProgressIndicator(
+                                color: Color(0xFFFCA311))
+                            : ElevatedButton(
+                                onPressed: _register,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Color(0xFFFCA311),
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: 12, horizontal: 20),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                                child: Text(
+                                  'Registrar',
+                                  style: TextStyle(fontSize: 16),
+                                ),
+                              ),
                       ],
                     ),
                   ),
