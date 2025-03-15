@@ -19,13 +19,36 @@ export async function createNoticeHandler(ctx: RouterContext<string>) {
   const { title, content, userId, category, hasFile, fileUrl, fileKey } =
     await ctx.request.body.json();
 
+  // Handle different possible formats of hasFile
+  let hasFileValue;
+  if (
+    hasFile === true ||
+    hasFile === "true" ||
+    hasFile === 1 ||
+    hasFile === "1"
+  ) {
+    hasFileValue = 1;
+  } else {
+    hasFileValue = 0;
+  }
+
+  console.log("hasFileValue after conversion:", hasFileValue);
+
   // These will throw if not found
   checkNoticeExistsByUserId(userId);
 
   // This guard clause is not needed since the  function will throw an error if the user is not found
   // if (!user) return;
 
-  createNotice(title, content, userId, category, hasFile, fileUrl, fileKey);
+  createNotice(
+    title,
+    content,
+    userId,
+    category,
+    hasFileValue,
+    fileUrl,
+    fileKey
+  );
   ctx.response.status = 201;
   ctx.response.body = {
     message: `Notice created successfully! at ${new Date()}`,

@@ -98,7 +98,7 @@ class _AnunciosScreenState extends State<AnunciosScreen>
                   'content': texto,
                   'userId': 1, // Temporary value until you fix auth
                   'category': categoria,
-                  'hasFile': 0, // Changed from hasFiles to hasFile
+                  'hasFile': tieneArchivos, // Changed from hasFiles to hasFile
                   'fileUrl': null,
                   'fileKey': null,
                 },
