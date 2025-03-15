@@ -1,4 +1,8 @@
-import { execute } from "./dbMod.ts";
+import {
+  execute,
+  // executeTransaction,
+  // queryOne
+} from "./dbMod.ts";
 
 export function initializeDatabase() {
   const createUsersTable = `
@@ -62,6 +66,59 @@ export function initializeDatabase() {
   // }
 
   // execute(updateAdminUsers);
+
+  // Function to check if a column exists in a table
+  // Function to check if a column exists in a table
+  // function columnExists(table: string, column: string): boolean {
+  //   const checkColumn = `
+  //   SELECT COUNT(*) as count
+  //   FROM pragma_table_info('${table}')
+  //   WHERE name='${column}';
+  // `;
+  //   const result = queryOne<{ count: number }>(checkColumn);
+  //   return result.count > 0;
+  // }
+
+  // // Prepare queries and parameters for adding columns if they don't exist
+  // const queries: string[] = [];
+  // const params: (string | number | null | Uint8Array | boolean)[][] = [];
+
+  // if (!columnExists("notices", "category")) {
+  //   queries.push(`
+  //   ALTER TABLE notices
+  //   ADD COLUMN category TEXT DEFAULT 'Clases';
+  // `);
+  //   params.push([]);
+  // }
+
+  // if (!columnExists("notices", "has_file")) {
+  //   queries.push(`
+  //   ALTER TABLE notices
+  //   ADD COLUMN has_file BOOLEAN DEFAULT 0;
+  // `);
+  //   params.push([]);
+  // }
+
+  // if (!columnExists("notices", "file_url")) {
+  //   queries.push(`
+  //   ALTER TABLE notices
+  //   ADD COLUMN file_url TEXT;
+  // `);
+  //   params.push([]);
+  // }
+
+  // if (!columnExists("notices", "file_key")) {
+  //   queries.push(`
+  //   ALTER TABLE notices
+  //   ADD COLUMN file_key TEXT;
+  // `);
+  //   params.push([]);
+  // }
+
+  // // Execute all column addition queries in a single transaction
+  // if (queries.length > 0) {
+  //   executeTransaction(queries, params);
+  // }
 
   console.log("Database initialized successfully!");
 }

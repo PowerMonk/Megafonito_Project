@@ -37,7 +37,7 @@ export function createNotice(
   content: string,
   userId: number,
   category: string = "Clases",
-  hasFile: boolean = false,
+  hasFile: boolean | number,
   fileUrl: string | null = null,
   fileKey: string | null = null // Add file key parameter
 ) {
@@ -46,16 +46,7 @@ export function createNotice(
     VALUES (?, ?, ?, ?, ?, ?, ?);
   `;
   return safeExecute(() =>
-    execute(
-      query,
-      title,
-      content,
-      userId,
-      category,
-      hasFile ? 1 : 0,
-      fileUrl,
-      fileKey
-    )
+    execute(query, title, content, userId, category, hasFile, fileUrl, fileKey)
   );
 }
 
