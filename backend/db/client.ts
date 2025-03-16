@@ -15,13 +15,18 @@ export function initializeDatabase() {
     );
   `;
 
+  // Eliminar la tabla de notices si ya existe
+  // const dropNoticesTable = `
+  //   DROP TABLE IF EXISTS notices;
+  // `;
+
   const createNoticesTable = `
     CREATE TABLE IF NOT EXISTS notices (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       title TEXT NOT NULL,
       content TEXT NOT NULL,
       user_id INTEGER,
-      category TEXT DEFAULT 'Clases',
+      category TEXT DEFAULT 'Materias',
       has_file BOOLEAN DEFAULT 0,
       file_url TEXT,
       file_key TEXT,  
@@ -56,6 +61,7 @@ export function initializeDatabase() {
   // `;
 
   execute(createUsersTable);
+  // execute(dropNoticesTable); // Eliminar tabla antes de crear una nueva
   execute(createNoticesTable);
   execute(createIndexes);
 
@@ -86,7 +92,7 @@ export function initializeDatabase() {
   // if (!columnExists("notices", "category")) {
   //   queries.push(`
   //   ALTER TABLE notices
-  //   ADD COLUMN category TEXT DEFAULT 'Clases';
+  //   ADD COLUMN category TEXT DEFAULT 'Materias';
   // `);
   //   params.push([]);
   // }
