@@ -31,14 +31,16 @@ class _AnunciosScreenState extends State<AnunciosScreen>
   late Animation<double> _animation;
   List<Map<String, dynamic>> _anuncios = []; // Lista para almacenar anuncios
   Set<int> _expandedIndices = {}; // Para rastrear índices expandidos
-  // String? _selectedImportance; // Filtro de importancia
   DateTime? _selectedDate; // Filtro de fecha
-  // Filtros de categoría y orden de la parte superior
+// Filtros de categoría y orden de la parte superior
   String? _selectedCategory;
   String? _selectedSortOption;
-  // Lista para las pantallas de la aplicación
   int _currentIndex = 0;
-  // late List<Widget> _screens;
+
+  // Pagination variables
+  int _currentPage = 1;
+  bool _isLoading = false;
+  bool _hasMoreData = true;
 
   final List<String> _screenTitles = [
     'Megafonito',
@@ -56,21 +58,109 @@ class _AnunciosScreenState extends State<AnunciosScreen>
       vsync: this,
     );
     _animation = Tween<double>(begin: 0, end: 1).animate(_controller);
-    // Valores para la lista de pantallas
-    // Esta feature fue removida debido a que cargaba las pantallas de manera estática y no se actualizaban cuando habían nuevos anuncios
-    // _screens = [
-    //   _buildAnunciosContent(), // Current screen's content
-    //   ContactosEscolaresScreen(),
-    //   ProcesosEscolaresScreen(),
-    //   SoporteMegafonitoScreen(),
-    //   BeneficiosScreen(),
-    // ];
+
+    // Load notices when the screen initializes
+    _loadNotices();
   }
 
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  // Helper method to get color based on category (NOT USEFUL FOR NOW)
+  // Color _getCategoryColor(String category) {
+  //   switch (category) {
+  //     case 'Materias':
+  //       return Colors.blue[100]!;
+  //     case 'Convocatorias':
+  //       return Colors.purple[100]!;
+  //     case 'Eventos':
+  //       return Colors.orange[100]!;
+  //     case 'Deportivos':
+  //       return Colors.green[100]!;
+  //     case 'Culturales':
+  //       return Colors.pink[100]!;
+  //     case 'Comunidad':
+  //       return Colors.red[100]!;
+  //     default:
+  //       return Colors.white;
+  //   }
+  // }
+
+  // Method to load notices from the API
+  Future<void> _loadNotices({bool refresh = false}) async {
+    if (_isLoading) return;
+
+    setState(() {
+      _isLoading = true;
+      if (refresh) {
+        _currentPage = 1;
+        _hasMoreData = true;
+        _anuncios = [];
+      }
+    });
+
+    try {
+      final result = await ApiService.getNotices(
+        page: _currentPage,
+        limit: 2, // You can adjust this value
+        category: _selectedCategory,
+        hasFiles: _selectedSortOption == 'Con archivos' ? true : null,
+      );
+
+      final List<dynamic> notices = result['data'];
+      final pagination = result['pagination'];
+
+      setState(() {
+        // Convert API response to match our local format
+        _anuncios.addAll(notices
+            .map((notice) => {
+                  'titulo': notice['title'],
+                  'texto': notice['content'],
+                  'categoria': notice['category'] ?? 'Materias',
+                  'tieneArchivos': notice['has_file'] == 1,
+                  // 'color': _getCategoryColor(notice['category'] ?? 'Materias'),
+                  'fecha': DateTime.parse(notice['created_at']),
+                })
+            .toList());
+
+        _currentPage++;
+        _hasMoreData = pagination['currentPage'] < pagination['totalPages'];
+        _isLoading = false;
+      });
+
+      // Apply any local sorting if needed
+      if (_selectedSortOption == 'Más recientes' ||
+          _selectedSortOption == 'Más antiguos') {
+        _applySorting();
+      }
+    } catch (e) {
+      print('Error loading notices: $e');
+      setState(() {
+        _isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al cargar anuncios: $e')),
+      );
+    }
+  }
+
+  // Apply sorting locally
+  void _applySorting() {
+    if (_selectedSortOption == 'Más recientes') {
+      _anuncios.sort(
+          (a, b) => (b['fecha'] as DateTime).compareTo(a['fecha'] as DateTime));
+    } else if (_selectedSortOption == 'Más antiguos') {
+      _anuncios.sort(
+          (a, b) => (a['fecha'] as DateTime).compareTo(b['fecha'] as DateTime));
+    }
+  }
+
+  // Update the filter method to reload from API
+  void _filterAnuncios() {
+    _loadNotices(refresh: true);
   }
 
   void _toggleMenu() {
@@ -105,17 +195,9 @@ class _AnunciosScreenState extends State<AnunciosScreen>
               );
 
               if (response.statusCode == 201) {
-                // If created successfully, add to local list and update UI
-                setState(() {
-                  _anuncios.add({
-                    'titulo': titulo,
-                    'texto': texto,
-                    'color': color,
-                    'categoria': categoria,
-                    'tieneArchivos': tieneArchivos,
-                    'fecha': DateTime.now(), // Add date for filtering
-                  });
-                });
+                // Refresh the notices list after creating a new one
+                _loadNotices(refresh: true);
+
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text('Anuncio creado con éxito')),
                 );
@@ -125,7 +207,7 @@ class _AnunciosScreenState extends State<AnunciosScreen>
             } catch (e) {
               print('Error creating announcement: $e');
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Error al crear el anuncio')),
+                SnackBar(content: Text('Error al crear el anuncio: $e')),
               );
             }
           },
@@ -150,52 +232,13 @@ class _AnunciosScreenState extends State<AnunciosScreen>
     });
   }
 
-// FUNCIONES COMENTADAS PORQUE NO SE USAN POR AHORA Y PARA AHORRAR MEMORIA
+// FUNCIONES COMENTADAS PORQUE NO SE USAN POR AHORA Y PARA AHORRAR MEMORIA (solo dejé una de ejemplo)
 
   // void _navigateToContactosEscolares() {
   //   Navigator.push(
   //     context,
   //     MaterialPageRoute(
   //       builder: (context) => ContactosEscolaresScreen(),
-  //     ),
-  //   ).then((_) {
-  //     if (_isMenuOpen) {
-  //       _toggleMenu();
-  //     }
-  //   });
-  // }
-
-  //  void _navigateToProcesosEscolares() {
-  //   Navigator.push(
-  //     context,
-  //     MaterialPageRoute(
-  //       builder: (context) => ProcesosEscolaresScreen(),
-  //     ),
-  //   ).then((_) {
-  //     if (_isMenuOpen) {
-  //       _toggleMenu();
-  //     }
-  //   });
-  // }
-
-  // void _navigateToBeneficios() {
-  //   Navigator.push(
-  //     context,
-  //     MaterialPageRoute(
-  //       builder: (context) => BeneficiosScreen(),
-  //     ),
-  //   ).then((_) {
-  //     if (_isMenuOpen) {
-  //       _toggleMenu();
-  //     }
-  //   });
-  // }
-
-  // void _navigateToSoporte() {
-  //   Navigator.push(
-  //     context,
-  //     MaterialPageRoute(
-  //       builder: (context) => SoporteMegafonitoScreen(),
   //     ),
   //   ).then((_) {
   //     if (_isMenuOpen) {
@@ -214,39 +257,6 @@ class _AnunciosScreenState extends State<AnunciosScreen>
       if (_isMenuOpen) {
         _toggleMenu();
       }
-    });
-  }
-
-// Update the _filterAnuncios method in Anuncios.dart
-  void _filterAnuncios() {
-    List<Map<String, dynamic>> filteredAnuncios = _anuncios.where((anuncio) {
-      // Remove importance filter as we're not using it anymore
-      bool matchesDate = _selectedDate == null ||
-          (anuncio['fecha'] != null &&
-              (anuncio['fecha'] as DateTime).isAtSameMomentAs(_selectedDate!));
-
-      // Use the category from the new filter
-      bool matchesCategory = _selectedCategory == null ||
-          _selectedCategory == '' ||
-          anuncio['categoria'] == _selectedCategory;
-
-      return matchesDate && matchesCategory;
-    }).toList();
-
-    if (_selectedSortOption == 'Más recientes') {
-      filteredAnuncios.sort(
-          (a, b) => (b['fecha'] as DateTime).compareTo(a['fecha'] as DateTime));
-    } else if (_selectedSortOption == 'Más antiguos') {
-      filteredAnuncios.sort(
-          (a, b) => (a['fecha'] as DateTime).compareTo(b['fecha'] as DateTime));
-    } else if (_selectedSortOption == 'Con archivos') {
-      filteredAnuncios = filteredAnuncios
-          .where((anuncio) => anuncio['tieneArchivos'] == true)
-          .toList();
-    }
-
-    setState(() {
-      _anuncios = filteredAnuncios;
     });
   }
 
@@ -339,72 +349,115 @@ class _AnunciosScreenState extends State<AnunciosScreen>
             },
           ),
           Expanded(
-            child: ListView(
-              padding: EdgeInsets.all(16.0),
-              children: _anuncios.asMap().entries.map((entry) {
-                int index = entry.key;
-                Map<String, dynamic> anuncio = entry.value;
-                bool isExpanded = _expandedIndices.contains(index);
-
-                return GestureDetector(
-                  onTap: () => _toggleExpansion(index),
-                  child: AnimatedContainer(
-                    duration: Duration(milliseconds: 300),
-                    margin: EdgeInsets.symmetric(vertical: 10),
-                    padding: EdgeInsets.all(16.0),
-                    decoration: BoxDecoration(
-                      color: anuncio['color'] ?? Color(0xFFFFFFFF),
-                      borderRadius: BorderRadius.circular(15),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black26,
-                          blurRadius: 10,
-                          offset: Offset(0, 5),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Row with title and icons/tags
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+            child: _isLoading && _anuncios.isEmpty
+                ? Center(child: CircularProgressIndicator())
+                : _anuncios.isEmpty
+                    ? Center(child: Text('No hay anuncios disponibles'))
+                    : RefreshIndicator(
+                        onRefresh: () => _loadNotices(refresh: true),
+                        child: ListView(
+                          padding: EdgeInsets.all(16.0),
                           children: [
-                            // Título with Expanded to take available space
-                            Expanded(
-                              child: Text(
-                                anuncio['titulo'],
-                                style: TextStyle(
-                                    color: Color(0xFF000000), fontSize: 18),
-                              ),
-                            ),
-                            // Category tag and file icon if exists
-                            Row(
-                              children: [
-                                NoticeTag(category: anuncio['categoria'] ?? ''),
-                                if (anuncio['tieneArchivos'] == true)
-                                  Padding(
-                                    padding: const EdgeInsets.only(left: 4),
-                                    child: FileAttachmentIcon(),
+                            ..._anuncios.asMap().entries.map((entry) {
+                              int index = entry.key;
+                              Map<String, dynamic> anuncio = entry.value;
+                              bool isExpanded =
+                                  _expandedIndices.contains(index);
+
+                              return GestureDetector(
+                                onTap: () => _toggleExpansion(index),
+                                child: AnimatedContainer(
+                                  duration: Duration(milliseconds: 300),
+                                  margin: EdgeInsets.symmetric(vertical: 10),
+                                  padding: EdgeInsets.all(16.0),
+                                  decoration: BoxDecoration(
+                                    color: Color(0xFFFFFFFF),
+                                    borderRadius: BorderRadius.circular(15),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black26,
+                                        blurRadius: 10,
+                                        offset: Offset(0, 5),
+                                      ),
+                                    ],
                                   ),
-                              ],
-                            ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+// Row with title and icons/tags
+                                      Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+// Título with Expanded to take available space
+                                          Expanded(
+                                            child: Text(
+                                              anuncio['titulo'],
+                                              style: TextStyle(
+                                                  color: Color(0xFF000000),
+                                                  fontSize: 18),
+                                            ),
+                                          ),
+// Category tag and file icon if exists
+                                          Row(
+                                            children: [
+                                              NoticeTag(
+                                                  category:
+                                                      anuncio['categoria'] ??
+                                                          ''),
+                                              if (anuncio['tieneArchivos'] ==
+                                                  true)
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          left: 4),
+                                                  child: Icon(Icons.attach_file,
+                                                      size: 18),
+                                                ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                      if (isExpanded) ...[
+                                        SizedBox(height: 8),
+                                        Text(
+                                          anuncio['texto'],
+                                          style: TextStyle(
+                                              color: Color(0xFF000000)),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+
+                            // Loading more indicator
+                            if (_isLoading)
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child:
+                                    Center(child: CircularProgressIndicator()),
+                              ),
+
+                            // Load more button
+                            if (!_isLoading && _hasMoreData)
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Center(
+                                  child: ElevatedButton(
+                                    onPressed: _loadNotices,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Color(0xFFFCA311),
+                                    ),
+                                    child: Text('Cargar más anuncios'),
+                                  ),
+                                ),
+                              ),
                           ],
                         ),
-                        // Expanded content
-                        if (isExpanded) ...[
-                          SizedBox(height: 8),
-                          Text(
-                            anuncio['texto'],
-                            style: TextStyle(color: Color(0xFF000000)),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
+                      ),
           ),
         ],
       ),
@@ -442,6 +495,18 @@ class _AnunciosScreenState extends State<AnunciosScreen>
           ),
         ],
       ),
+    );
+  }
+}
+
+// Simple icon widget for file attachments
+class FileAttachmentIcon extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Icon(
+      Icons.attach_file,
+      size: 18,
+      color: Colors.black87,
     );
   }
 }
