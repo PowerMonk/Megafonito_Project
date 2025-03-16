@@ -71,4 +71,46 @@ class ApiService {
       rethrow;
     }
   }
+
+  static Future<Map<String, dynamic>> getNotices({
+    int page = 1,
+    int limit = 2,
+    String? category,
+    bool? hasFiles,
+  }) async {
+    try {
+      // Build query parameters
+      final queryParams = {
+        'page': page.toString(),
+        'limit': limit.toString(),
+      };
+
+      if (category != null && category.isNotEmpty) {
+        queryParams['category'] = category;
+      }
+
+      if (hasFiles != null) {
+        queryParams['hasFiles'] = hasFiles.toString();
+      }
+
+      // Construct query string
+      final queryString = Uri(queryParameters: queryParams).query;
+
+      // Make request
+      final response = await authenticatedRequest(
+        '/notices?$queryString',
+        'GET',
+      );
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        throw Exception(
+            'Failed to fetch notices: ${response.statusCode} - ${response.body}');
+      }
+    } catch (e) {
+      print('Error fetching notices: $e');
+      rethrow;
+    }
+  }
 }
