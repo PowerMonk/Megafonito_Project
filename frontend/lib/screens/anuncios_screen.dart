@@ -169,8 +169,8 @@ class _AnunciosScreenState extends State<AnunciosScreen>
       context,
       MaterialPageRoute(
         builder: (context) => CrearNuevoAnuncioScreen(
-          onAnuncioCreado:
-              (titulo, texto, color, categoria, tieneArchivos) async {
+          onAnuncioCreado: (titulo, texto, color, categoria, tieneArchivos,
+              fileUrl, fileKey) async {
             try {
               await NoticesService.createNotice(
                 context,
@@ -178,6 +178,8 @@ class _AnunciosScreenState extends State<AnunciosScreen>
                 content: texto,
                 category: categoria,
                 hasFile: tieneArchivos,
+                fileUrl: fileUrl,
+                fileKey: fileKey,
               );
 
               // Refresh the notices list after creating a new one

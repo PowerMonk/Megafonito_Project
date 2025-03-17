@@ -19,31 +19,40 @@ class StorageService {
         return null;
       }
 
-      // Upload the picked file
+      // Get file details
       File file = File(result.files.single.path!);
       String fileName = result.files.single.name;
+
+      // Debug logging
+      print('Uploading file: $fileName');
+      print('File size: ${file.lengthSync()} bytes');
 
       // Create form data for upload
       var request = http.MultipartRequest(
           'POST', Uri.parse('${ApiService.baseUrl}/upload/s3'));
 
-      // Add authorization header
-      request.headers['Content-Type'] = 'multipart/form-data';
+      // Set authorization header - DON'T manually set Content-Type for multipart requests
       request.headers['Authorization'] = 'Bearer ${ApiService.token}';
 
-      // Add file
+      // Add file to request
       request.files.add(
         await http.MultipartFile.fromPath(
-          'file',
+          'file', // This must match the field name expected by the server
           file.path,
           filename: fileName,
         ),
       );
 
-      // Send request
-      var response = await request.send();
-      var responseData = await response.stream.bytesToString();
-      var parsedResponse = jsonDecode(responseData);
+      // Send request and get response
+      print('Sending S3 upload request to ${request.url}');
+      var streamedResponse = await request.send();
+      var response = await http.Response.fromStream(streamedResponse);
+
+      print('S3 upload response status: ${response.statusCode}');
+      print('S3 upload response body: ${response.body}');
+
+      // Parse response
+      Map<String, dynamic> parsedResponse = jsonDecode(response.body);
 
       // Check status
       if (response.statusCode == 200 || response.statusCode == 201) {
@@ -53,14 +62,15 @@ class StorageService {
 
         // Return the file URL and key
         return {
-          'fileUrl': parsedResponse['fileUrl'],
-          'fileKey': parsedResponse['fileKey'],
+          'fileUrl': parsedResponse['fileUrl'] as String,
+          'fileKey': parsedResponse['fileKey'] as String,
         };
       } else {
-        throw Exception(
-            'Failed to upload file: ${parsedResponse['error'] ?? response.statusCode}');
+        var errorMsg = parsedResponse['error'] ?? 'Unknown error';
+        throw Exception('Error al subir archivo: $errorMsg');
       }
     } catch (e) {
+      print('File upload error: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error al subir archivo: $e')),
       );

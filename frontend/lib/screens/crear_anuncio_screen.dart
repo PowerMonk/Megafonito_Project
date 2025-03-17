@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:file_picker/file_picker.dart'; // Add this import
-import 'dart:io'; // For File operations
+import 'package:file_picker/file_picker.dart';
+import 'dart:io';
+import '../services/storage_service.dart';
 
 class CrearNuevoAnuncioScreen extends StatefulWidget {
-  final Function(String, String, Color, String, bool) onAnuncioCreado;
+  // Change the callback to include fileUrl and fileKey parameters
+  final Function(String, String, Color, String, bool, String?, String?)
+      onAnuncioCreado;
 
   CrearNuevoAnuncioScreen({required this.onAnuncioCreado});
 
@@ -17,6 +20,12 @@ class _CrearNuevoAnuncioScreenState extends State<CrearNuevoAnuncioScreen> {
   final TextEditingController _textoController = TextEditingController();
   String _categoriaSeleccionada = 'Materias';
   bool _tieneArchivos = false;
+  bool _isUploading = false;
+
+  // Store uploaded file details
+  String? _fileUrl;
+  String? _fileKey;
+  String? _fileName;
 
   // Lista de categorías (misma que en NoticesFilter)
   final List<String> _categorias = [
@@ -34,8 +43,8 @@ class _CrearNuevoAnuncioScreenState extends State<CrearNuevoAnuncioScreen> {
     final Color color = Color(0xFFFFFFFF); // Color blanco por defecto
 
     if (titulo.isNotEmpty && texto.isNotEmpty) {
-      widget.onAnuncioCreado(
-          titulo, texto, color, _categoriaSeleccionada, _tieneArchivos);
+      widget.onAnuncioCreado(titulo, texto, color, _categoriaSeleccionada,
+          _tieneArchivos, _fileUrl, _fileKey);
       Navigator.pop(context);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -45,32 +54,35 @@ class _CrearNuevoAnuncioScreenState extends State<CrearNuevoAnuncioScreen> {
   }
 
   void _agregarArchivo() async {
+    setState(() {
+      _isUploading = true;
+    });
+
     try {
-      FilePickerResult? result = await FilePicker.platform.pickFiles();
+      // Use the storage service to pick and upload file
+      final result = await StorageService.pickAndUploadFile(context);
 
       if (result != null) {
-        // File was picked
-        File file = File(result.files.single.path!);
-
         setState(() {
           _tieneArchivos = true;
+          _fileUrl = result['fileUrl'];
+          _fileKey = result['fileKey'];
+          _fileName = result['fileUrl']?.split('/').last;
+          _isUploading = false;
         });
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text(
-                  'Archivo "${result.files.single.name}" adjuntado correctamente')),
-        );
+        print('File uploaded successfully: URL=${_fileUrl}, Key=${_fileKey}');
       } else {
-        // User canceled the picker
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('No se seleccionó ningún archivo')),
-        );
+        setState(() {
+          _isUploading = false;
+        });
       }
     } catch (e) {
+      setState(() {
+        _isUploading = false;
+      });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text('Error al seleccionar archivo: ${e.toString()}')),
+        SnackBar(content: Text('Error al subir archivo: ${e.toString()}')),
       );
     }
   }
@@ -102,40 +114,25 @@ class _CrearNuevoAnuncioScreenState extends State<CrearNuevoAnuncioScreen> {
                 _buildTextField(_textoController, 'Texto', maxLines: 4),
                 SizedBox(height: 16),
 
-                // Botón para adjuntar archivos centrado
-                ElevatedButton.icon(
-                  onPressed: _agregarArchivo,
-                  icon: Icon(Icons.attach_file, color: Colors.black),
-                  label: Text(
-                    'Agregar archivo',
-                    style: TextStyle(color: Colors.black),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFFFCA311),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                  ),
-                ),
-
-                // Botón para adjuntar archivos del lado izquierdo
-                // Align(
-                //   alignment: Alignment.centerLeft, // Lo alinea a la izquierda
-                //   child: ElevatedButton.icon(
-                //     onPressed: _agregarArchivo,
-                //     icon: Icon(Icons.attach_file, color: Colors.black),
-                //     label: Text(
-                //       'Agregar archivo',
-                //       style: TextStyle(color: Colors.black),
-                //     ),
-                //     style: ElevatedButton.styleFrom(
-                //       backgroundColor: Color(0xFFFCA311),
-                //       shape: RoundedRectangleBorder(
-                //         borderRadius: BorderRadius.circular(15),
-                //       ),
-                //     ),
-                //   ),
-                // ),
+                // Botón para adjuntar archivos
+                _isUploading
+                    ? Center(child: CircularProgressIndicator())
+                    : ElevatedButton.icon(
+                        onPressed: _agregarArchivo,
+                        icon: Icon(Icons.attach_file, color: Colors.black),
+                        label: Text(
+                          _fileName != null
+                              ? 'Archivo: $_fileName'
+                              : 'Agregar archivo',
+                          style: TextStyle(color: Colors.black),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color(0xFFFCA311),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                        ),
+                      ),
 
                 SizedBox(height: 16),
                 _buildCategoryDropdown(),
@@ -149,6 +146,7 @@ class _CrearNuevoAnuncioScreenState extends State<CrearNuevoAnuncioScreen> {
     );
   }
 
+  // Rest of the widget methods remain the same
   Widget _buildTextField(TextEditingController controller, String label,
       {int maxLines = 1}) {
     return TextField(
@@ -192,7 +190,7 @@ class _CrearNuevoAnuncioScreenState extends State<CrearNuevoAnuncioScreen> {
           );
         }).toList(),
         isExpanded: true,
-        underline: SizedBox(), // Eliminar la línea subrayada
+        underline: SizedBox(), // Remove underline
       ),
     );
   }
