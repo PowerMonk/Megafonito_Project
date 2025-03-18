@@ -9,9 +9,11 @@ class ApiService {
   // Store JWT token
   static String? _token;
   static String? _userRole;
+  static String? _userId;
 
   static String? get token => _token;
   static String? get userRole => _userRole;
+  static String? get userId => _userId;
 
   // Login method
   static Future<Map<String, dynamic>> login(String username) async {
@@ -26,6 +28,11 @@ class ApiService {
         final data = jsonDecode(response.body);
         _token = data['token'];
         _userRole = data['role'];
+        _userId = data['userId'] is int
+            ? data['userId']
+            : int.tryParse(data['userId'].toString());
+
+        print('Login successful: UserID=$_userId, Role=$_userRole');
         return data;
       } else {
         throw Exception(
@@ -112,5 +119,12 @@ class ApiService {
       print('Error fetching notices: $e');
       rethrow;
     }
+  }
+
+// Add this method to ApiService
+  static void clearToken() {
+    _token = null;
+    _userRole = null;
+    _userId = null;
   }
 }

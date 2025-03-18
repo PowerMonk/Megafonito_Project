@@ -23,7 +23,7 @@ export async function loginHandler(ctx: RouterContext<string>) {
     role: user!.role as UserRole,
   });
   ctx.response.status = 200;
-  ctx.response.body = { token, role: user!.role };
+  ctx.response.body = { token, role: user!.role, userId: user!.id };
 }
 
 export async function userCreatorHandler(ctx: RouterContext<string>) {

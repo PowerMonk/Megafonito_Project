@@ -36,15 +36,17 @@ class NoticesService {
     String? fileKey,
   }) async {
     try {
+      // Get user ID, defaulting to 1 if not available
+      final userId = AuthService.currentUser?.id ?? ApiService.userId ?? 1;
+
       final response = await ApiService.authenticatedRequest(
         '/notices',
         'POST',
         body: {
           'title': title,
           'content': content,
-          'userId':
-              // AuthService.currentUser?.id, // Get from current user if available
-              1, // Hardcoded user ID for now
+          'userId': userId, // Get from current user if available
+          // 1, // Hardcoded user ID for now
           'category': category,
           'hasFile': hasFile,
           'fileUrl': fileUrl,
