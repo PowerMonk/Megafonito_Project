@@ -67,6 +67,6 @@ class AuthService {
   // Logout method
   static void logout() {
     _currentUser = null;
-    // ApiService.clearToken();
+    ApiService.clearToken();
   }
 }
