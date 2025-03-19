@@ -17,12 +17,22 @@ class AuthService {
     try {
       final result = await ApiService.login(username);
 
+      // Get userId, ensure it's an int
+      int? userId;
+      if (result['userId'] != null) {
+        if (result['userId'] is int) {
+          userId = result['userId'];
+        } else {
+          userId = int.tryParse(result['userId'].toString());
+        }
+      }
+
       // If login is successful, create user object
       _currentUser = User(
         name: username,
-        email: username, // Using username as email for now
+        email: username, // using username as email for now
         role: result['role'],
-        id: result['userId'],
+        id: userId, // Now properly typed
       );
 
       return _currentUser!;

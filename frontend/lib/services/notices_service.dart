@@ -37,7 +37,12 @@ class NoticesService {
   }) async {
     try {
       // Get user ID, defaulting to 1 if not available
-      final userId = AuthService.currentUser?.id ?? ApiService.userId ?? 1;
+      final userId = AuthService.currentUser?.id ?? ApiService.userId;
+      // final userId = AuthService.currentUser?.id ?? ApiService.userId ?? 1;
+
+      // Use null-safe fallback for userId (with debug info)
+      print(
+          'Creating notice with userID: $userId (from auth: ${AuthService.currentUser?.id}, from API: ${ApiService.userId})');
 
       final response = await ApiService.authenticatedRequest(
         '/notices',

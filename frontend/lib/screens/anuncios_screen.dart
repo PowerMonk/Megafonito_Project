@@ -84,13 +84,18 @@ class _AnunciosScreenState extends State<AnunciosScreen>
     try {
       final result = await NoticesService.loadNotices(
         page: _currentPage,
-        limit: 2,
+        limit: 10,
         category: _selectedCategory,
         hasFiles: _selectedSortOption == 'Con archivos' ? true : null,
       );
 
+      print('API Response: $result');
+      print('Data type: ${result['data'].runtimeType}');
+      print('Pagination: ${result['pagination']}');
+
       final List<dynamic> notices = result['data'];
       final pagination = result['pagination'];
+      final totalPages = pagination['totalPages'];
 
       setState(() {
         // Convert API response to match our local format
@@ -100,12 +105,31 @@ class _AnunciosScreenState extends State<AnunciosScreen>
                   'texto': notice['content'],
                   'categoria': notice['category'] ?? 'Materias',
                   'tieneArchivos': notice['has_file'] == 1,
-                  'fecha': DateTime.parse(notice['created_at']),
+                  // Null-safe version
+                  'fecha': notice['created_at'] != null
+                      ? DateTime.tryParse(notice['created_at'])
+                      : DateTime.now(),
                 })
             .toList());
 
+// VERSION ORIGINAL
+        // _hasMoreData = pagination['currentPage'] < pagination['totalPages'];
+        // _currentPage++;
+
+        // DS Version
+        final currentPage = pagination['currentPage'] as int? ?? 1;
+        final totalPages = pagination['totalPages'] as int? ?? 1;
+        _hasMoreData = currentPage < totalPages;
+
         _currentPage++;
-        _hasMoreData = pagination['currentPage'] < pagination['totalPages'];
+
+        // null-safe version
+        // _hasMoreData = pagination != null &&
+        //     pagination['currentPage'] != null &&
+        //     pagination['totalPages'] != null &&
+        //     (pagination['currentPage'] as num) <
+        //         (pagination['totalPages'] as num);
+
         _isLoading = false;
       });
 

@@ -9,11 +9,11 @@ class ApiService {
   // Store JWT token
   static String? _token;
   static String? _userRole;
-  static String? _userId;
+  static int? _userId;
 
   static String? get token => _token;
   static String? get userRole => _userRole;
-  static String? get userId => _userId;
+  static int? get userId => _userId;
 
   // Login method
   static Future<Map<String, dynamic>> login(String username) async {
@@ -28,9 +28,15 @@ class ApiService {
         final data = jsonDecode(response.body);
         _token = data['token'];
         _userRole = data['role'];
-        _userId = data['userId'] is int
-            ? data['userId']
-            : int.tryParse(data['userId'].toString());
+
+        // Correctly parse userId as int
+        if (data['userId'] != null) {
+          if (data['userId'] is int) {
+            _userId = data['userId'];
+          } else {
+            _userId = int.tryParse(data['userId'].toString());
+          }
+        }
 
         print('Login successful: UserID=$_userId, Role=$_userRole');
         return data;
@@ -81,7 +87,7 @@ class ApiService {
 
   static Future<Map<String, dynamic>> getNotices({
     int page = 1,
-    int limit = 2,
+    int limit = 3,
     String? category,
     bool? hasFiles,
   }) async {
