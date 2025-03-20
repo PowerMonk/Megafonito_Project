@@ -84,7 +84,7 @@ class _AnunciosScreenState extends State<AnunciosScreen>
     try {
       final result = await NoticesService.loadNotices(
         page: _currentPage,
-        limit: 10,
+        limit: 5,
         category: _selectedCategory,
         hasFiles: _selectedSortOption == 'Con archivos' ? true : null,
       );

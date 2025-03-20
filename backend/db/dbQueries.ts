@@ -124,26 +124,43 @@ export function paginatedQuery(
 ): { data: DatabaseRow[]; total: number } {
   const offset = (page - 1) * limit;
 
-  // Get total count
-  const countQuery = query.replace(
-    /SELECT (.+?) FROM/i,
-    "SELECT COUNT(*) as total FROM"
-  );
-  const totalResult = db.prepare(countQuery).get(...params) as {
-    total: number;
-  };
-  const total = totalResult.total;
+  // Remove the ORDER BY clause for the count query
+  const queryWithoutOrder = query.replace(/ORDER BY[\s\S]*/i, "");
 
-  // Get paginated data
-  const paginatedQuery = `${query} LIMIT ? OFFSET ?`;
+  const countQuery = `
+    SELECT COUNT(*) as total 
+    FROM (${queryWithoutOrder}) AS subquery
+  `;
 
-  // If there are no params, only pass limit and offset
-  const paginatedParams =
-    params.length > 0 ? [...params, limit, offset] : [limit, offset];
+  try {
+    // Execute the count query with the same params
+    const totalResult = db.prepare(countQuery).get(...params) as
+      | { total: number }
+      | { total: string };
 
-  const data = db.prepare(paginatedQuery).all(...paginatedParams);
+    let total: number;
+    if (typeof totalResult?.total === "string") {
+      total = parseInt(totalResult.total, 10);
+    } else if (typeof totalResult?.total === "number") {
+      total = totalResult.total;
+    } else {
+      total = 0;
+      throw new Error(
+        "Warning: Could not extract total count from query result:" +
+          totalResult
+      );
+    }
 
-  return { data, total };
+    // Construct the paginated data query (keep the ORDER BY here)
+    const paginatedQuery = `${query} LIMIT ? OFFSET ?`;
+    const paginatedParams = [...params, limit, offset];
+    const data = db.prepare(paginatedQuery).all(...paginatedParams);
+
+    return { data, total };
+  } catch (error) {
+    console.error("Error in paginatedQuery:", error);
+    return { data: [], total: 0 };
+  }
 }
 
 /**

@@ -167,6 +167,7 @@ export function getPaginatedNotices(
   const whereConditions: string[] = [];
   const queryParams: (string | number | null | boolean)[] = [];
 
+  // Add conditions based on filters
   if (category) {
     whereConditions.push(`n.category = ?`);
     queryParams.push(category);
@@ -177,26 +178,58 @@ export function getPaginatedNotices(
     queryParams.push(hasFiles ? 1 : 0);
   }
 
+  // Append WHERE clause if conditions exist
   if (whereConditions.length > 0) {
     baseQuery += ` WHERE ${whereConditions.join(" AND ")}`;
   }
 
+  // Append ORDER BY clause
   baseQuery += ` ORDER BY n.created_at DESC`;
 
-  const { data, total } = paginatedQuery(
-    baseQuery,
-    page,
-    limit,
-    ...queryParams
-  );
+  // console.log(`Executing query with page=${page}, limit=${limit}`);
+  // console.log(`SQL: ${baseQuery}`);
+  // console.log(`Params: ${JSON.stringify(queryParams)}`);
 
-  return {
-    data: data as Notice[],
-    pagination: {
-      currentPage: page,
-      pageSize: limit,
-      totalItems: total,
-      totalPages: Math.ceil(total / limit),
-    },
-  };
+  try {
+    // Call the paginatedQuery function from dbQueries.ts
+    const { data, total } = paginatedQuery(
+      baseQuery,
+      page,
+      limit,
+      ...queryParams
+    );
+
+    // Ensure total is a valid number
+    const totalItems = typeof total === "number" ? total : 0;
+
+    // Calculate totalPages safely
+    const totalPages = limit > 0 ? Math.ceil(totalItems / limit) : 0;
+
+    // console.log(
+    //   `Query returned ${data.length} items, total=${totalItems}, totalPages=${totalPages}`
+    // );
+
+    // Return the paginated response
+    return {
+      data: data as Notice[],
+      pagination: {
+        currentPage: page,
+        pageSize: limit,
+        totalItems: totalItems,
+        totalPages: totalPages,
+      },
+    };
+  } catch (error) {
+    console.error("Error in getPaginatedNotices:", error);
+    // Return empty response on error
+    return {
+      data: [],
+      pagination: {
+        currentPage: page,
+        pageSize: limit,
+        totalItems: 0,
+        totalPages: 0,
+      },
+    };
+  }
 }
