@@ -8,7 +8,7 @@ class NoticesService {
   // Notice loading logic
   static Future<Map<String, dynamic>> loadNotices({
     int page = 1,
-    int limit = 10,
+    int limit = 5,
     String? category,
     bool? hasFiles,
   }) async {

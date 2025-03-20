@@ -87,7 +87,7 @@ class ApiService {
 
   static Future<Map<String, dynamic>> getNotices({
     int page = 1,
-    int limit = 3,
+    int limit = 5,
     String? category,
     bool? hasFiles,
   }) async {

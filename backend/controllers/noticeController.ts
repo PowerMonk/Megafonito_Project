@@ -138,7 +138,7 @@ export function getAllNoticesHandler(ctx: RouterContext<string>) {
 export function getPaginatedNoticesHandler(ctx: RouterContext<string>) {
   // Parse query parameters
   const page = parseInt(ctx.request.url.searchParams.get("page") ?? "1");
-  const limit = parseInt(ctx.request.url.searchParams.get("limit") ?? "3");
+  const limit = parseInt(ctx.request.url.searchParams.get("limit") ?? "5");
   const category = ctx.request.url.searchParams.get("category") || undefined;
   const hasFiles = ctx.request.url.searchParams.has("hasFiles")
     ? ctx.request.url.searchParams.get("hasFiles") === "true"
