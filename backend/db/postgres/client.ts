@@ -2,7 +2,7 @@ import {
   execute,
   // executeTransaction,
   // queryOne
-} from "./dbMod.ts";
+} from "../dbMod.ts";
 
 export function initializeDatabase() {
   const createUsersTable = `
