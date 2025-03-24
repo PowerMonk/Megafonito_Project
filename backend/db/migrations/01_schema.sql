@@ -5,6 +5,15 @@ CREATE TABLE IF NOT EXISTS user_roles (
   reach_level INTEGER NOT NULL CHECK (reach_level >= 0)
 );
 
+-- Groups (departments, grades, etc.)
+CREATE TABLE IF NOT EXISTS groups (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(50) NOT NULL,
+  type VARCHAR(30) NOT NULL, -- 'grade', 'department', etc.
+  parent_id INTEGER REFERENCES groups(id), -- For hierarchical grouping
+  UNIQUE (name, type)
+);
+
 -- Users table with improved structure
 CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,
@@ -17,14 +26,6 @@ CREATE TABLE IF NOT EXISTS users (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- Groups (departments, grades, etc.)
-CREATE TABLE IF NOT EXISTS groups (
-  id SERIAL PRIMARY KEY,
-  name VARCHAR(50) NOT NULL,
-  type VARCHAR(30) NOT NULL, -- 'grade', 'department', etc.
-  parent_id INTEGER REFERENCES groups(id), -- For hierarchical grouping
-  UNIQUE (name, type)
-);
 
 -- User-Group associations (many-to-many)
 -- This is necessary despite seeming redundant, as it allows users to belong to multiple groups
@@ -68,7 +69,7 @@ CREATE TABLE IF NOT EXISTS notices (
   attachment_url TEXT,
   attachment_key TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-  publish_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  publish_at TIMESTAMP WITH TIME ZONE,
   expiry_date TIMESTAMP WITH TIME ZONE
 );
 
