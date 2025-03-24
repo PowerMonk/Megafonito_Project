@@ -5,6 +5,7 @@ import {
   getAllUsers,
   getUserById,
   updateUser,
+  createUserWithForeignKeys,
 } from "../models/modelsMod.ts";
 import { generateJWT } from "../auth/authMod.ts";
 
@@ -63,24 +64,29 @@ function getRoleLevelFromName(roleName: string): number {
   }
 }
 
-// User creation handler
+// In userController.ts
 export async function userCreatorHandler(ctx: RouterContext<string>) {
   try {
-    const { control_number, email, name, role, primary_group_id, schedule } =
-      await ctx.request.body.json();
+    const {
+      control_number,
+      email,
+      name,
+      role, // Role name, not ID
+      group, // Group name, not ID
+      group_type, // Optional group type
+      schedule,
+    } = await ctx.request.body.json();
 
     // Validate required fields
-    if (!control_number || !email || !name) {
+    if (!control_number || !email || !name || !role) {
       ctx.response.status = 400;
       ctx.response.body = {
-        error: "Control number, email, and name are required",
+        error: "Control number, email, name, and role are required",
       };
       return;
     }
 
-    // If someone is trying to create an admin account, check permissions
-    const roleId = getRoleIdFromName(role || "Student");
-
+    // Admin permission check
     if (
       role === UserRole.ADMIN &&
       (!ctx.state.user || ctx.state.user.role !== UserRole.ADMIN)
@@ -93,21 +99,22 @@ export async function userCreatorHandler(ctx: RouterContext<string>) {
       return;
     }
 
-    // Create user
-    const newUser = await createUser(
+    // Create user with role and group names
+    const newUser = await createUserWithForeignKeys(
       control_number,
       email,
       name,
-      roleId,
-      primary_group_id,
+      role,
+      group || "General", // Default group if not specified
+      group_type || "department",
       schedule
     );
 
     const token = await generateJWT({
       id: newUser.id,
       name: newUser.name,
-      role: role || "Student",
-      roleLevel: getRoleLevelFromName(role || "Student"),
+      role: newUser.role_name || "Student",
+      roleLevel: getRoleLevelFromName(newUser.role_name || "Student"),
     });
 
     ctx.response.status = 201;
@@ -119,7 +126,7 @@ export async function userCreatorHandler(ctx: RouterContext<string>) {
   } catch (error) {
     console.error("Error creating user:", error);
     ctx.response.status = 500;
-    ctx.response.body = { error: "Failed to create user" };
+    ctx.response.body = { error: "Failed to create user: " + error };
   }
 }
 
