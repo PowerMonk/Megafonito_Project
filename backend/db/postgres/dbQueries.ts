@@ -83,6 +83,27 @@ export async function executeTransaction(
 }
 
 /**
+ * Executes a transaction with dynamic logic
+ */
+export async function executeTransactionWithLogic(
+  transactionLogic: (transaction: any) => Promise<any>
+): Promise<any> {
+  try {
+    let result: any;
+
+    await sql.begin(async (transaction) => {
+      result = await transactionLogic(transaction);
+    });
+
+    console.log("Transaction executed successfully!");
+    return result;
+  } catch (error) {
+    console.error("Transaction execution error:", error);
+    throw error;
+  }
+}
+
+/**
  * Executes a paginated query with total count
  */
 export async function paginatedQuery<T>(
