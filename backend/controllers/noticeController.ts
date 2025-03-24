@@ -1,150 +1,306 @@
-import { RouterContext } from "@oak/oak";
+import { RouterContext } from "jsr:@oak/oak";
 import {
+  getPaginatedNotices,
   createNotice,
-  getNoticesByUser,
+  getNoticeById,
+  getNoticesByAuthorId,
   updateNotice,
   deleteNotice,
-  getNoticeByUserIdAndNoticeId,
-  getNoticesByNoticeId,
-  getAllNotices,
-  getPaginatedNotices,
+  getUserById,
 } from "../models/modelsMod.ts";
-import {
-  checkNoticeExistsByNoticeId,
-  checkNoticeExistsByUserId,
-} from "../utils/utilsMod.ts";
-import { getS3Service } from "../proxy/proxyMod.ts";
 
+// Create notice handler
 export async function createNoticeHandler(ctx: RouterContext<string>) {
-  const { title, content, userId, category, hasFile, fileUrl, fileKey } =
-    await ctx.request.body.json();
-
-  // Handle different possible formats of hasFile
-  let hasFileValue;
-  if (
-    hasFile === true ||
-    hasFile === "true" ||
-    hasFile === 1 ||
-    hasFile === "1"
-  ) {
-    hasFileValue = 1;
-  } else {
-    hasFileValue = 0;
+  const user = ctx.state.user;
+  if (!user || !user.id) {
+    ctx.response.status = 401;
+    ctx.response.body = { error: "Authentication required" };
+    return;
   }
 
-  console.log("hasFileValue after conversion:", hasFileValue);
+  try {
+    const requestBody = await ctx.request.body.json();
+    const {
+      title,
+      content,
+      category = "General",
+      minRoleLevel = 1,
+      targetGroups = [],
+      targetClasses = [],
+      hasAttachment = false,
+      attachmentUrl = null,
+      attachmentKey = null,
+      publishAt,
+      expiryDate,
+    } = requestBody;
 
-  // These will throw if not found
-  checkNoticeExistsByUserId(userId);
-
-  // This guard clause is not needed since the  function will throw an error if the user is not found
-  // if (!user) return;
-
-  createNotice(
-    title,
-    content,
-    userId,
-    category,
-    hasFileValue,
-    fileUrl,
-    fileKey
-  );
-  ctx.response.status = 201;
-  ctx.response.body = {
-    message: `Notice created successfully! at ${new Date()}`,
-  };
-}
-
-export function getNoticesByUserHandler(ctx: RouterContext<string>) {
-  const userId = +ctx.params.userId;
-
-  checkNoticeExistsByUserId(userId);
-
-  const noticesObtainedById = getNoticesByUser(userId);
-  ctx.response.body = noticesObtainedById;
-}
-
-export function getNoticeByUserAndIdHandler(ctx: RouterContext<string>) {
-  const userId = +ctx.params.userId;
-  const noticeId = +ctx.params.noticeId;
-
-  checkNoticeExistsByUserId(userId);
-  checkNoticeExistsByNoticeId(noticeId);
-
-  const noticeObtainedByUserAndById = getNoticeByUserIdAndNoticeId(
-    userId,
-    noticeId
-  );
-
-  ctx.response.body = noticeObtainedByUserAndById;
-}
-
-export function getNoticesByNoticeIdHandler(ctx: RouterContext<string>) {
-  const noticeId = +ctx.params.noticeId;
-
-  checkNoticeExistsByNoticeId(noticeId);
-
-  const noticesObtainedByNoticeId = getNoticesByNoticeId(noticeId);
-  ctx.response.body = noticesObtainedByNoticeId;
-}
-
-export async function noticeUpdaterHandler(ctx: RouterContext<string>) {
-  const noticeId = +ctx.params.noticeId;
-  const { title, content, category, hasFile, fileUrl, fileKey } =
-    await ctx.request.body.json();
-
-  checkNoticeExistsByNoticeId(noticeId);
-
-  // Update notice with all fields, including file information
-  updateNotice(noticeId, title, content, category, hasFile, fileUrl, fileKey);
-  ctx.response.status = 200;
-  ctx.response.body = {
-    message: `Notice updated successfully! at ${new Date()}`,
-  };
-}
-
-export async function noticeDeleterHandler(ctx: RouterContext<string>) {
-  const noticeId = +ctx.params.noticeId;
-
-  checkNoticeExistsByNoticeId(noticeId);
-
-  // Get notice to check if it has attached files
-  const notice = getNoticesByNoticeId(noticeId);
-
-  // If notice has files, delete them from S3
-  if (notice && notice.has_file && notice.file_key) {
-    try {
-      const fileKey = String(notice.file_key);
-      const s3Service = getS3Service();
-      await s3Service.deleteFile(fileKey);
-    } catch (error) {
-      console.error("Failed to delete file from S3:", error);
-      // Continue with notice deletion even if file deletion fails
+    if (!title || !content) {
+      ctx.response.status = 400;
+      ctx.response.body = { error: "Title and content are required" };
+      return;
     }
+
+    // Parse dates if provided
+    let parsedPublishAt = undefined;
+    let parsedExpiryDate = undefined;
+
+    if (publishAt) {
+      parsedPublishAt = new Date(publishAt);
+    }
+
+    if (expiryDate) {
+      parsedExpiryDate = new Date(expiryDate);
+    }
+
+    const notice = await createNotice(
+      title,
+      content,
+      user.id,
+      category,
+      minRoleLevel,
+      targetGroups,
+      targetClasses,
+      hasAttachment,
+      attachmentUrl,
+      attachmentKey,
+      parsedPublishAt,
+      parsedExpiryDate
+    );
+
+    ctx.response.status = 201;
+    ctx.response.body = notice;
+  } catch (error) {
+    console.error("Error creating notice:", error);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Failed to create notice" };
+  }
+}
+
+// Get all notices (paginated, with filters)
+export async function getNoticesHandler(ctx: RouterContext<string>) {
+  try {
+    const url = new URL(ctx.request.url);
+    const page = parseInt(url.searchParams.get("page") || "1", 10);
+    const limit = parseInt(url.searchParams.get("limit") || "12", 10);
+    const category = url.searchParams.get("category") || undefined;
+
+    // Update parameter name to match the new schema
+    const hasAttachmentParam = url.searchParams.get("hasAttachment");
+    const hasAttachment =
+      hasAttachmentParam === "true"
+        ? true
+        : hasAttachmentParam === "false"
+        ? false
+        : undefined;
+
+    // Get user role level from auth context
+    const minRoleLevel = ctx.state.user?.roleLevel || 1;
+
+    const result = await getPaginatedNotices(
+      page,
+      limit,
+      category,
+      hasAttachment,
+      minRoleLevel
+    );
+
+    ctx.response.status = 200;
+    ctx.response.body = {
+      data: result.data,
+      pagination: result.pagination,
+    };
+  } catch (error) {
+    console.error("Error getting notices:", error);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Failed to retrieve notices" };
+  }
+}
+
+// Get notices by user ID
+export async function getNoticesByUserHandler(ctx: RouterContext<string>) {
+  try {
+    const userId = parseInt(ctx.params.id || "0");
+    if (isNaN(userId) || userId <= 0) {
+      ctx.response.status = 400;
+      ctx.response.body = { error: "Invalid user ID" };
+      return;
+    }
+
+    const user = await getUserById(userId);
+    if (!user) {
+      ctx.response.status = 404;
+      ctx.response.body = { error: "User not found" };
+      return;
+    }
+
+    const url = new URL(ctx.request.url);
+    const page = parseInt(url.searchParams.get("page") || "1", 10);
+    const limit = parseInt(url.searchParams.get("limit") || "12", 10);
+
+    const notices = await getNoticesByAuthorId(userId, page, limit);
+
+    ctx.response.status = 200;
+    ctx.response.body = {
+      data: notices.data,
+      pagination: notices.pagination,
+    };
+  } catch (error) {
+    console.error("Error getting user notices:", error);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Failed to retrieve user notices" };
+  }
+}
+
+// Get single notice by ID
+export async function getNoticeByIdHandler(ctx: RouterContext<string>) {
+  try {
+    const noticeId = parseInt(ctx.params.id || "0");
+    if (isNaN(noticeId) || noticeId <= 0) {
+      ctx.response.status = 400;
+      ctx.response.body = { error: "Invalid notice ID" };
+      return;
+    }
+
+    const notice = await getNoticeById(noticeId);
+    if (!notice) {
+      ctx.response.status = 404;
+      ctx.response.body = { error: "Notice not found" };
+      return;
+    }
+
+    ctx.response.status = 200;
+    ctx.response.body = notice;
+  } catch (error) {
+    console.error("Error getting notice:", error);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Failed to retrieve notice" };
+  }
+}
+
+// Update notice
+export async function updateNoticeHandler(ctx: RouterContext<string>) {
+  const user = ctx.state.user;
+  if (!user || !user.id) {
+    ctx.response.status = 401;
+    ctx.response.body = { error: "Authentication required" };
+    return;
   }
 
-  deleteNotice(noticeId);
-  ctx.response.status = 200;
-  ctx.response.body = {
-    message: `Notice deleted successfully! at ${new Date()}`,
-  };
+  try {
+    const noticeId = parseInt(ctx.params.id || "0");
+    if (isNaN(noticeId) || noticeId <= 0) {
+      ctx.response.status = 400;
+      ctx.response.body = { error: "Invalid notice ID" };
+      return;
+    }
+
+    // Check if notice exists and user has permission
+    const existingNotice = await getNoticeById(noticeId);
+    if (!existingNotice) {
+      ctx.response.status = 404;
+      ctx.response.body = { error: "Notice not found" };
+      return;
+    }
+
+    // Only author or admin can update
+    if (existingNotice.author_id !== user.id && user.role_name !== "Admin") {
+      ctx.response.status = 403;
+      ctx.response.body = { error: "Permission denied" };
+      return;
+    }
+
+    const requestBody = await ctx.request.body.json();
+
+    // Handle date fields
+    if (requestBody.publishAt) {
+      requestBody.publish_at = new Date(requestBody.publishAt);
+      delete requestBody.publishAt;
+    }
+
+    if (requestBody.expiryDate) {
+      requestBody.expiry_date = new Date(requestBody.expiryDate);
+      delete requestBody.expiryDate;
+    }
+
+    // Convert hasAttachment to has_attachment
+    if (requestBody.hasAttachment !== undefined) {
+      requestBody.has_attachment = requestBody.hasAttachment;
+      delete requestBody.hasAttachment;
+    }
+
+    // Convert attachmentUrl to attachment_url
+    if (requestBody.attachmentUrl !== undefined) {
+      requestBody.attachment_url = requestBody.attachmentUrl;
+      delete requestBody.attachmentUrl;
+    }
+
+    // Convert attachmentKey to attachment_key
+    if (requestBody.attachmentKey !== undefined) {
+      requestBody.attachment_key = requestBody.attachmentKey;
+      delete requestBody.attachmentKey;
+    }
+
+    const success = await updateNotice(noticeId, requestBody);
+
+    if (success) {
+      const updatedNotice = await getNoticeById(noticeId);
+      ctx.response.status = 200;
+      ctx.response.body = updatedNotice;
+    } else {
+      ctx.response.status = 500;
+      ctx.response.body = { error: "Failed to update notice" };
+    }
+  } catch (error) {
+    console.error("Error updating notice:", error);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Failed to update notice" };
+  }
 }
 
-export function getAllNoticesHandler(ctx: RouterContext<string>) {
-  const allNotices = getAllNotices();
-  ctx.response.body = allNotices;
-}
+// Delete notice
+export async function deleteNoticeHandler(ctx: RouterContext<string>) {
+  const user = ctx.state.user;
+  if (!user || !user.id) {
+    ctx.response.status = 401;
+    ctx.response.body = { error: "Authentication required" };
+    return;
+  }
 
-export function getPaginatedNoticesHandler(ctx: RouterContext<string>) {
-  // Parse query parameters
-  const page = parseInt(ctx.request.url.searchParams.get("page") ?? "1");
-  const limit = parseInt(ctx.request.url.searchParams.get("limit") ?? "5");
-  const category = ctx.request.url.searchParams.get("category") || undefined;
-  const hasFiles = ctx.request.url.searchParams.has("hasFiles")
-    ? ctx.request.url.searchParams.get("hasFiles") === "true"
-    : undefined;
+  try {
+    const noticeId = parseInt(ctx.params.id || "0");
+    if (isNaN(noticeId) || noticeId <= 0) {
+      ctx.response.status = 400;
+      ctx.response.body = { error: "Invalid notice ID" };
+      return;
+    }
 
-  // Get notices with filters
-  const paginatedNotices = getPaginatedNotices(page, limit, category, hasFiles);
-  ctx.response.body = paginatedNotices;
+    // Check if notice exists and user has permission
+    const existingNotice = await getNoticeById(noticeId);
+    if (!existingNotice) {
+      ctx.response.status = 404;
+      ctx.response.body = { error: "Notice not found" };
+      return;
+    }
+
+    // Only author or admin can delete
+    if (existingNotice.author_id !== user.id && user.role_name !== "Admin") {
+      ctx.response.status = 403;
+      ctx.response.body = { error: "Permission denied" };
+      return;
+    }
+
+    const success = await deleteNotice(noticeId);
+
+    if (success) {
+      ctx.response.status = 200;
+      ctx.response.body = { message: "Notice deleted successfully" };
+    } else {
+      ctx.response.status = 500;
+      ctx.response.body = { error: "Failed to delete notice" };
+    }
+  } catch (error) {
+    console.error("Error deleting notice:", error);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Failed to delete notice" };
+  }
 }

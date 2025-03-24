@@ -3,9 +3,9 @@ import {
   userCreatorHandler,
   getAllUsersHandler,
   userUpdaterHandler,
-  userDeleterHandler,
+  // userDeleterHandler,
   getSingleUserHandler,
-  getUserAndUpdateHandler,
+  // getUserAndUpdateHandler,
   loginHandler,
 } from "../controllers/controllersMod.ts";
 import { Validation } from "../utils/utilsMod.ts";
@@ -18,7 +18,7 @@ router
   .post(
     "/users",
     authMiddleware,
-    validation.validateUserCreation,
+    // validation.validateUserCreation,
     userCreatorHandler
   )
   .post("/login", loginHandler)
@@ -29,12 +29,12 @@ router
     getAllUsersHandler // 3. Only executes if role check passes
   )
   .get("/users/getuser/:username", authMiddleware, getSingleUserHandler)
-  .put(
-    "/users/dualtransaction/:userId",
-    authMiddleware,
-    getUserAndUpdateHandler
-  )
-  .put("/users/:userId", authMiddleware, userUpdaterHandler)
-  .delete("/users/:userId", authMiddleware, userDeleterHandler);
+  // .put(
+  //   "/users/dualtransaction/:userId",
+  //   authMiddleware,
+  //   getUserAndUpdateHandler
+  // )
+  .put("/users/:userId", authMiddleware, userUpdaterHandler);
+// .delete("/users/:userId", authMiddleware, userDeleterHandler);
 
 export default router;

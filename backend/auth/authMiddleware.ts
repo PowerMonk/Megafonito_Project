@@ -5,34 +5,58 @@ export const authMiddleware: Middleware = async (ctx, next) => {
   try {
     // Get token from header
     const authHeader = ctx.request.headers.get("Authorization");
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+
+    // More detailed error handling for debugging
+    if (!authHeader) {
+      console.error("No Authorization header found");
       ctx.response.status = 401;
       ctx.response.body = { message: "Unauthorized: No token provided" };
       return;
     }
 
+    if (!authHeader.startsWith("Bearer ")) {
+      console.error("Authorization header doesn't start with 'Bearer '");
+      ctx.response.status = 401;
+      ctx.response.body = { message: "Unauthorized: Invalid token format" };
+      return;
+    }
+
     const token = authHeader.split(" ")[1];
+
+    if (!token || token.trim() === "") {
+      console.error("Empty token after splitting");
+      ctx.response.status = 401;
+      ctx.response.body = { message: "Unauthorized: Empty token" };
+      return;
+    }
+
+    console.log("Verifying token:", token.substring(0, 10) + "...");
     const payload = await verifyJWT(token);
+    console.log("Token verified, payload:", payload);
 
     // Check if payload has the expected structure
     if (!payload || typeof payload !== "object") {
+      console.error("Invalid payload structure:", payload);
       ctx.response.status = 401;
       ctx.response.body = { message: "Invalid token payload" };
-      throw new Error("Invalid token payload");
+      return;
     }
 
     // Set the user in state with the correct role from the token
     ctx.state.user = {
       id: payload.id,
-      username: payload.username,
-      role: payload.role, // Make sure this is setting the literal string "admin"
+      name: payload.name, // Changed from username to name to match your new JWT structure
+      role: payload.role,
     };
 
     await next();
   } catch (error) {
+    console.error("Auth middleware error:", error);
     ctx.response.status = 401;
-    ctx.response.body = { message: "Unauthorized: Invalid token" };
-    throw new Error(error + "Unauthorized: Invalid token");
+    ctx.response.body = {
+      message: "Unauthorized: Invalid token",
+      error: String(error),
+    };
   }
 };
 

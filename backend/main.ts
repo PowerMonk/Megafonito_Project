@@ -4,13 +4,13 @@ import {
   loggingMiddleware,
   rateLimiter,
 } from "./utils/utilsMod.ts";
-import { initializeDatabase } from "./db/dbMod.ts";
+import { testConnection } from "./db/dbMod.ts";
 import { router } from "./routes/routesMod.ts";
 
 const app = new Application();
 
 // For the moment being, it creates the users and notices tables
-initializeDatabase();
+testConnection();
 
 // Define routes
 router

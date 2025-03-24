@@ -15,17 +15,17 @@ export class Validation {
     return value > 0;
   }
 
-  #userExists(username: string): boolean {
-    const query = `SELECT COUNT(*) as count FROM users WHERE username = ?`;
-    const result = queryAll<{ count: number }>(query, username);
-    return result[0].count > 0;
-  }
+  // #userExists(username: string): boolean {
+  //   const query = `SELECT COUNT(*) as count FROM users WHERE username = ?`;
+  //   const result = queryAll<{ count: number }>(query, username);
+  //   return result[0].count > 0;
+  // }
 
-  #emailExists(email: string): boolean {
-    const query = `SELECT COUNT(*) as count FROM users WHERE email = ?`;
-    const result = queryAll<{ count: number }>(query, email);
-    return result[0].count > 0;
-  }
+  // #emailExists(email: string): boolean {
+  //   const query = `SELECT COUNT(*) as count FROM users WHERE email = ?`;
+  //   const result = queryAll<{ count: number }>(query, email);
+  //   return result[0].count > 0;
+  // }
 
   validateUserCreation: Middleware = async (ctx, next) => {
     const { username, email } = await ctx.request.body.json();
@@ -44,17 +44,17 @@ export class Validation {
       return;
     }
 
-    if (this.#userExists(username)) {
-      ctx.response.status = 400;
-      ctx.response.body = { error: "Username already exists" };
-      return;
-    }
+    // if (this.#userExists(username)) {
+    //   ctx.response.status = 400;
+    //   ctx.response.body = { error: "Username already exists" };
+    //   return;
+    // }
 
-    if (this.#emailExists(email)) {
-      ctx.response.status = 400;
-      ctx.response.body = { error: "Email already exists" };
-      return;
-    }
+    // if (this.#emailExists(email)) {
+    //   ctx.response.status = 400;
+    //   ctx.response.body = { error: "Email already exists" };
+    //   return;
+    // }
 
     await next();
   };
