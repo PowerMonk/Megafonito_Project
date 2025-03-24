@@ -1,85 +1,143 @@
-import {
-  execute,
-  executeTransaction,
-  queryAll,
-  queryOne,
-  safeQuery,
-  safeQueryAll,
-  safeExecute,
-  safeExecuteTransaction,
-  DatabaseRow,
-} from "../db/dbMod.ts";
+import { queryAll, queryOne, execute } from "../db/postgres/dbQueries.ts";
 
-export function createUser(username: string, email: string, role: string) {
-  const query = `
-      INSERT INTO users (username, email, role) VALUES (?, ?, ?);
-    `;
-  return safeExecute(() => execute(query, username, email, role));
+// Update user model interface to match new schema
+export interface User {
+  id: number;
+  control_number: string;
+  email: string;
+  name: string;
+  role_id: number;
+  role_name?: string; // For joining with roles table
+  primary_group_id?: number;
+  schedule?: JSON; // JSON object for user schedule
+  created_at?: Date;
 }
 
-// Neccessary safe query function
-export function getAllUsers() {
+// Create user function
+export async function createUser(
+  control_number: string,
+  email: string,
+  name: string,
+  role_id: number,
+  primary_group_id?: number | null,
+  schedule?: Record<string, unknown> | null
+): Promise<User> {
+  // Convert undefined to null for PostgreSQL
+  const safeGroupId = primary_group_id === undefined ? null : primary_group_id;
+  const safeSchedule = schedule === undefined ? null : schedule;
+
+  // Debug the values being sent to the database
+  console.log("Creating user with params:", {
+    control_number,
+    email,
+    name,
+    role_id,
+    primary_group_id: safeGroupId,
+    schedule: safeSchedule ? JSON.stringify(safeSchedule) : null,
+  });
+
   const query = `
-      SELECT * FROM users;
-    `;
-  return safeQueryAll(() => queryAll(query));
+    INSERT INTO users (control_number, email, name, role_id, primary_group_id, schedule) 
+    VALUES ($1, $2, $3, $4, $5, $6)
+    RETURNING *
+  `;
+
+  const result = await queryOne(query, [
+    control_number,
+    email,
+    name,
+    role_id,
+    primary_group_id,
+    schedule,
+  ]);
+
+  return result as User;
 }
 
-// export function getUserByUsername(username: string) {
-//   const query = `
-//       SELECT * FROM users WHERE username = ?;
-//     `;
-//   return queryOne(query, username);
-// }
-/**
- * Looks up a user by username
- * @param username The username to search for
- * @returns User record if found, null if no matching user exists
- * @throws Error if database query fails
- */
-export function getUserByUsername(username: string): DatabaseRow | null {
-  const query = `SELECT * FROM users WHERE username = ?;`;
+// Get all users with role names
+export async function getAllUsers(): Promise<User[]> {
+  const query = `
+    SELECT u.*, r.name as role_name
+    FROM users u
+    JOIN user_roles r ON u.role_id = r.id
+    ORDER BY u.id
+  `;
+
+  return (await queryAll(query)) as User[];
+}
+
+// Get user by control number (username)
+export async function getUserByControlNumber(
+  control_number: string
+): Promise<User | null> {
   try {
-    const result = safeQuery(() => queryOne(query, username));
-    // Check if the result is an empty object (no user found)
-    return Object.keys(result).length === 0 ? null : result;
+    const query = `
+      SELECT u.*, r.name as role_name
+      FROM users u
+      JOIN user_roles r ON u.role_id = r.id
+      WHERE u.control_number = $1
+    `;
+
+    return (await queryOne(query, [control_number])) as User;
   } catch (error) {
-    // This catches actual DB errors
-    throw new Error(`Database error looking up user: ${error}` + 500);
+    console.error(
+      `Error getting user by control number ${control_number}:`,
+      error
+    );
+    return null;
   }
 }
-export function getUserById(userId: number) {
-  const query = `
-      SELECT * FROM users WHERE id = ?;
+
+// Get user by ID
+export async function getUserById(userId: number): Promise<User | null> {
+  try {
+    const query = `
+      SELECT u.*, r.name as role_name
+      FROM users u
+      JOIN user_roles r ON u.role_id = r.id
+      WHERE u.id = $1
     `;
-  return safeQuery(() => queryOne(query, userId));
+
+    return (await queryOne(query, [userId])) as User;
+  } catch (error) {
+    console.error(`Error getting user by ID ${userId}:`, error);
+    return null;
+  }
 }
 
-// Neccessary safe query function
-export function updateUser(userId: number, username: string, email: string) {
-  const query = `
-  UPDATE users SET username = ?, email = ? WHERE id = ?;
-  `;
-  return safeExecute(() => execute(query, username, email, userId));
-}
-
-// Neccessary safe query function
-export function deleteUser(userId: number) {
-  const query = `
-      DELETE FROM users WHERE id = ?;
-      `;
-  return safeExecute(() => execute(query, userId));
-}
-
-export function getUserAndUpdateUser(
+// Update user
+export async function updateUser(
   userId: number,
-  username: string,
-  email: string
-) {
-  const queries = [
-    "SELECT * FROM users WHERE id = ?",
-    "UPDATE users SET username = ?, email = ? WHERE id = ?",
-  ];
-  const params = [[userId], [username, email, userId]];
-  return safeExecuteTransaction(() => executeTransaction(queries, params));
+  name: string,
+  email: string,
+  primary_group_id?: number
+): Promise<boolean> {
+  try {
+    const query = `
+      UPDATE users
+      SET name = $1, email = $2, primary_group_id = $3
+      WHERE id = $4
+    `;
+
+    await execute(query, [name, email, primary_group_id, userId]);
+    return true;
+  } catch (error) {
+    console.error(`Error updating user ${userId}:`, error);
+    return false;
+  }
+}
+
+// Delete user
+export async function deleteUser(userId: number): Promise<boolean> {
+  try {
+    const query = `
+      DELETE FROM users WHERE id = $1
+    `;
+
+    await execute(query, [userId]);
+    return true;
+  } catch (error) {
+    console.error(`Error deleting user ${userId}:`, error);
+    return false;
+  }
 }

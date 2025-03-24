@@ -1,18 +1,18 @@
 // import { RouterContext } from "@oak/oak";
 import { isEmptyObject } from "./utilsMod.ts";
 import {
-  getUserByUsername,
+  // getUserByUsername,
   getUserById,
-  getNoticesByNoticeId,
+  // getNoticesByNoticeId,
 } from "../models/modelsMod.ts";
 
-export function checkUserExistsByUsername(username: string) {
-  const user = getUserByUsername(username);
-  if (isEmptyObject(user)) {
-    throw new Error(`User not found with username: ${username}`);
-  }
-  return user;
-}
+// export function checkUserExistsByUsername(username: string) {
+//   const user = getUserByUsername(username);
+//   if (isEmptyObject(user)) {
+//     throw new Error(`User not found with username: ${username}`);
+//   }
+//   return user;
+// }
 
 export function checkUserExistsById(userId: number) {
   const user = getUserById(userId);
@@ -22,13 +22,13 @@ export function checkUserExistsById(userId: number) {
   return user;
 }
 // Pending to get implementation in the noticeController.ts
-export function checkNoticeExistsByUsername(username: string) {
-  const user = getUserByUsername(username);
-  if (isEmptyObject(user)) {
-    throw new Error(`User not found with username: ${username}`);
-  }
-  return user;
-}
+// export function checkNoticeExistsByUsername(username: string) {
+//   const user = getUserByUsername(username);
+//   if (isEmptyObject(user)) {
+//     throw new Error(`User not found with username: ${username}`);
+//   }
+//   return user;
+// }
 
 export function checkNoticeExistsByUserId(userId: number) {
   const user = getUserById(userId);
@@ -38,13 +38,13 @@ export function checkNoticeExistsByUserId(userId: number) {
   return user;
 }
 
-export function checkNoticeExistsByNoticeId(noticeId: number) {
-  const notice = getNoticesByNoticeId(noticeId);
-  if (isEmptyObject(notice)) {
-    throw new Error(`Notice not found with id: ${noticeId}`);
-  }
-  return notice;
-}
+// export function checkNoticeExistsByNoticeId(noticeId: number) {
+//   const notice = getNoticesByNoticeId(noticeId);
+//   if (isEmptyObject(notice)) {
+//     throw new Error(`Notice not found with id: ${noticeId}`);
+//   }
+//   return notice;
+// }
 
 export const formatErrorResponse = (
   status: number,

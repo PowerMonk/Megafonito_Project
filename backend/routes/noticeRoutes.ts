@@ -1,13 +1,13 @@
 import { router, validation } from "./routesMod.ts";
 import {
   createNoticeHandler,
+  getNoticesHandler,
   getNoticesByUserHandler,
-  noticeUpdaterHandler,
-  noticeDeleterHandler,
-  getNoticeByUserAndIdHandler,
-  getNoticesByNoticeIdHandler,
-  getAllNoticesHandler,
-  getPaginatedNoticesHandler,
+  getNoticeByIdHandler,
+  updateNoticeHandler,
+  deleteNoticeHandler,
+  // getNoticeByUserAndIdHandler,
+  // getAllNoticesHandler,
   // uploadFileHandler,
   // serveFileHandler,
 } from "../controllers/controllersMod.ts";
@@ -26,21 +26,17 @@ router
     validation.validateNoticeCreation,
     createNoticeHandler
   )
-  .get("/allnotices", authMiddleware, getAllNoticesHandler)
-  .get("/notices", getPaginatedNoticesHandler)
+  // .get("/allnotices", authMiddleware, getAllNoticesHandler)
+  .get("/notices", getNoticesHandler)
   .get("/notices/:userId", authMiddleware, getNoticesByUserHandler)
-  .get(
-    "/notices/anuncio/:noticeId",
-    authMiddleware,
-    getNoticesByNoticeIdHandler
-  )
-  .get(
-    "/notices/:userId/:noticeId",
-    authMiddleware,
-    getNoticeByUserAndIdHandler
-  )
-  .put("/notices/:noticeId", authMiddleware, noticeUpdaterHandler)
-  .delete("/notices/:noticeId", authMiddleware, noticeDeleterHandler)
+  .get("/notices/anuncio/:noticeId", authMiddleware, getNoticeByIdHandler)
+  // .get(
+  //   "/notices/:userId/:noticeId",
+  //   authMiddleware,
+  //   getNoticeByUserAndIdHandler
+  // )
+  .put("/notices/:noticeId", authMiddleware, updateNoticeHandler)
+  .delete("/notices/:noticeId", authMiddleware, deleteNoticeHandler)
   // .post("/upload", authMiddleware, uploadFileHandler)
   // .get("/files/:fileName", serveFileHandler)
   // S3 file routes
