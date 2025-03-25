@@ -34,6 +34,80 @@ export interface PaginatedResponse<T> {
   };
 }
 
+// Create notice
+export async function createNotice(
+  title: string,
+  content: string,
+  authorId: number,
+  category: string = "General",
+  min_role_level: number = 1,
+  targetGroups: number[] = [], // Array of group IDs
+  targetClasses: number[] = [], // Array of class IDs
+  hasAttachment: boolean = false,
+  attachmentUrl?: string,
+  attachmentKey?: string,
+  publishAt?: Date,
+  expiryDate?: Date
+): Promise<Notice> {
+  try {
+    // Sanitize arrays - ensure they're valid PostgreSQL integer arrays
+    const safeTargetGroups =
+      targetGroups && targetGroups.length > 0
+        ? targetGroups.filter((id) => typeof id === "number")
+        : [];
+
+    const safeTargetClasses =
+      targetClasses && targetClasses.length > 0
+        ? targetClasses.filter((id) => typeof id === "number")
+        : [];
+
+    console.log("Creating notice with params:", {
+      title,
+      content,
+      authorId,
+      category,
+      min_role_level,
+      safeTargetGroups,
+      safeTargetClasses,
+      hasAttachment,
+      attachmentUrl,
+      attachmentKey,
+      publishAt,
+      expiryDate,
+    });
+
+    const query = `
+      INSERT INTO notices (
+        title, content, author_id, category, min_role_level,
+        target_groups, target_classes, has_attachment, 
+        attachment_url, attachment_key, publish_at, expiry_date
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+      RETURNING *
+    `;
+
+    const newNotice = await queryOne(query, [
+      title,
+      content,
+      authorId,
+      category,
+      min_role_level,
+      safeTargetGroups,
+      safeTargetClasses,
+      hasAttachment,
+      attachmentUrl,
+      attachmentKey,
+      publishAt,
+      expiryDate,
+    ]);
+
+    return newNotice as Notice;
+  } catch (error) {
+    console.error("Error creating notice:", error);
+    throw error;
+  }
+}
+
 export async function getAllNotices(): Promise<Notice[]> {
   const query = `
     SELECT n.*, u.name as author_name 
@@ -109,49 +183,6 @@ export async function getPaginatedNotices(
       totalPages,
     },
   };
-}
-
-// Create notice
-export async function createNotice(
-  title: string,
-  content: string,
-  authorId: number,
-  category: string = "General",
-  minRoleLevel: number = 1,
-  targetGroups: number[] = [],
-  targetClasses: number[] = [],
-  hasAttachment: boolean = false,
-  attachmentUrl?: string,
-  attachmentKey?: string,
-  publishAt?: Date,
-  expiryDate?: Date
-): Promise<Notice> {
-  const query = `
-    INSERT INTO notices (
-      title, content, author_id, category, min_role_level,
-      target_groups, target_classes, has_attachment, 
-      attachment_url, attachment_key, publish_at, expiry_date
-    )
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
-    RETURNING *
-  `;
-
-  const result = (await queryOne(query, [
-    title,
-    content,
-    authorId,
-    category,
-    minRoleLevel,
-    targetGroups,
-    targetClasses,
-    hasAttachment,
-    attachmentUrl,
-    attachmentKey,
-    publishAt,
-    expiryDate,
-  ])) as Notice;
-
-  return result;
 }
 
 // Get notice by ID

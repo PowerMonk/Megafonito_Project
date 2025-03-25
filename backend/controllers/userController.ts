@@ -1,11 +1,11 @@
 import { RouterContext } from "jsr:@oak/oak";
 import {
-  createUser,
   getUserByControlNumber,
   getAllUsers,
   getUserById,
-  updateUser,
+  updateUserWithForeignKeys,
   createUserWithForeignKeys,
+  deleteUser,
 } from "../models/modelsMod.ts";
 import { generateJWT } from "../auth/authMod.ts";
 
@@ -28,6 +28,8 @@ export async function loginHandler(ctx: RouterContext<string>) {
 
   // Get user with role data
   const user = await getUserByControlNumber(control_number);
+
+  console.log(user);
 
   if (!user) {
     ctx.response.status = 404;
@@ -52,7 +54,7 @@ export async function loginHandler(ctx: RouterContext<string>) {
 }
 
 // Helper function to get role level
-function getRoleLevelFromName(roleName: string): number {
+export function getRoleLevelFromName(roleName: string): number {
   switch (roleName) {
     case "Admin":
       return 10;
@@ -113,8 +115,10 @@ export async function userCreatorHandler(ctx: RouterContext<string>) {
     const token = await generateJWT({
       id: newUser.id,
       name: newUser.name,
-      role: newUser.role_name || "Student",
-      roleLevel: getRoleLevelFromName(newUser.role_name || "Student"),
+      role: newUser.role_name,
+      roleLevel: getRoleLevelFromName(newUser.role_name as UserRole),
+      // role: newUser.role_name || "Student",
+      // roleLevel: getRoleLevelFromName(newUser.role_name || "Student"),
     });
 
     ctx.response.status = 201;
@@ -160,15 +164,15 @@ export async function getAllUsersHandler(ctx: RouterContext<string>) {
 // Get single user handler
 export async function getSingleUserHandler(ctx: RouterContext<string>) {
   try {
-    const userId = parseInt(ctx.params.id || "0");
+    const control_number = ctx.params.control_number;
 
-    if (isNaN(userId) || userId <= 0) {
+    if (control_number === null || control_number.length <= 0) {
       ctx.response.status = 400;
-      ctx.response.body = { error: "Invalid user ID" };
+      ctx.response.body = { error: "Invalid user control number" };
       return;
     }
 
-    const user = await getUserById(userId);
+    const user = await getUserByControlNumber(control_number);
 
     if (!user) {
       ctx.response.status = 404;
@@ -214,15 +218,42 @@ export async function userUpdaterHandler(ctx: RouterContext<string>) {
       return;
     }
 
-    const { name, email, primary_group_id } = await ctx.request.body.json();
+    const {
+      name,
+      email,
+      role, // New: role name
+      group, // New: group name
+      group_type, // New: group type
+      schedule, // New: schedule
+    } = await ctx.request.body.json();
 
-    if (!name || !email) {
+    if (!name || !email || !role) {
       ctx.response.status = 400;
-      ctx.response.body = { error: "Name and email are required" };
+      ctx.response.body = { error: "Name, email and role are required" };
       return;
     }
 
-    const success = await updateUser(userId, name, email, primary_group_id);
+    // Special permission check for role changes
+    if (
+      role &&
+      role === UserRole.ADMIN &&
+      ctx.state.user.role !== UserRole.ADMIN
+    ) {
+      ctx.response.status = 403;
+      ctx.response.body = { error: "Only admins can assign admin role" };
+      return;
+    }
+
+    // Use the enhanced update function
+    const success = await updateUserWithForeignKeys(
+      userId,
+      name,
+      email,
+      role, // Role name (optional)
+      group, // Group name (optional)
+      group_type,
+      schedule
+    );
 
     if (success) {
       const updatedUser = await getUserById(userId);
@@ -234,7 +265,58 @@ export async function userUpdaterHandler(ctx: RouterContext<string>) {
     }
   } catch (error) {
     console.error("Error updating user:", error);
+
+    // Provide more specific error message if available
+    if (error instanceof Error) {
+      ctx.response.status = 400;
+      ctx.response.body = { error: error.message };
+    } else {
+      ctx.response.status = 500;
+      ctx.response.body = { error: "Failed to update user" };
+    }
+  }
+}
+
+export async function userDeleterHandler(ctx: RouterContext<string>) {
+  try {
+    const control_number = ctx.params.control_number;
+
+    if (control_number === null || control_number.length <= 0) {
+      ctx.response.status = 400;
+      ctx.response.body = { error: "Invalid user control number" };
+      return;
+    }
+
+    const user = await getUserByControlNumber(control_number);
+
+    if (!user) {
+      ctx.response.status = 404;
+      ctx.response.body = { error: "User not found" };
+      return;
+    }
+
+    // Check permissions - only self or admin can delete
+    if (
+      ctx.state.user.id !== user.id &&
+      ctx.state.user.role !== UserRole.ADMIN
+    ) {
+      ctx.response.status = 403;
+      ctx.response.body = { error: "Permission denied" };
+      return;
+    }
+
+    const success = await deleteUser(user.id);
+
+    if (success) {
+      ctx.response.status = 200;
+      ctx.response.body = { message: "User deleted successfully" };
+    } else {
+      ctx.response.status = 500;
+      ctx.response.body = { error: "Failed to delete user" };
+    }
+  } catch (error) {
+    console.error("Error deleting user:", error);
     ctx.response.status = 500;
-    ctx.response.body = { error: "Failed to update user" };
+    ctx.response.body = { error: "Failed to delete user" };
   }
 }

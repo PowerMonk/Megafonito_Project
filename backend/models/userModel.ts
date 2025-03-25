@@ -92,47 +92,6 @@ export async function createUserWithForeignKeys(
   }
 }
 
-// Create user function
-export async function createUser(
-  control_number: string,
-  email: string,
-  name: string,
-  role_id: number,
-  primary_group_id?: number | null,
-  schedule?: Record<string, unknown> | null
-): Promise<User> {
-  // Convert undefined to null for PostgreSQL
-  const safeGroupId = primary_group_id === undefined ? null : primary_group_id;
-  const safeSchedule = schedule === undefined ? null : schedule;
-
-  // Debug the values being sent to the database
-  console.log("Creating user with params:", {
-    control_number,
-    email,
-    name,
-    role_id,
-    primary_group_id: safeGroupId,
-    schedule: safeSchedule ? JSON.stringify(safeSchedule) : null,
-  });
-
-  const query = `
-    INSERT INTO users (control_number, email, name, role_id, primary_group_id, schedule) 
-    VALUES ($1, $2, $3, $4, $5, $6)
-    RETURNING *
-  `;
-
-  const result = await queryOne(query, [
-    control_number,
-    email,
-    name,
-    role_id,
-    primary_group_id,
-    schedule,
-  ]);
-
-  return result as User;
-}
-
 // Get all users with role names
 export async function getAllUsers(): Promise<User[]> {
   const query = `
@@ -184,22 +143,95 @@ export async function getUserById(userId: number): Promise<User | null> {
   }
 }
 
-// Update user
-export async function updateUser(
+// Update user with support for role and group changes
+export async function updateUserWithForeignKeys(
   userId: number,
   name: string,
   email: string,
-  primary_group_id?: number
+  roleName?: string,
+  groupName?: string,
+  groupType: string = "department",
+  schedule?: Record<string, unknown> | null
 ): Promise<boolean> {
   try {
-    const query = `
-      UPDATE users
-      SET name = $1, email = $2, primary_group_id = $3
-      WHERE id = $4
-    `;
+    return await executeTransactionWithLogic(async (transaction) => {
+      // Get current user data to check what needs updating
+      const currentUserQuery = "SELECT * FROM users WHERE id = $1";
+      const currentUser = await transaction.unsafe(currentUserQuery, [userId]);
 
-    await execute(query, [name, email, primary_group_id, userId]);
-    return true;
+      if (!currentUser || currentUser.length === 0) {
+        throw new Error(`User with ID ${userId} not found`);
+      }
+
+      // Prepare for updates
+      let roleId = currentUser[0].role_id;
+      let groupId = currentUser[0].primary_group_id;
+      const safeSchedule =
+        schedule === undefined
+          ? currentUser[0].schedule
+          : schedule === null
+          ? null
+          : JSON.stringify(schedule);
+
+      // Update role if provided
+      if (roleName) {
+        const roleQuery = "SELECT id FROM user_roles WHERE name = $1";
+        const roleResult = await transaction.unsafe(roleQuery, [roleName]);
+
+        if (!roleResult || roleResult.length === 0) {
+          throw new Error(`Role "${roleName}" not found`);
+        }
+
+        roleId = roleResult[0].id;
+      }
+
+      // Update group if provided
+      if (groupName) {
+        const groupQuery =
+          "SELECT id FROM groups WHERE name = $1 AND type = $2";
+        const groupResult = await transaction.unsafe(groupQuery, [
+          groupName,
+          groupType,
+        ]);
+
+        if (groupResult && groupResult.length > 0) {
+          groupId = groupResult[0].id;
+        }
+        // else {
+        //   // Create group if it doesn't exist
+        //   const createGroupQuery =
+        //     "INSERT INTO groups (name, type) VALUES ($1, $2) RETURNING id";
+        //   const newGroupResult = await transaction.unsafe(createGroupQuery, [
+        //     groupName,
+        //     groupType,
+        //   ]);
+        //   groupId = newGroupResult[0].id;
+        // }
+      }
+
+      // Update user with all the data
+      const updateQuery = `
+        UPDATE users
+        SET name = $1, 
+            email = $2, 
+            role_id = $3, 
+            primary_group_id = $4,
+            schedule = $5
+        WHERE id = $6
+        RETURNING *
+      `;
+
+      const updateResult = await transaction.unsafe(updateQuery, [
+        name,
+        email,
+        roleId,
+        groupId,
+        safeSchedule,
+        userId,
+      ]);
+
+      return updateResult && updateResult.length > 0;
+    });
   } catch (error) {
     console.error(`Error updating user ${userId}:`, error);
     return false;

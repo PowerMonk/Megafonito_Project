@@ -3,7 +3,7 @@ import {
   userCreatorHandler,
   getAllUsersHandler,
   userUpdaterHandler,
-  // userDeleterHandler,
+  userDeleterHandler,
   getSingleUserHandler,
   // getUserAndUpdateHandler,
   loginHandler,
@@ -28,13 +28,13 @@ router
     requireRole([UserRole.ADMIN]), // 2. Checks if user.role is "admin"
     getAllUsersHandler // 3. Only executes if role check passes
   )
-  .get("/users/getuser/:username", authMiddleware, getSingleUserHandler)
+  .get("/users/getuser/:control_number", authMiddleware, getSingleUserHandler)
   // .put(
   //   "/users/dualtransaction/:userId",
   //   authMiddleware,
   //   getUserAndUpdateHandler
   // )
-  .put("/users/:userId", authMiddleware, userUpdaterHandler);
-// .delete("/users/:userId", authMiddleware, userDeleterHandler);
+  .put("/users/:userId", authMiddleware, userUpdaterHandler)
+  .delete("/users/:control_number", authMiddleware, userDeleterHandler);
 
 export default router;

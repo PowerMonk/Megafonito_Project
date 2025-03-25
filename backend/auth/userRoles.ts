@@ -4,9 +4,11 @@
  */
 export enum UserRole {
   /** Full access to all system features */
-  ADMIN = "admin",
+  ADMIN = "Admin",
+  TEACHER = "Teacher",
   /** Standard access with limited permissions */
   USER = "user",
+  STUDENT = "Student",
 }
 
 /**
