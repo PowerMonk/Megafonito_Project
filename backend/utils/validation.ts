@@ -78,12 +78,12 @@ export class Validation {
       // return;
     }
 
-    if (!this.#validatePositiveNumber(userId)) {
-      ctx.response.status = 400;
-      ctx.response.body = { error: "Invalid userId" };
-      throw new Error("Invalid userId");
-      // return;
-    }
+    // if (!this.#validatePositiveNumber(userId)) {
+    //   ctx.response.status = 400;
+    //   ctx.response.body = { error: "Invalid userId" };
+    //   throw new Error("Invalid userId");
+    //   // return;
+    // }
 
     await next();
   };

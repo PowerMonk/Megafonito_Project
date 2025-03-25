@@ -8,15 +8,27 @@ import {
   deleteNotice,
   getUserById,
 } from "../models/modelsMod.ts";
+import { UserRole } from "../auth/authMod.ts";
 
 // Create notice handler
 export async function createNoticeHandler(ctx: RouterContext<string>) {
   const user = ctx.state.user;
-  if (!user || !user.id) {
+  if (!user || !user.id || !user.role) {
     ctx.response.status = 401;
     ctx.response.body = { error: "Authentication required" };
     return;
   }
+  console.log(user.role);
+  if (
+    ctx.state.user.role !== UserRole.ADMIN &&
+    ctx.state.user.role !== UserRole.TEACHER
+  ) {
+    ctx.response.status = 403;
+    ctx.response.body = { error: "Permission denied" };
+    return;
+  }
+
+  // const roleLevel = getRoleLevelFromName(user.role);
 
   try {
     const requestBody = await ctx.request.body.json();
@@ -24,7 +36,8 @@ export async function createNoticeHandler(ctx: RouterContext<string>) {
       title,
       content,
       category = "General",
-      minRoleLevel = 1,
+      // Lowest role level that can view the notice
+      min_role_level = 1,
       targetGroups = [],
       targetClasses = [],
       hasAttachment = false,
@@ -34,9 +47,11 @@ export async function createNoticeHandler(ctx: RouterContext<string>) {
       expiryDate,
     } = requestBody;
 
-    if (!title || !content) {
+    if (!title || !content || !category) {
       ctx.response.status = 400;
-      ctx.response.body = { error: "Title and content are required" };
+      ctx.response.body = {
+        error: "Title, content and category are required",
+      };
       return;
     }
 
@@ -57,7 +72,8 @@ export async function createNoticeHandler(ctx: RouterContext<string>) {
       content,
       user.id,
       category,
-      minRoleLevel,
+      // lowest role level that can view the notice
+      min_role_level,
       targetGroups,
       targetClasses,
       hasAttachment,
@@ -68,7 +84,7 @@ export async function createNoticeHandler(ctx: RouterContext<string>) {
     );
 
     ctx.response.status = 201;
-    ctx.response.body = notice;
+    ctx.response.body = { message: "Notice created successfully", notice };
   } catch (error) {
     console.error("Error creating notice:", error);
     ctx.response.status = 500;
