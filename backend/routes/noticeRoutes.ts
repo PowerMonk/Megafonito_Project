@@ -6,8 +6,8 @@ import {
   getNoticeByIdHandler,
   updateNoticeHandler,
   deleteNoticeHandler,
+  getAllNoticesHandler,
   // getNoticeByUserAndIdHandler,
-  // getAllNoticesHandler,
   // uploadFileHandler,
   // serveFileHandler,
 } from "../controllers/controllersMod.ts";
@@ -26,8 +26,8 @@ router
     validation.validateNoticeCreation,
     createNoticeHandler
   )
-  // .get("/allnotices", authMiddleware, getAllNoticesHandler)
-  .get("/notices", getNoticesHandler)
+  .get("/allnotices", authMiddleware, getAllNoticesHandler)
+  .get("/notices", authMiddleware, getNoticesHandler)
   .get("/notices/:userId", authMiddleware, getNoticesByUserHandler)
   .get("/notices/anuncio/:noticeId", authMiddleware, getNoticeByIdHandler)
   // .get(
