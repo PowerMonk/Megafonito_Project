@@ -125,55 +125,72 @@ export async function getPaginatedNotices(
   limit: number = 12,
   category?: string,
   hasAttachment?: boolean,
-  minRoleLevel?: number
+  minRoleLevel?: number,
+  startDate?: string,
+  endDate?: string,
+  includeFuture: boolean = false,
+  includeExpired: boolean = false
 ): Promise<PaginatedResponse<Notice>> {
+  // Start with a basic query
   let baseQuery = `
     SELECT n.*, u.name as author_name 
     FROM notices n 
     LEFT JOIN users u ON n.author_id = u.id
-    WHERE ($4::INTEGER IS NULL OR n.min_role_level <= $4)
+    WHERE 1=1
   `;
 
   const params: any[] = [];
 
-  // Add category filter if provided
-  if (category) {
-    baseQuery += ` AND n.category = $1`;
+  // Apply role level security filter
+  if (minRoleLevel !== undefined) {
+    baseQuery += ` AND n.min_role_level <= $${params.length + 1}`;
+    params.push(minRoleLevel);
+  }
+
+  // Apply category filter only if provided
+  if (category && category !== "All") {
+    baseQuery += ` AND n.category = $${params.length + 1}`;
     params.push(category);
-  } else {
-    params.push(null);
   }
 
-  // Add has_attachment filter if provided
-  if (hasAttachment !== undefined) {
-    baseQuery += ` AND n.has_attachment = $2`;
-    params.push(hasAttachment);
-  } else {
-    params.push(null);
+  // Apply attachment filter only if specifically requested
+  if (hasAttachment === true) {
+    baseQuery += ` AND n.has_attachment = true`;
+  } else if (hasAttachment === false) {
+    baseQuery += ` AND n.has_attachment = false`;
   }
 
-  // Add current date filter for published notices
-  baseQuery += ` AND (n.publish_at IS NULL OR n.publish_at <= CURRENT_TIMESTAMP)`;
+  // Apply date range filter if provided
+  if (startDate) {
+    baseQuery += ` AND n.created_at >= $${params.length + 1}`;
+    params.push(startDate);
+  }
 
-  // Add expiry date filter
-  baseQuery += ` AND (n.expiry_date IS NULL OR n.expiry_date > CURRENT_TIMESTAMP)`;
+  if (endDate) {
+    baseQuery += ` AND n.created_at <= $${params.length + 1}`;
+    params.push(endDate);
+  }
 
-  // Add null for the third parameter
-  params.push(null);
+  // Add published notices filter (unless includeFuture is true)
+  if (!includeFuture) {
+    baseQuery += ` AND (n.publish_at IS NULL OR n.publish_at <= CURRENT_TIMESTAMP)`;
+  }
 
-  // Add min role level
-  params.push(minRoleLevel);
+  // Add expiry filter (unless includeExpired is true)
+  if (!includeExpired) {
+    baseQuery += ` AND (n.expiry_date IS NULL OR n.expiry_date > CURRENT_TIMESTAMP)`;
+  }
 
   // Add ORDER BY clause
   baseQuery += ` ORDER BY n.created_at DESC`;
 
+  // console.log("Executing query:", baseQuery, "with params:", params);
+
   // Execute paginated query
   const { data, total } = await paginatedQuery(baseQuery, page, limit, params);
-
   // Calculate total pages
   const totalPages = Math.ceil(total / limit);
 
-  // Return paginated response
   return {
     data: data as Notice[],
     pagination: {
@@ -184,7 +201,6 @@ export async function getPaginatedNotices(
     },
   };
 }
-
 // Get notice by ID
 export async function getNoticeById(noticeId: number): Promise<Notice | null> {
   try {
@@ -239,7 +255,7 @@ export async function getNoticesByAuthorId(
 // Update notice
 export async function updateNotice(
   noticeId: number,
-  updateData: Partial<Notice> // Partial makes all fields optional
+  updateData: Partial<Notice> // makes all fields optional
 ): Promise<boolean> {
   // Build dynamic update query
   let query = "UPDATE notices SET ";
@@ -247,14 +263,38 @@ export async function updateNotice(
   const values: any[] = [];
   let paramCount = 1;
 
+  console.log("Updating notice with data:", updateData);
+
   // Add each field to update
   for (const [key, value] of Object.entries(updateData)) {
     // Skip id field
     if (key === "id") continue;
 
-    setClauses.push(`${key} = $${paramCount}`);
-    values.push(value);
+    // For arrays (target_groups, target_classes), ensure they're properly formatted
+    if (Array.isArray(value)) {
+      // Make sure array only contains numbers
+      const safeArray = value.filter((item) => typeof item === "number");
+      setClauses.push(`"${key}" = $${paramCount}`);
+      values.push(safeArray);
+    }
+    // Handle date objects
+    else if (value instanceof Date) {
+      setClauses.push(`"${key}" = $${paramCount}`);
+      values.push(value);
+    }
+    // Handle all other types
+    else {
+      setClauses.push(`"${key}" = $${paramCount}`);
+      values.push(value);
+    }
+
     paramCount++;
+  }
+
+  // If no fields to update, return early
+  if (setClauses.length === 0) {
+    console.log("No fields to update for notice", noticeId);
+    return true;
   }
 
   // Complete the query
@@ -262,21 +302,32 @@ export async function updateNotice(
   query += ` WHERE id = $${paramCount} RETURNING *`;
   values.push(noticeId);
 
+  console.log("Executing update query:", query);
+  console.log("With values:", values);
+
   try {
-    (await queryOne(query, values)) as Notice;
+    const result = await queryOne(query, values);
+    console.log("Update result:", result);
     return true;
   } catch (error) {
     console.error(`Error updating notice ${noticeId}:`, error);
     return false;
   }
 }
-
 // Delete notice
 export async function deleteNotice(noticeId: number): Promise<boolean> {
   try {
+    console.log(`Attempting to delete notice with ID: ${noticeId}`);
     const query = "DELETE FROM notices WHERE id = $1";
-    await execute(query, [noticeId]);
-    return true;
+    const result = await execute(query, [noticeId]);
+
+    if (result > 0) {
+      console.log(`Notice with ID ${noticeId} deleted.`);
+      return true;
+    } else {
+      console.log(`No notice found with ID ${noticeId}.`);
+      return false;
+    }
   } catch (error) {
     console.error(`Error deleting notice ${noticeId}:`, error);
     return false;

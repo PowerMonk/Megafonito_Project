@@ -7,8 +7,10 @@ import {
   updateNotice,
   deleteNotice,
   getUserById,
+  getAllNotices,
 } from "../models/modelsMod.ts";
 import { UserRole } from "../auth/authMod.ts";
+import { getRoleLevelFromName } from "./controllersMod.ts";
 
 // Create notice handler
 export async function createNoticeHandler(ctx: RouterContext<string>) {
@@ -70,10 +72,10 @@ export async function createNoticeHandler(ctx: RouterContext<string>) {
     const notice = await createNotice(
       title,
       content,
-      user.id,
+      user.id, // Not needed in the request body, get from user context
       category,
       // lowest role level that can view the notice
-      min_role_level,
+      min_role_level, // default to 1, could not be added in the request body
       targetGroups,
       targetClasses,
       hasAttachment,
@@ -92,7 +94,6 @@ export async function createNoticeHandler(ctx: RouterContext<string>) {
   }
 }
 
-// Get all notices (paginated, with filters)
 export async function getNoticesHandler(ctx: RouterContext<string>) {
   try {
     const url = new URL(ctx.request.url);
@@ -100,24 +101,69 @@ export async function getNoticesHandler(ctx: RouterContext<string>) {
     const limit = parseInt(url.searchParams.get("limit") || "12", 10);
     const category = url.searchParams.get("category") || undefined;
 
-    // Update parameter name to match the new schema
+    // Parse hasAttachment param
     const hasAttachmentParam = url.searchParams.get("hasAttachment");
-    const hasAttachment =
-      hasAttachmentParam === "true"
-        ? true
-        : hasAttachmentParam === "false"
-        ? false
-        : undefined;
+    let hasAttachment: boolean | undefined = undefined;
+    if (hasAttachmentParam === "true") {
+      hasAttachment = true;
+    } else if (hasAttachmentParam === "false") {
+      hasAttachment = false;
+    }
 
-    // Get user role level from auth context
-    const minRoleLevel = ctx.state.user?.roleLevel || 1;
+    // Parse date filter parameters
+    // Parse date filter parameters
+    const startDate = url.searchParams.get("startDate")
+      ? new Date(Date.parse(url.searchParams.get("startDate")!))
+          .toISOString()
+          .slice(0, 19)
+          .replace("T", " ") + "-06"
+      : undefined;
+
+    const endDate = url.searchParams.get("endDate")
+      ? new Date(Date.parse(url.searchParams.get("endDate")!))
+          .toISOString()
+          .slice(0, 19)
+          .replace("T", " ") + "-06"
+      : undefined;
+
+    // Show future notices parameter (defaults to false)
+    const includeFuture = url.searchParams.get("includeFuture") === "true";
+
+    // Show expired notices parameter (defaults to false)
+    const includeExpired = url.searchParams.get("includeExpired") === "true";
+
+    const user = ctx.state.user;
+    if (!user || !user.id || !user.role) {
+      ctx.response.status = 401;
+      ctx.response.body = { error: "Authentication required" };
+      return;
+    }
+
+    // Get user role level
+    const roleLevel = getRoleLevelFromName(user.role);
+
+    console.log("Getting notices with filters:", {
+      page,
+      limit,
+      category,
+      hasAttachment,
+      minRoleLevel: roleLevel,
+      startDate,
+      endDate,
+      includeFuture,
+      includeExpired,
+    });
 
     const result = await getPaginatedNotices(
       page,
       limit,
       category,
       hasAttachment,
-      minRoleLevel
+      roleLevel,
+      startDate,
+      endDate,
+      includeFuture,
+      includeExpired
     );
 
     ctx.response.status = 200;
@@ -128,6 +174,39 @@ export async function getNoticesHandler(ctx: RouterContext<string>) {
   } catch (error) {
     console.error("Error getting notices:", error);
     ctx.response.status = 500;
+    ctx.response.body = {
+      error: "Failed to retrieve notices",
+      details: error,
+    };
+  }
+}
+
+// Get all notices (admin only)
+export async function getAllNoticesHandler(ctx: RouterContext<string>) {
+  try {
+    const user = ctx.state.user;
+    if (!user || !user.id || !user.role) {
+      ctx.response.status = 401;
+      ctx.response.body = { error: "Authentication required" };
+      return;
+    }
+
+    // Only allow admins to access all notices
+    if (user.role !== UserRole.ADMIN) {
+      ctx.response.status = 403;
+      ctx.response.body = {
+        error: "Permission denied. Admin access required.",
+      };
+      return;
+    }
+
+    const notices = await getAllNotices();
+
+    ctx.response.status = 200;
+    ctx.response.body = notices;
+  } catch (error) {
+    console.error("Error getting all notices:", error);
+    ctx.response.status = 500;
     ctx.response.body = { error: "Failed to retrieve notices" };
   }
 }
@@ -135,7 +214,7 @@ export async function getNoticesHandler(ctx: RouterContext<string>) {
 // Get notices by user ID
 export async function getNoticesByUserHandler(ctx: RouterContext<string>) {
   try {
-    const userId = parseInt(ctx.params.id || "0");
+    const userId = parseInt(ctx.params.userId || "0");
     if (isNaN(userId) || userId <= 0) {
       ctx.response.status = 400;
       ctx.response.body = { error: "Invalid user ID" };
@@ -170,7 +249,7 @@ export async function getNoticesByUserHandler(ctx: RouterContext<string>) {
 // Get single notice by ID
 export async function getNoticeByIdHandler(ctx: RouterContext<string>) {
   try {
-    const noticeId = parseInt(ctx.params.id || "0");
+    const noticeId = parseInt(ctx.params.noticeId || "0");
     if (isNaN(noticeId) || noticeId <= 0) {
       ctx.response.status = 400;
       ctx.response.body = { error: "Invalid notice ID" };
@@ -203,7 +282,7 @@ export async function updateNoticeHandler(ctx: RouterContext<string>) {
   }
 
   try {
-    const noticeId = parseInt(ctx.params.id || "0");
+    const noticeId = parseInt(ctx.params.noticeId || "0");
     if (isNaN(noticeId) || noticeId <= 0) {
       ctx.response.status = 400;
       ctx.response.body = { error: "Invalid notice ID" };
@@ -283,7 +362,7 @@ export async function deleteNoticeHandler(ctx: RouterContext<string>) {
   }
 
   try {
-    const noticeId = parseInt(ctx.params.id || "0");
+    const noticeId = parseInt(ctx.params.noticeId || "0");
     if (isNaN(noticeId) || noticeId <= 0) {
       ctx.response.status = 400;
       ctx.response.body = { error: "Invalid notice ID" };
