@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:async';
 import 'login_screen.dart';
 
@@ -34,15 +35,21 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF14213D),
+      backgroundColor: Color.fromARGB(255, 255, 255, 255),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset(
-              'assets/LogoMegafon_V2.png',
-              width: 200,
+            // Image.asset(
+            //   'assets/MegafonitoJPEG.jpeg',
+            //   width: 200,
+            //   height: 200,
+            // ),
+            SizedBox(height: 20),
+            SvgPicture.asset(
+              'assets/Megafonito.svg',
               height: 200,
+              width: 200,
             ),
             SizedBox(height: 20),
             Text(
@@ -50,7 +57,7 @@ class _SplashScreenState extends State<SplashScreen> {
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFFFCA311),
+                color: Color.fromARGB(255, 34, 32, 78),
               ),
             ),
             SizedBox(height: 20),
@@ -60,7 +67,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 value: progress,
                 minHeight: 20,
                 backgroundColor: Color(0xFFE5E5E5),
-                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFFCA311)),
+                color: Color.fromARGB(255, 34, 32, 78),
               ),
             ),
           ],
