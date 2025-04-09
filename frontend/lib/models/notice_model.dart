@@ -1,42 +1,40 @@
+/// Basic notice model for frontend development
 class Notice {
+  final int id;
   final String title;
   final String content;
   final String category;
-  final bool hasFile;
-  final String? fileUrl;
-  final String? fileKey;
+  final String? authorName;
   final DateTime createdAt;
+  final bool hasAttachment;
+  final String? attachmentUrl;
+  final String? attachmentKey;
 
   Notice({
+    required this.id,
     required this.title,
     required this.content,
     required this.category,
-    required this.hasFile,
-    this.fileUrl,
-    this.fileKey,
+    this.authorName,
     required this.createdAt,
+    required this.hasAttachment,
+    this.attachmentUrl,
+    this.attachmentKey,
   });
 
   factory Notice.fromJson(Map<String, dynamic> json) {
     return Notice(
+      id: json['id'],
       title: json['title'],
       content: json['content'],
-      category: json['category'] ?? 'Materias',
-      hasFile: json['has_file'] == 1 || json['has_file'] == true,
-      fileUrl: json['file_url'],
-      fileKey: json['file_key'],
-      createdAt: DateTime.parse(json['created_at']),
+      category: json['category'] ?? 'General',
+      authorName: json['author_name'],
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'])
+          : DateTime.now(),
+      hasAttachment: json['has_attachment'] ?? false,
+      attachmentUrl: json['attachment_url'],
+      attachmentKey: json['attachment_key'],
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'title': title,
-      'content': content,
-      'category': category,
-      'has_file': hasFile ? 1 : 0,
-      'file_url': fileUrl,
-      'file_key': fileKey,
-    };
   }
 }

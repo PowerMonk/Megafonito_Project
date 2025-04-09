@@ -3,9 +3,6 @@ import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'anuncios_screen.dart';
-import 'register_screen.dart';
-
-// Imagina que este es un cambio importante (solo se cambiaron archivos que no llegarán al repo remoto)
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -13,42 +10,40 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _formKey = GlobalKey<FormState>();
-  String? username;
-  String? password;
   bool _isLoading = false;
 
-  void _login() async {
-    if (_formKey.currentState!.validate()) {
+  // Simplified login function - no validation, just bypass
+  void _bypassLogin() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // Using a default username for development
+      final user = await AuthService.login(context, "dev_user");
+
       setState(() {
-        _isLoading = true;
+        _isLoading = false;
       });
 
-      try {
-        // Call auth service to login
-        final user = await AuthService.login(context, username!);
-
-        setState(() {
-          _isLoading = false;
-        });
-
-        // Navigate to AnunciosScreen with the user role info
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => AnunciosScreen(
-              userName: user.name,
-              // userName: widget.userName,
-              userEmail: user.email,
-              isSuperUser: AuthService.isAdmin,
-            ),
+      // Navigate to AnunciosScreen with mock user info
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) => AnunciosScreen(
+            userName: user.name,
+            userEmail: user.email,
+            isSuperUser: true, // Always admin for development
           ),
-        );
-      } catch (e) {
-        setState(() {
-          _isLoading = false;
-        });
-        // Error is already shown by the service
-      }
+        ),
+      );
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      // Show error if something goes wrong
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error bypassing login: $e')),
+      );
     }
   }
 
@@ -161,19 +156,17 @@ class _LoginScreenState extends State<LoginScreen> {
                     Align(
                       alignment: Alignment.bottomLeft,
                       child: Text(
-                        'Inicia con tu correo institucional',
+                        'Modo desarrollo - Login rápido',
                         style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w300,
                           color: Color.fromARGB(255, 255, 255, 255),
+                          fontSize: 13,
                         ),
                       ),
                     ),
                     SizedBox(height: 12),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        // Google login implementation
-                      },
+                    // MODIFIED BUTTON - Now it's a bypass login button
+                    ElevatedButton(
+                      onPressed: _isLoading ? null : _bypassLogin,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Color.fromARGB(240, 240, 240, 240),
                         minimumSize: Size(double.infinity, 50),
@@ -181,46 +174,29 @@ class _LoginScreenState extends State<LoginScreen> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      icon: Image.asset(
-                        'assets/GoogleIcon.png', // Asegúrate de tener este logo en tus assets
-                        height: 24,
-                        width: 24,
-                      ),
-                      label: Text(
-                        'Continuar con Google',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w300,
-                          color: Color.fromARGB(255, 0, 0, 0),
-                        ),
+                      child: _isLoading
+                          ? CircularProgressIndicator()
+                          : Text(
+                              'Entrar como Admin (Modo Dev)',
+                              style: TextStyle(
+                                color: Color.fromARGB(255, 0, 0, 0),
+                              ),
+                            ),
+                    ),
+                    SizedBox(height: 10),
+                    Text(
+                      'No se requiere autenticación',
+                      style: TextStyle(
+                        color: Colors.grey,
+                        fontSize: 13,
                       ),
                     ),
-                    // SizedBox(height: 1),
-                    TextButton(
-                      onPressed: () {
-                        // Password recovery action
-                      },
-                      child: Text(
-                        '¿Olvidaste tu contraseña?',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w300,
-                          color: Color.fromARGB(255, 255, 255, 255),
-                        ),
-                      ),
-                    ),
-                    Spacer(), // Pushes the problems text to bottom
-                    TextButton(
-                      onPressed: () {
-                        // Login issues action
-                      },
-                      child: Text(
-                        '¿Problemas al iniciar sesión?',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w300,
-                          color: Color.fromARGB(255, 255, 255, 255),
-                        ),
+                    Spacer(),
+                    Text(
+                      'Versión de desarrollo',
+                      style: TextStyle(
+                        color: Colors.grey,
+                        fontSize: 13,
                       ),
                     ),
                     SizedBox(height: 20),

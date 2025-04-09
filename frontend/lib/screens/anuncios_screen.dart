@@ -214,9 +214,9 @@ class _AnunciosScreenState extends State<AnunciosScreen>
               );
             } catch (e) {
               print('Error creating announcement: $e');
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Error al crear el anuncio: $e')),
-              );
+              // ScaffoldMessenger.of(context).showSnackBar(
+              //   SnackBar(content: Text('Error al crear el anuncio: $e')),
+              // );
             }
           },
         ),
