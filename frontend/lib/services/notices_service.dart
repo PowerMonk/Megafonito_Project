@@ -4,8 +4,13 @@ import '../models/notice_model.dart';
 import 'api_service.dart';
 import 'auth_service.dart';
 
+/// Mock notices service with no real backend connections
+/// Uses in-memory storage for temporary notices data
 class NoticesService {
-  // Notice loading logic
+  // Mock in-memory notices storage
+  static List<Notice> _cachedNotices = [];
+
+  // Notice loading logic (using mock data)
   static Future<Map<String, dynamic>> loadNotices({
     int page = 1,
     int limit = 5,
@@ -25,7 +30,7 @@ class NoticesService {
     }
   }
 
-  // Notice creation logic
+  // Notice creation logic (using mock data)
   static Future<void> createNotice(
     BuildContext context, {
     required String title,
@@ -36,32 +41,29 @@ class NoticesService {
     String? fileKey,
   }) async {
     try {
-      // Get user ID, defaulting to 1 if not available
-      final userId = AuthService.currentUser?.id ?? ApiService.userId;
-      // final userId = AuthService.currentUser?.id ?? ApiService.userId ?? 1;
+      await Future.delayed(
+          Duration(milliseconds: 800)); // Simulate network delay
 
-      // Use null-safe fallback for userId (with debug info)
-      print(
-          'Creating notice with userID: $userId (from auth: ${AuthService.currentUser?.id}, from API: ${ApiService.userId})');
+      // Temporarily store the notice in memory
+      final mockNotice = {
+        'id': DateTime.now().millisecondsSinceEpoch,
+        'title': title,
+        'content': content,
+        'category': category,
+        'author_name': AuthService.currentUser?.name ?? 'Anonymous',
+        'created_at': DateTime.now().toIso8601String(),
+        'has_attachment': hasFile,
+        'attachment_url': fileUrl,
+        'attachment_key': fileKey,
+      };
 
-      final response = await ApiService.authenticatedRequest(
-        '/notices',
-        'POST',
-        body: {
-          'title': title,
-          'content': content,
-          'userId': userId, // Get from current user if available
-          // 1, // Hardcoded user ID for now
-          'category': category,
-          'hasFile': hasFile,
-          'fileUrl': fileUrl,
-          'fileKey': fileKey,
-        },
+      // Update the mock data at the beginning of the list
+      final notices = ApiService.getMockNotices();
+      (notices['data'] as List).insert(0, mockNotice);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Anuncio creado con éxito (modo desarrollo)')),
       );
-
-      if (response.statusCode != 201) {
-        throw Exception('Error creating announcement: ${response.body}');
-      }
 
       return;
     } catch (e) {
@@ -94,7 +96,6 @@ class NoticesService {
       }
 
       List<dynamic> noticesData = apiResponse['data'];
-
       return noticesData.map((data) => Notice.fromJson(data)).toList();
     } catch (e) {
       print('Error converting API response to notices: $e');
