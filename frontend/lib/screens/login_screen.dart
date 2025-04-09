@@ -5,6 +5,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'anuncios_screen.dart';
 import 'register_screen.dart';
 
+// Imagina que este es un cambio importante (solo se cambiaron archivos que no llegarán al repo remoto)
+
 class LoginScreen extends StatefulWidget {
   @override
   _LoginScreenState createState() => _LoginScreenState();
