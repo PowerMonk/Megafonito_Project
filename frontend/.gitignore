@@ -10,9 +10,15 @@ build/
 /android/.gradle/
 /android/.idea/
 /android/local.properties
-/android/app/
 /android/gradle/wrapper/
+# Ignorar todo lo de android/app excepto el build.gradle
+/android/app/*
+!/android/app/build.gradle
 
+# Firebase sensitive files
+lib/firebase_options.dart
+firebase.json
+/android/app/google-services.json
 
 # iOS
 ios/
