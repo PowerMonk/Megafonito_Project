@@ -18,7 +18,8 @@ build/
 # Firebase sensitive files
 lib/firebase_options.dart
 firebase.json
-/android/app/google-services.json
+# Igualmente app esta en el ignore asi que no deberia de llegar, pero ya está desde antes, asi que si debería de llegar
+# /android/app/google-services.json
 
 # iOS
 ios/
