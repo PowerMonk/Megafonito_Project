@@ -3,6 +3,8 @@ import 'package:file_picker/file_picker.dart';
 import 'dart:io';
 import '../services/storage_service.dart';
 
+// Random comment for pipeline testing
+
 class CrearNuevoAnuncioScreen extends StatefulWidget {
   // Change the callback to include fileUrl and fileKey parameters
   final Function(String, String, Color, String, bool, String?, String?)
