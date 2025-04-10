@@ -20,6 +20,7 @@ jobs:
         with:
           channel: "stable" # Usa la versión estable de Flutter
 
+          # El repo debería de estar correctamente configurado por lo que este paso no deberia de hacer falta
       - name: Generate missing files
         working-directory: ./frontend
         run: flutter create . # Genera las carpetas y archivos faltantes
