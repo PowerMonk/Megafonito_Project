@@ -38,5 +38,6 @@ linux/
 # Test
 test/
 
+# Ignore plugins files
 .flutter-plugins
 .flutter-plugins-dependencies
