@@ -230,7 +230,7 @@ class _AnunciosScreenState extends State<AnunciosScreen>
       appBar: AppBar(
         title: Text(_screenTitles[_currentIndex],
             style: TextStyle(color: Colors.white)),
-        backgroundColor: Color(0xFF14213D),
+        backgroundColor: Colors.black,
         actions: [
           IconButton(
               onPressed: () => _navigateToUserInfo(),
@@ -255,31 +255,44 @@ class _AnunciosScreenState extends State<AnunciosScreen>
               child: Icon(Icons.add, color: Colors.black),
             )
           : null,
+      // Navbar
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
-        backgroundColor: Color(0xFF14213D),
+        backgroundColor: Colors.black,
         selectedItemColor: Color(0xFFFCA311),
         unselectedItemColor: Colors.white,
         type: BottomNavigationBarType.fixed,
+
+        // Force equal spacing
+        showUnselectedLabels: true,
+
+        // Fix icon alignment
+        iconSize: 24.0,
+
+        // Add some padding adjustments
+        selectedLabelStyle:
+            TextStyle(height: 1.5, fontSize: 12.0, letterSpacing: -0.2),
+        unselectedLabelStyle:
+            TextStyle(height: 1.5, fontSize: 12.0, letterSpacing: -0.2),
         items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
+            icon: Icon(Icons.home_outlined),
             label: 'Inicio',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.contact_mail),
+            icon: Icon(Icons.person_search_outlined),
             label: 'Contactos',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.star),
-            label: 'Becas',
+            icon: Icon(Icons.star_border_outlined),
+            label: 'Oportunidades',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.school),
+            icon: Icon(Icons.school_outlined),
             label: 'Procesos',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.support),
+            icon: Icon(Icons.campaign_outlined),
             label: 'Soporte',
           ),
         ],
@@ -294,7 +307,8 @@ class _AnunciosScreenState extends State<AnunciosScreen>
 
   Widget _buildAnunciosContent() {
     return Container(
-      color: Color(0xFFE5E5E5),
+      // color: Color(0xFFE5E5E5),
+      color: Colors.white,
       child: Column(
         children: [
           NoticesFilter(
@@ -351,6 +365,10 @@ class _AnunciosScreenState extends State<AnunciosScreen>
                                     onPressed: _loadNotices,
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: Color(0xFFFCA311),
+                                      foregroundColor: Colors.black,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(15),
+                                      ),
                                     ),
                                     child: Text('Cargar más anuncios'),
                                   ),
@@ -372,7 +390,8 @@ class _AnunciosScreenState extends State<AnunciosScreen>
       padding: EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(30),
+        borderRadius: BorderRadius.circular(25),
+        border: Border.all(color: Colors.black),
         boxShadow: [
           BoxShadow(
             color: Colors.black26,
@@ -384,12 +403,12 @@ class _AnunciosScreenState extends State<AnunciosScreen>
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: Color(0xFF14213D), size: 20),
+          Icon(icon, color: Colors.black, size: 20),
           SizedBox(width: 8),
           Text(
             label,
             style: TextStyle(
-              color: Color(0xFF14213D),
+              color: Colors.black,
               fontSize: 16,
               fontWeight: FontWeight.bold,
             ),
