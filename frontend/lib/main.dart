@@ -16,8 +16,8 @@ class MyApp extends StatelessWidget {
           iconTheme: IconThemeData(color: Colors.white),
           actionsIconTheme: IconThemeData(color: Colors.white),
         ),
-        primaryColor: Color(0xFF14213D),
-        scaffoldBackgroundColor: Color(0xFF14213D),
+        primaryColor: Colors.black,
+        scaffoldBackgroundColor: Colors.black,
         textTheme: TextTheme(
           bodyLarge: TextStyle(color: Color(0xFF000000)),
         ),

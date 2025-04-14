@@ -23,12 +23,15 @@ class NoticeCard extends StatelessWidget {
         padding: EdgeInsets.all(16.0),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(15),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: Colors.black),
           boxShadow: [
             BoxShadow(
-              color: Colors.black26,
-              blurRadius: 10,
-              offset: Offset(0, 5),
+              color: const Color.fromARGB(255, 105, 104, 104),
+              blurRadius: 1,
+              offset: const Offset(-2, 3),
+              spreadRadius: 0.5,
+              blurStyle: BlurStyle.inner,
             ),
           ],
         ),

@@ -50,8 +50,13 @@ class _NoticesFilterState extends State<NoticesFilter> {
                       label: Text(category),
                       selected: isSelected,
                       selectedColor: Color(0xFFFCA311),
+                      backgroundColor: Colors.white,
                       labelStyle: TextStyle(
                         color: isSelected ? Colors.white : Colors.black,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        side: BorderSide(color: Colors.black),
+                        borderRadius: BorderRadius.circular(15),
                       ),
                       onSelected: (selected) {
                         setState(() {
