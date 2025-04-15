@@ -89,10 +89,14 @@ class _ContactosEscolaresScreenState extends State<ContactosEscolaresScreen> {
     required String website,
   }) {
     return Card(
-      margin: EdgeInsets.symmetric(vertical: 10),
-      elevation: 5, // Sombra más pronunciada
+      color: Colors.white,
+      elevation: 2.2, // Sombra más pronunciada
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(15), // Bordes redondeados
+        side: BorderSide(
+            color:
+                const Color.fromARGB(100, 160, 158, 158), // 100 is ~39% opacity
+            width: 1.0),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -104,16 +108,16 @@ class _ContactosEscolaresScreenState extends State<ContactosEscolaresScreen> {
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF14213D), // Azul oscuro
+                color: Colors.black, // Azul oscuro
               ),
             ),
             SizedBox(height: 8),
             Text('Teléfono: $phone',
-                style: TextStyle(color: Color(0xFF333333))), // Gris oscuro
+                style: TextStyle(color: Colors.black)), // Gris oscuro
             Text('Correo: $email',
-                style: TextStyle(color: Color(0xFF333333))), // Gris oscuro
+                style: TextStyle(color: Colors.black)), // Gris oscuro
             Text('Página Web: $website',
-                style: TextStyle(color: Color(0xFF333333))), // Gris oscuro
+                style: TextStyle(color: Colors.black)), // Gris oscuro
           ],
         ),
       ),

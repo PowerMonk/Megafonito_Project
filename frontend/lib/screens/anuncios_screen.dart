@@ -8,7 +8,7 @@ import 'crear_anuncio_screen.dart'; // Will refactor later
 import 'support_screen.dart';
 import 'contact_screen.dart';
 import 'school_processes_screen.dart';
-import 'benefits_screen.dart';
+import 'opportunities_screen.dart';
 import 'user_info_screen.dart';
 
 class AnunciosScreen extends StatefulWidget {
@@ -45,7 +45,7 @@ class _AnunciosScreenState extends State<AnunciosScreen>
   final List<String> _screenTitles = [
     'Megafonito',
     'Contactos Escolares',
-    'Becas',
+    'Oportunidades',
     'Procesos Escolares',
     'Soporte Megafonito',
   ];
