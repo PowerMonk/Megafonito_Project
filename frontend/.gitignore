@@ -12,8 +12,9 @@ build/
 /android/local.properties
 /android/gradle/wrapper/
 # Ignorar todo lo de android/app excepto el build.gradle
-/android/app/*
+/android/app/
 !/android/app/build.gradle
+!/android/app/src/main/**
 
 # Firebase sensitive files
 lib/firebase_options.dart
@@ -22,7 +23,8 @@ firebase.json
 # /android/app/google-services.json
 
 # iOS
-ios/
+ios/*
+!/ios/Runner/Info.plist
 
 # MacOS
 macos/
