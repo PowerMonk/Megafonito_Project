@@ -104,115 +104,116 @@ class _CrearNuevoAnuncioScreenState extends State<CrearNuevoAnuncioScreen> {
     }
   }
 
-  // void _mostrarMenuOpciones(BuildContext context) {
-  //   showModalBottomSheet(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return Column(
-  //         mainAxisSize: MainAxisSize.min,
-  //         children: <Widget>[
-  //           ListTile(
-  //             leading: Icon(Icons.schedule),
-  //             title: Text('Programar envío'),
-  //             onTap: () {
-  //               Navigator.pop(context);
-  //               // Implementar la lógica para programar el envío
-  //             },
-  //           ),
-  //           ListTile(
-  //             leading: Icon(Icons.poll),
-  //             title: Text('Agregar encuesta'),
-  //             onTap: () {
-  //               Navigator.pop(context);
-  //               // Implementar la lógica para agregar una encuesta
-  //             },
-  //           ),
-  //           ListTile(
-  //             leading: Icon(Icons.delete_sweep),
-  //             title: Text('Eliminar archivos adjuntos'),
-  //             onTap: () {
-  //               Navigator.pop(context);
-  //               setState(() {
-  //                 _archivosAdjuntos.clear();
-  //                 _tieneArchivos = false;
-  //               });
-  //             },
-  //           ),
-  //           ListTile(
-  //             leading: Icon(Icons.save),
-  //             title: Text('Guardar borrador'),
-  //             onTap: () {
-  //               Navigator.pop(context);
-  //               // Implementar la lógica para guardar el borrador
-  //             },
-  //           ),
-  //         ],
-  //       );
-  //     },
-  //   );
-  // }
-
   void _mostrarMenuOpciones(BuildContext context) {
-    showMenu(
+    showModalBottomSheet(
       context: context,
-      position: RelativeRect.fromLTRB(MediaQuery.of(context).size.width - 100,
-          56, 10, 0), // Ajusta la posición según sea necesario
-      items: [
-        PopupMenuItem(
-          value: 'programar_envio',
-          child: ListTile(
-            // leading: Icon(Icons.schedule_outlined),
-            contentPadding: EdgeInsetsDirectional.only(start: 5),
-            title: Text('Programar envío'),
-          ),
-        ),
-        PopupMenuItem(
-          value: 'agregar_encuesta',
-          child: ListTile(
-            // leading: Icon(Icons.poll_outlined),
-            contentPadding: EdgeInsetsDirectional.only(start: 5),
-            title: Text('Agregar encuesta'),
-          ),
-        ),
-        PopupMenuItem(
-          value: 'eliminar_archivos',
-          child: ListTile(
-            // leading: Icon(Icons.delete_sweep_outlined),
-            contentPadding: EdgeInsetsDirectional.only(start: 5),
-            title: Text('Eliminar archivos adjuntos'),
-          ),
-        ),
-        PopupMenuItem(
-          value: 'guardar_borrador',
-          child: ListTile(
-            // leading: Icon(Icons.save_outlined),
-            contentPadding: EdgeInsetsDirectional.only(start: 5),
-            title: Text('Guardar borrador'),
-          ),
-        ),
-      ],
-    ).then((value) {
-      if (value != null) {
-        switch (value) {
-          case 'programar_envio':
-            // Implementar la lógica para programar el envío
-            break;
-          case 'agregar_encuesta':
-            // Implementar la lógica para agregar una encuesta
-            break;
-          case 'eliminar_archivos':
-            setState(() {
-              _archivosAdjuntos.clear();
-              _tieneArchivos = false;
-            });
-            break;
-          case 'guardar_borrador':
-            // Implementar la lógica para guardar el borrador
-            break;
-        }
-      }
-    });
+      backgroundColor: Colors.white,
+      builder: (BuildContext context) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            ListTile(
+              leading: Icon(Icons.schedule),
+              title: Text('Programar envío'),
+              onTap: () {
+                Navigator.pop(context);
+                // Implementar la lógica para programar el envío
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.poll),
+              title: Text('Agregar encuesta'),
+              onTap: () {
+                Navigator.pop(context);
+                // Implementar la lógica para agregar una encuesta
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.delete_sweep),
+              title: Text('Eliminar archivos adjuntos'),
+              onTap: () {
+                Navigator.pop(context);
+                setState(() {
+                  _archivosAdjuntos.clear();
+                  _tieneArchivos = false;
+                });
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.save),
+              title: Text('Guardar borrador'),
+              onTap: () {
+                Navigator.pop(context);
+                // Implementar la lógica para guardar el borrador
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
+
+  // void _mostrarMenuOpciones(BuildContext context) {
+  //   showMenu(
+  //     context: context,
+  //     position: RelativeRect.fromLTRB(MediaQuery.of(context).size.width - 100,
+  //         56, 10, 0), // Ajusta la posición según sea necesario
+  //     items: [
+  //       PopupMenuItem(
+  //         value: 'programar_envio',
+  //         child: ListTile(
+  //           leading: Icon(Icons.schedule_outlined),
+  //           contentPadding: EdgeInsetsDirectional.only(start: 5),
+  //           title: Text('Programar envío'),
+  //         ),
+  //       ),
+  //       PopupMenuItem(
+  //         value: 'agregar_encuesta',
+  //         child: ListTile(
+  //           leading: Icon(Icons.poll_outlined),
+  //           contentPadding: EdgeInsetsDirectional.only(start: 5),
+  //           title: Text('Agregar encuesta'),
+  //         ),
+  //       ),
+  //       PopupMenuItem(
+  //         value: 'eliminar_archivos',
+  //         child: ListTile(
+  //           leading: Icon(Icons.delete_sweep_outlined),
+  //           contentPadding: EdgeInsetsDirectional.only(start: 5),
+  //           title: Text('Eliminar archivos adjuntos'),
+  //         ),
+  //       ),
+  //       PopupMenuItem(
+  //         value: 'guardar_borrador',
+  //         child: ListTile(
+  //           leading: Icon(Icons.save_outlined),
+  //           contentPadding: EdgeInsetsDirectional.only(start: 5),
+  //           title: Text('Guardar borrador'),
+  //         ),
+  //       ),
+  //     ],
+  //   ).then((value) {
+  //     if (value != null) {
+  //       switch (value) {
+  //         case 'programar_envio':
+  //           // Implementar la lógica para programar el envío
+  //           break;
+  //         case 'agregar_encuesta':
+  //           // Implementar la lógica para agregar una encuesta
+  //           break;
+  //         case 'eliminar_archivos':
+  //           setState(() {
+  //             _archivosAdjuntos.clear();
+  //             _tieneArchivos = false;
+  //           });
+  //           break;
+  //         case 'guardar_borrador':
+  //           // Implementar la lógica para guardar el borrador
+  //           break;
+  //       }
+  //     }
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
