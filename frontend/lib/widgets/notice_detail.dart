@@ -71,8 +71,7 @@ class NoticeDetail extends StatelessWidget {
     return Container(
       // Container envuelve todo para aplicar el color de fondo y los bordes redondeados.
       decoration: BoxDecoration(
-        color: Theme.of(context)
-            .canvasColor, // Usa el color de fondo por defecto del tema.
+        color: Colors.white, // Usa el color de fondo por defecto del tema.
         borderRadius: BorderRadius.vertical(
             top: Radius.circular(16.0)), // Redondeo solo en la parte superior.
       ),

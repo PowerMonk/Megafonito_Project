@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../services/notices_service.dart';
 import '../widgets/notice_card.dart';
 import '../widgets/notice_detail.dart';
@@ -187,6 +188,7 @@ class _AnunciosScreenState extends State<AnunciosScreen>
   }
 
   // --- UI Building ---
+  // header
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -212,6 +214,7 @@ class _AnunciosScreenState extends State<AnunciosScreen>
               tooltip: 'Crear Anuncio',
             )
           : null,
+      // navbar
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         backgroundColor: Colors.black,
@@ -222,30 +225,90 @@ class _AnunciosScreenState extends State<AnunciosScreen>
         iconSize: 24.0,
         selectedLabelStyle: TextStyle(fontSize: 12.0, letterSpacing: -0.2),
         unselectedLabelStyle: TextStyle(fontSize: 12.0, letterSpacing: -0.2),
-        items: const [
+        items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            activeIcon: Icon(Icons.home),
+            icon: SvgPicture.asset(
+              'assets/icons/inicio_icon.svg',
+              height: 24.0,
+              width: 24.0,
+              colorFilter:
+                  const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+            ),
+            activeIcon: SvgPicture.asset(
+              'assets/icons/inicio_icon.svg',
+              height: 24.0,
+              width: 24.0,
+              colorFilter:
+                  const ColorFilter.mode(Color(0xFFFCA311), BlendMode.srcIn),
+            ),
             label: 'Inicio',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person_search_outlined),
-            activeIcon: Icon(Icons.person_search),
+            icon: SvgPicture.asset(
+              'assets/icons/contactos_icon.svg',
+              height: 24.0,
+              width: 24.0,
+              colorFilter:
+                  const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+            ),
+            activeIcon: SvgPicture.asset(
+              'assets/icons/contactos_icon.svg',
+              height: 24.0,
+              width: 24.0,
+              colorFilter:
+                  const ColorFilter.mode(Color(0xFFFCA311), BlendMode.srcIn),
+            ),
             label: 'Contactos',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.star_border_outlined),
-            activeIcon: Icon(Icons.star),
+            icon: SvgPicture.asset(
+              'assets/icons/oportunidades_icon.svg',
+              height: 24.0,
+              width: 24.0,
+              colorFilter:
+                  const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+            ),
+            activeIcon: SvgPicture.asset(
+              'assets/icons/oportunidades_icon.svg',
+              height: 24.0,
+              width: 24.0,
+              colorFilter:
+                  const ColorFilter.mode(Color(0xFFFCA311), BlendMode.srcIn),
+            ),
             label: 'Oportunidades',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.school_outlined),
-            activeIcon: Icon(Icons.school),
+            icon: SvgPicture.asset(
+              'assets/icons/procesos_icon.svg',
+              height: 24.0,
+              width: 24.0,
+              colorFilter:
+                  const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+            ),
+            activeIcon: SvgPicture.asset(
+              'assets/icons/procesos_icon.svg',
+              height: 24.0,
+              width: 24.0,
+              colorFilter:
+                  const ColorFilter.mode(Color(0xFFFCA311), BlendMode.srcIn),
+            ),
             label: 'Procesos',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.campaign_outlined),
-            activeIcon: Icon(Icons.campaign),
+            icon: SvgPicture.asset(
+              'assets/icons/soporte_icon.svg',
+              height: 24.0,
+              width: 24.0,
+              colorFilter:
+                  const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+            ),
+            activeIcon: SvgPicture.asset(
+              'assets/icons/soporte_icon.svg',
+              height: 24.0,
+              width: 24.0,
+              colorFilter:
+                  const ColorFilter.mode(Color(0xFFFCA311), BlendMode.srcIn),
+            ),
             label: 'Soporte',
           ),
         ],

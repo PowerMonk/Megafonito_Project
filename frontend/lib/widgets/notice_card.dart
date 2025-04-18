@@ -37,6 +37,7 @@ class NoticeCard extends StatelessWidget {
         anuncio['category'] ?? 'General'; // Categoría o valor por defecto.
     final bool hasAttachment = anuncio['has_attachment'] ??
         false; // Indica si hay adjunto (asume falso por defecto).
+    final String createdAt = '14 abr'; // Simulación de fecha de creación.
 
     // --- Estructura de la Tarjeta ---
     return InkWell(
@@ -62,29 +63,29 @@ class NoticeCard extends StatelessWidget {
             crossAxisAlignment:
                 CrossAxisAlignment.start, // Alinea el contenido a la izquierda.
             children: [
-              // --- Sección 1: Autor + Icono ---
+              // --- Sección 1: Autor + Icono + Fecha ---
               Row(
-                // Organiza el autor y el icono en una fila horizontal.
+                // Organiza el autor, icono y fecha en una fila horizontal.
                 children: [
                   Text('Autor:',
                       style: TextStyle(
                           color: Colors.grey[700])), // Etiqueta "Autor".
                   SizedBox(width: 4), // Pequeño espacio horizontal.
-                  Expanded(
-                    // Expanded permite que el nombre del autor ocupe el espacio disponible.
-                    child: Text(
-                      authorName,
-                      style: TextStyle(
-                          fontWeight:
-                              FontWeight.w500), // Estilo del nombre del autor.
-                      overflow: TextOverflow
-                          .ellipsis, // Añade '...' si el texto es muy largo.
-                      maxLines: 1, // Limita a una sola línea.
-                    ),
+                  Text(
+                    authorName,
+                    style: TextStyle(
+                        fontWeight:
+                            FontWeight.w500), // Estilo del nombre del autor.
+                    overflow: TextOverflow
+                        .ellipsis, // Añade '...' si el texto es muy largo.
+                    maxLines: 1, // Limita a una sola línea.
                   ),
-                  SizedBox(width: 8), // Espacio antes del icono.
+                  SizedBox(width: 4), // Espacio antes del icono.
                   Icon(Icons.person_outline,
                       size: 20.0, color: Colors.grey[700]), // Icono de persona.
+                  Spacer(), // Empuja la fecha al extremo derecho.
+                  Text(createdAt, // Fecha de creación simulada.
+                      style: TextStyle(color: Colors.grey[600], fontSize: 12)),
                 ],
               ),
               Divider(height: 16.0, thickness: 1.0), // --- Divisor visual 1 ---
@@ -117,12 +118,13 @@ class NoticeCard extends StatelessWidget {
                   if (hasAttachment)
                     Icon(Icons.attach_file_outlined,
                         size: 18, color: Colors.grey[700]), // Icono de adjunto.
+                  SizedBox(width: 4), // Espacio.
+                  Spacer(), // Spacer ocupa todo el espacio disponible, empujando lo siguiente a la derecha.
                   // Text('Destacar',
                   //     style: TextStyle(
                   //         fontSize: 12,
                   //         color: Colors.orange)), // Texto "Destacar".
-                  SizedBox(width: 4), // Espacio.
-                  Spacer(), // Spacer ocupa todo el espacio disponible, empujando lo siguiente a la derecha.
+                  // SizedBox(width: 4), // Espacio.
                   Icon(Icons.star_border,
                       color: Colors.orangeAccent,
                       size: 18.0), // Icono de estrella (borde).

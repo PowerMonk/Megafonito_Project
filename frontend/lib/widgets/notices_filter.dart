@@ -54,10 +54,10 @@ class _NoticesFilterState extends State<NoticesFilter> {
                       labelStyle: TextStyle(
                         color: isSelected ? Colors.white : Colors.black,
                       ),
-                      shape: RoundedRectangleBorder(
-                        side: BorderSide(color: Colors.black),
-                        borderRadius: BorderRadius.circular(15),
-                      ),
+                      // shape: RoundedRectangleBorder(
+                      //   side: BorderSide(color: Colors.black),
+                      //   borderRadius: BorderRadius.circular(15),
+                      // ),
                       onSelected: (selected) {
                         setState(() {
                           selectedCategory = selected ? category : null;
