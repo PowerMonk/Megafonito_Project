@@ -116,8 +116,7 @@ class ApiService {
               'Les damos la bienvenida a todos los estudiantes al nuevo semestre.',
           'category': 'General',
           'author_name': 'Coordinación Académica',
-          'created_at':
-              DateTime.now().subtract(Duration(days: 5)).toIso8601String(),
+          'created_at': '2023-10-15T14:30:00.000Z',
           'has_attachment': true,
           'attachment_url': 'https://example.com/mock-calendar.pdf',
           'attachment_key': 'mock-calendar-key',
@@ -128,8 +127,7 @@ class ApiService {
           'content': 'Se abre la convocatoria para la beca Benito Juarez.',
           'category': 'Convocatorias',
           'author_name': 'Departamento de Becas',
-          'created_at':
-              DateTime.now().subtract(Duration(days: 3)).toIso8601String(),
+          'created_at': '2023-10-15T14:30:00.000Z',
           'has_attachment': true,
           'attachment_url': 'https://example.com/mock-scholarship.pdf',
           'attachment_key': 'mock-scholarship-key',
@@ -141,21 +139,20 @@ class ApiService {
               'Invitamos a todos los estudiantes a participar en el torneo deportivo.',
           'category': 'Deportivos',
           'author_name': 'Coordinación de Deportes',
-          'created_at':
-              DateTime.now().subtract(Duration(days: 2)).toIso8601String(),
+          'created_at': '2023-10-15T14:30:00.000Z',
           'has_attachment': false,
           'attachment_url': null,
           'attachment_key': null,
         },
         {
           'id': 4,
-          'title': 'Conferencia sobre Inteligencia Artificial',
+          'title':
+              'Conferencia sobre Inteligencia Artificial en el Auditorio de la Universidad',
           'content':
               'Conferencia magistral sobre los avances en IA. No faltes!',
           'category': 'Eventos',
           'author_name': 'Academia de Sistemas',
-          'created_at':
-              DateTime.now().subtract(Duration(days: 1)).toIso8601String(),
+          'created_at': '2023-10-15T14:30:00.000Z',
           'has_attachment': false,
           'attachment_url': null,
           'attachment_key': null,
@@ -167,8 +164,7 @@ class ApiService {
               'Informamos sobre los cambios en el plan de estudios para el siguiente semestre.',
           'category': 'Materias',
           'author_name': 'Dirección Académica',
-          'created_at':
-              DateTime.now().subtract(Duration(hours: 12)).toIso8601String(),
+          'created_at': '2023-10-15T14:30:00.000Z',
           'has_attachment': true,
           'attachment_url': 'https://example.com/mock-curriculum.pdf',
           'attachment_key': 'mock-curriculum-key',
@@ -180,11 +176,11 @@ class ApiService {
               'Inscríbete al taller de desarrollo web con React y Flutter.',
           'category': 'Comunidad',
           'author_name': 'Club de Programación',
-          'created_at':
-              DateTime.now().subtract(Duration(hours: 6)).toIso8601String(),
-          'has_attachment': false,
-          'attachment_url': null,
-          'attachment_key': null,
+          'created_at': '2023-10-15T14:30:00.000Z',
+          'has_attachment': true,
+          'attachment_url':
+              "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSdSYD20ZhA_YJ_ijTDssLT1Z-MtyGlMhQe5A&s",
+          'attachment_key': "anuel-picture-lmao",
         },
       ],
       'pagination': {

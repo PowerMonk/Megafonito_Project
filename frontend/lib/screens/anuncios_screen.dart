@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import '../widgets/notice_card.dart';
 import '../services/notices_service.dart';
-import '../services/api_service.dart';
-import '../widgets/notices_filter.dart'; // Keep this for now, will refactor later
-import '../widgets/notice_tags.dart';
-import 'crear_anuncio_screen.dart'; // Will refactor later
+import '../widgets/notice_card.dart';
+import '../widgets/notice_detail.dart';
+import '../widgets/notices_filter.dart'; // Add this import
+import 'crear_anuncio_screen.dart';
 import 'support_screen.dart';
 import 'contact_screen.dart';
 import 'school_processes_screen.dart';
@@ -28,11 +27,7 @@ class AnunciosScreen extends StatefulWidget {
 
 class _AnunciosScreenState extends State<AnunciosScreen>
     with SingleTickerProviderStateMixin {
-  bool _isMenuOpen = false;
-  late AnimationController _controller;
-  late Animation<double> _animation;
   List<Map<String, dynamic>> _anuncios = [];
-  Set<int> _expandedIndices = {};
   String? _selectedCategory;
   String? _selectedSortOption;
   int _currentIndex = 0;
@@ -50,27 +45,22 @@ class _AnunciosScreenState extends State<AnunciosScreen>
     'Soporte Megafonito',
   ];
 
+  final List<Widget> _screens = [
+    ContactosEscolaresScreen(),
+    BeneficiosScreen(),
+    ProcesosEscolaresScreen(),
+    SoporteMegafonitoScreen(),
+  ];
+
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 300),
-      vsync: this,
-    );
-    _animation = Tween<double>(begin: 0, end: 1).animate(_controller);
-
-    // Load notices when the screen initializes
     _loadNotices();
   }
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
+  // --- Data Loading ---
   Future<void> _loadNotices({bool refresh = false}) async {
-    if (_isLoading) return;
+    if (_isLoading && !refresh) return;
 
     setState(() {
       _isLoading = true;
@@ -86,65 +76,55 @@ class _AnunciosScreenState extends State<AnunciosScreen>
         page: _currentPage,
         limit: 5,
         category: _selectedCategory,
-        hasFiles: _selectedSortOption == 'Con archivos' ? true : null,
       );
-
-      print('API Response: $result');
-      print('Data type: ${result['data'].runtimeType}');
-      print('Pagination: ${result['pagination']}');
 
       final List<dynamic> notices = result['data'];
       final pagination = result['pagination'];
-      final totalPages = pagination['totalPages'];
 
       setState(() {
-        // Convert API response to match our local format
-        _anuncios.addAll(notices
-            .map((notice) => {
-                  'titulo': notice['title'],
-                  'texto': notice['content'],
-                  'categoria': notice['category'] ?? 'Materias',
-                  'tieneArchivos': notice['has_file'] == 1,
-                  // Null-safe version
-                  'fecha': notice['created_at'] != null
-                      ? DateTime.tryParse(notice['created_at'])
-                      : DateTime.now(),
-                })
-            .toList());
+        _anuncios.addAll(notices.map((notice) {
+          bool hasAttachment = false;
+          if (notice['has_attachment'] is bool) {
+            hasAttachment = notice['has_attachment'];
+          } else if (notice['has_attachment'] is int) {
+            hasAttachment = notice['has_attachment'] == 1;
+          }
 
-// VERSION ORIGINAL
-        // _hasMoreData = pagination['currentPage'] < pagination['totalPages'];
-        // _currentPage++;
+          return {
+            'id': notice['id'],
+            'title': notice['title'] ?? 'Sin Título',
+            'content': notice['content'] ?? '',
+            'category': notice['category'] ?? 'General',
+            'author_name': notice['author_name'] ?? 'Autor Desconocido',
+            'created_at': notice['created_at'] != null
+                ? DateTime.tryParse(notice['created_at']) ?? DateTime.now()
+                : DateTime.now(),
+            'has_attachment': hasAttachment,
+            'attachment_url': notice['attachment_url'],
+            'attachment_key': notice['attachment_key'],
+          };
+        }).toList());
 
-        // DS Version
-        final currentPage = pagination['currentPage'] as int? ?? 1;
-        final totalPages = pagination['totalPages'] as int? ?? 1;
+        final int currentPage = pagination['currentPage'] as int? ?? 1;
+        final int totalPages = pagination['totalPages'] as int? ?? 1;
         _hasMoreData = currentPage < totalPages;
 
-        _currentPage++;
-
-        // null-safe version
-        // _hasMoreData = pagination != null &&
-        //     pagination['currentPage'] != null &&
-        //     pagination['totalPages'] != null &&
-        //     (pagination['currentPage'] as num) <
-        //         (pagination['totalPages'] as num);
+        if (_hasMoreData) {
+          _currentPage++;
+        }
 
         _isLoading = false;
       });
-
-      if (_selectedSortOption == 'Más recientes' ||
-          _selectedSortOption == 'Más antiguos') {
-        _anuncios = NoticesService.sortNotices(_anuncios, _selectedSortOption);
-      }
     } catch (e) {
       print('Error loading notices: $e');
       setState(() {
         _isLoading = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al cargar anuncios: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al cargar anuncios: ${e.toString()}')),
+        );
+      }
     }
   }
 
@@ -152,26 +132,7 @@ class _AnunciosScreenState extends State<AnunciosScreen>
     _loadNotices(refresh: true);
   }
 
-  void _toggleExpansion(int index) {
-    setState(() {
-      if (_expandedIndices.contains(index)) {
-        _expandedIndices.remove(index);
-      } else {
-        _expandedIndices.add(index);
-      }
-      if (_isMenuOpen) {
-        _toggleMenu();
-      }
-    });
-  }
-
-  void _toggleMenu() {
-    setState(() {
-      _isMenuOpen = !_isMenuOpen;
-      _isMenuOpen ? _controller.forward() : _controller.reverse();
-    });
-  }
-
+  // --- Navigation ---
   void _navigateToUserInfo() {
     Navigator.push(
       context,
@@ -181,11 +142,7 @@ class _AnunciosScreenState extends State<AnunciosScreen>
           email: widget.userEmail,
         ),
       ),
-    ).then((_) {
-      if (_isMenuOpen) {
-        _toggleMenu();
-      }
-    });
+    );
   }
 
   void _navigateToCrearNuevoAnuncio() {
@@ -206,17 +163,22 @@ class _AnunciosScreenState extends State<AnunciosScreen>
                 fileKey: fileKey,
               );
 
-              // Refresh the notices list after creating a new one
               _loadNotices(refresh: true);
 
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Anuncio creado con éxito')),
-              );
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Anuncio creado con éxito')),
+                );
+              }
             } catch (e) {
               print('Error creating announcement: $e');
-              // ScaffoldMessenger.of(context).showSnackBar(
-              //   SnackBar(content: Text('Error al crear el anuncio: $e')),
-              // );
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                      content:
+                          Text('Error al crear el anuncio: ${e.toString()}')),
+                );
+              }
             }
           },
         ),
@@ -224,75 +186,66 @@ class _AnunciosScreenState extends State<AnunciosScreen>
     );
   }
 
+  // --- UI Building ---
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFF5F5F7),
       appBar: AppBar(
         title: Text(_screenTitles[_currentIndex],
             style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.black,
+        iconTheme: IconThemeData(color: Colors.white),
         actions: [
           IconButton(
-              onPressed: () => _navigateToUserInfo(),
+              onPressed: _navigateToUserInfo,
               icon: Icon(Icons.account_circle_outlined)),
         ],
       ),
-      body: _currentIndex == 0
-          ? _buildAnunciosContent() // Dynamically build announcements when selected
-          : IndexedStack(
-              index: _currentIndex - 1, // Adjust index
-              children: [
-                ContactosEscolaresScreen(),
-                BeneficiosScreen(),
-                ProcesosEscolaresScreen(),
-                SoporteMegafonitoScreen(),
-              ],
-            ),
+      body: _buildBody(),
       floatingActionButton: _currentIndex == 0 && widget.isSuperUser
           ? FloatingActionButton(
               onPressed: _navigateToCrearNuevoAnuncio,
               backgroundColor: Color(0xFFFCA311),
-              child: Icon(Icons.add, color: Colors.black),
+              foregroundColor: Colors.black,
+              child: Icon(Icons.add),
+              tooltip: 'Crear Anuncio',
             )
           : null,
-      // Navbar
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         backgroundColor: Colors.black,
         selectedItemColor: Color(0xFFFCA311),
         unselectedItemColor: Colors.white,
         type: BottomNavigationBarType.fixed,
-
-        // Force equal spacing
         showUnselectedLabels: true,
-
-        // Fix icon alignment
         iconSize: 24.0,
-
-        // Add some padding adjustments
-        selectedLabelStyle:
-            TextStyle(height: 1.5, fontSize: 12.0, letterSpacing: -0.2),
-        unselectedLabelStyle:
-            TextStyle(height: 1.5, fontSize: 12.0, letterSpacing: -0.2),
-        items: [
+        selectedLabelStyle: TextStyle(fontSize: 12.0, letterSpacing: -0.2),
+        unselectedLabelStyle: TextStyle(fontSize: 12.0, letterSpacing: -0.2),
+        items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home_outlined),
+            activeIcon: Icon(Icons.home),
             label: 'Inicio',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_search_outlined),
+            activeIcon: Icon(Icons.person_search),
             label: 'Contactos',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.star_border_outlined),
+            activeIcon: Icon(Icons.star),
             label: 'Oportunidades',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.school_outlined),
+            activeIcon: Icon(Icons.school),
             label: 'Procesos',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.campaign_outlined),
+            activeIcon: Icon(Icons.campaign),
             label: 'Soporte',
           ),
         ],
@@ -305,116 +258,50 @@ class _AnunciosScreenState extends State<AnunciosScreen>
     );
   }
 
-  Widget _buildAnunciosContent() {
-    return Container(
-      // color: Color(0xFFE5E5E5),
-      color: Colors.white,
-      child: Column(
+  Widget _buildBody() {
+    if (_currentIndex == 0) {
+      // Return a Column with both the filter and NoticesContent
+      return Column(
         children: [
+          // Add the filters at the top
           NoticesFilter(
             onCategorySelected: (category) {
               setState(() {
-                _selectedCategory = category;
+                _selectedCategory = category.isEmpty ? null : category;
               });
               _filterAnuncios();
             },
             onSortOptionSelected: (sortOption) {
               setState(() {
-                _selectedSortOption = sortOption;
+                _selectedSortOption = sortOption.isEmpty ? null : sortOption;
               });
               _filterAnuncios();
             },
           ),
+
+          // NoticesContent fills the remaining space
           Expanded(
-            child: _isLoading && _anuncios.isEmpty
-                ? Center(child: CircularProgressIndicator())
-                : _anuncios.isEmpty
-                    ? Center(child: Text('No hay anuncios disponibles'))
-                    : RefreshIndicator(
-                        onRefresh: () => _loadNotices(refresh: true),
-                        child: ListView(
-                          padding: EdgeInsets.all(16.0),
-                          children: [
-                            ..._anuncios.asMap().entries.map((entry) {
-                              int index = entry.key;
-                              Map<String, dynamic> anuncio = entry.value;
-                              bool isExpanded =
-                                  _expandedIndices.contains(index);
-
-                              return NoticeCard(
-                                notice: anuncio,
-                                isExpanded: isExpanded,
-                                onTap: () => _toggleExpansion(index),
-                              );
-                            }).toList(),
-
-                            // Loading more indicator
-                            if (_isLoading)
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child:
-                                    Center(child: CircularProgressIndicator()),
-                              ),
-
-                            // Load more button
-                            if (!_isLoading && _hasMoreData)
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Center(
-                                  child: ElevatedButton(
-                                    onPressed: _loadNotices,
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Color(0xFFFCA311),
-                                      foregroundColor: Colors.black,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(15),
-                                      ),
-                                    ),
-                                    child: Text('Cargar más anuncios'),
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMenuOption(IconData icon, String label) {
-    return AnimatedContainer(
-      duration: Duration(milliseconds: 200),
-      margin: EdgeInsets.symmetric(vertical: 5),
-      padding: EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(25),
-        border: Border.all(color: Colors.black),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black26,
-            blurRadius: 5,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, color: Colors.black, size: 20),
-          SizedBox(width: 8),
-          Text(
-            label,
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
+            child: NoticesContent(
+              anuncios: _anuncios,
+              hasMoreData: _hasMoreData,
+              isLoading: _isLoading,
+              onNoticeTap: (anuncio) => NoticeDetail.show(context, anuncio),
+              onRefresh: () => _loadNotices(refresh: true),
+              onLoadMore: _loadNotices,
             ),
           ),
         ],
-      ),
-    );
+      );
+    } else {
+      int stackIndex = _currentIndex - 1;
+      if (stackIndex >= 0 && stackIndex < _screens.length) {
+        return IndexedStack(
+          index: stackIndex,
+          children: _screens,
+        );
+      } else {
+        return Center(child: Text("Pantalla no encontrada"));
+      }
+    }
   }
 }
