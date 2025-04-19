@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:convert';
 
-class BeneficiosScreen extends StatefulWidget {
+class OpportunitiesScreen extends StatefulWidget {
   @override
   _BeneficiosScreenState createState() => _BeneficiosScreenState();
 }
 
-class _BeneficiosScreenState extends State<BeneficiosScreen> {
+class _BeneficiosScreenState extends State<OpportunitiesScreen> {
   bool _isGridView = true;
   List<Map<String, String>> careerLogos = [];
 
