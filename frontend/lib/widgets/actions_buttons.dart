@@ -37,7 +37,7 @@ class ActionButtons extends StatelessWidget {
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 3.0, sigmaY: 3.0),
               child: Container(
-                color: Colors.black.withOpacity(0.25), // Semi-transparent black
+                color: Colors.black.withOpacity(0.6), // Semi-transparent black
               ),
             ),
           ),
@@ -62,7 +62,7 @@ class ActionButtons extends StatelessWidget {
                       child: Text(
                         'Nuevo mensaje',
                         style: TextStyle(
-                          color: Colors.black,
+                          color: Colors.white,
                           fontWeight: FontWeight.w500,
                           fontSize: 14,
                         ),
@@ -100,7 +100,7 @@ class ActionButtons extends StatelessWidget {
                       child: Text(
                         'Anuncio nuevo',
                         style: TextStyle(
-                          color: Colors.black,
+                          color: Colors.white,
                           fontWeight: FontWeight.w500,
                           fontSize: 14,
                         ),
