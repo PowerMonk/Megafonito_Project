@@ -244,8 +244,15 @@ class _AnunciosScreenState extends State<AnunciosScreen>
         iconTheme: IconThemeData(color: Colors.white),
         actions: [
           IconButton(
-              onPressed: _navigateToUserInfo,
-              icon: Icon(Icons.account_circle_outlined)),
+            onPressed: _navigateToUserInfo,
+            icon: SvgPicture.asset(
+              'assets/icons/cuenta_icon.svg',
+              height: 24.0,
+              width: 24.0,
+              colorFilter:
+                  const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+            ),
+          ),
         ],
       ),
       body: Stack(
