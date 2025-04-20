@@ -232,6 +232,12 @@ class _AnunciosScreenState extends State<AnunciosScreen>
     setState(() => _showExtraFabs = false);
   }
 
+  void _handleCreateOpportunity() {
+    // TODO: Implement action for "Nuevo Mensaje"
+    print("Oportunidad nueva tapped");
+    setState(() => _showExtraFabs = false);
+  }
+
   // --- UI Building ---
   @override
   Widget build(BuildContext context) {
@@ -268,6 +274,7 @@ class _AnunciosScreenState extends State<AnunciosScreen>
               onShowExtraFabs: _handleShowExtraFabs,
               onCreateNotice: _navigateToCrearNuevoAnuncio,
               onCreateMessage: _handleCreateMessage,
+              onCreateOpportunity: _handleCreateOpportunity,
               onDismissBlur: _handleDismissBlur,
             ),
         ],
