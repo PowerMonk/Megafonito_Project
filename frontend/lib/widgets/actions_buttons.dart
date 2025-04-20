@@ -8,6 +8,7 @@ class ActionButtons extends StatelessWidget {
   final VoidCallback onShowExtraFabs;
   final VoidCallback onCreateNotice;
   final VoidCallback onCreateMessage;
+  final VoidCallback onCreateOpportunity;
   final VoidCallback onDismissBlur;
 
   const ActionButtons({
@@ -17,6 +18,7 @@ class ActionButtons extends StatelessWidget {
     required this.onShowExtraFabs,
     required this.onCreateNotice,
     required this.onCreateMessage,
+    required this.onCreateOpportunity,
     required this.onDismissBlur,
   }) : super(key: key);
 
@@ -51,6 +53,43 @@ class ActionButtons extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
+                // Third option: Oportunidad nueva
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Text Label
+                    Padding(
+                      padding: const EdgeInsets.only(right: 12.0),
+                      child: Text(
+                        'Oportunidad nueva',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                    // Circular Button
+                    FloatingActionButton(
+                      onPressed: onCreateOpportunity,
+                      backgroundColor: Colors.white,
+                      heroTag: 'extraFab2',
+                      tooltip: 'Crear Nueva Oportunidad',
+                      elevation: 4.0,
+                      mini: false,
+                      shape: CircleBorder(),
+                      child: SvgPicture.asset(
+                        'assets/icons/newopp_icon.svg',
+                        height: 35.0,
+                        width: 35.0,
+                        colorFilter: ColorFilter.mode(
+                            Color(0xFFFCA311), BlendMode.srcIn),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 20.0),
                 // Second Option: Nuevo Mensaje
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
