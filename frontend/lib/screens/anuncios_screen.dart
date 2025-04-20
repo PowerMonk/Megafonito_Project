@@ -53,7 +53,11 @@ class _AnunciosScreenState extends State<AnunciosScreen>
     ContactosEscolaresScreen(),
     OpportunitiesScreen(),
     ProcesosEscolaresScreen(),
-    SoporteMegafonitoScreen(),
+    UserInfoScreen(
+      name: "OnsaDev",
+      email: "OnsaDev@mgf.com",
+    )
+    // SoporteMegafonitoScreen(),
   ];
 
   bool _showExtraFabs = false; // State for extra buttons visibility
@@ -139,15 +143,10 @@ class _AnunciosScreenState extends State<AnunciosScreen>
   }
 
   // --- Navigation ---
-  void _navigateToUserInfo() {
+  void _navigateToSupport() {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => UserInfoScreen(
-          name: widget.userName,
-          email: widget.userEmail,
-        ),
-      ),
+      MaterialPageRoute(builder: (context) => SoporteMegafonitoScreen()),
     );
   }
 
@@ -250,9 +249,9 @@ class _AnunciosScreenState extends State<AnunciosScreen>
         iconTheme: IconThemeData(color: Colors.white),
         actions: [
           IconButton(
-            onPressed: _navigateToUserInfo,
+            onPressed: _navigateToSupport,
             icon: SvgPicture.asset(
-              'assets/icons/cuenta_icon.svg',
+              'assets/icons/bug_icon.svg',
               height: 24.0,
               width: 24.0,
               colorFilter:

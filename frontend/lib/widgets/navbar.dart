@@ -42,13 +42,13 @@ class AppNavBar extends StatelessWidget {
         ),
         BottomNavigationBarItem(
           icon: SvgPicture.asset(
-            'assets/icons/contactos_icon.svg',
+            'assets/icons/contactov2_icon.svg',
             height: 24.0,
             width: 24.0,
             colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
           ),
           activeIcon: SvgPicture.asset(
-            'assets/icons/contactos_icon.svg',
+            'assets/icons/contactov2_icon.svg',
             height: 24.0,
             width: 24.0,
             colorFilter:
@@ -90,19 +90,19 @@ class AppNavBar extends StatelessWidget {
         ),
         BottomNavigationBarItem(
           icon: SvgPicture.asset(
-            'assets/icons/soporte_icon.svg',
+            'assets/icons/cuenta_icon.svg',
             height: 24.0,
             width: 24.0,
             colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
           ),
           activeIcon: SvgPicture.asset(
-            'assets/icons/soporte_icon.svg',
+            'assets/icons/cuenta_icon.svg',
             height: 24.0,
             width: 24.0,
             colorFilter:
                 const ColorFilter.mode(Color(0xFFFCA311), BlendMode.srcIn),
           ),
-          label: 'Soporte',
+          label: 'Cuenta',
         ),
       ],
       onTap: onTap,

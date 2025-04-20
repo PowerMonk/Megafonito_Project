@@ -12,25 +12,25 @@ class _ContactosEscolaresScreenState extends State<ContactosEscolaresScreen> {
       'name': 'Profesor Juan Pérez',
       'phone': '555-1234',
       'email': 'juan.perez@escuela.edu',
-      'website': 'www.escuela.edu/profesor-juan',
+      'location': 'Edificio A',
     },
     {
       'name': 'Administradora María López',
       'phone': '555-5678',
       'email': 'maria.lopez@escuela.edu',
-      'website': 'www.escuela.edu/administradora-maria',
+      'location': 'Edificio F',
     },
     {
       'name': 'Profesor Carlos García',
       'phone': '555-8765',
       'email': 'carlos.garcia@escuela.edu',
-      'website': 'www.escuela.edu/profesor-carlos',
+      'location': 'Edificio D',
     },
     {
       'name': 'Administrativa Ana Torres',
       'phone': '555-4321',
       'email': 'ana.torres@escuela.edu',
-      'website': 'www.escuela.edu/administrativa-ana',
+      'location': 'Edificio H',
     },
   ];
 
@@ -58,8 +58,26 @@ class _ContactosEscolaresScreenState extends State<ContactosEscolaresScreen> {
             },
             decoration: InputDecoration(
               labelText: 'Buscar por nombre',
-              border: OutlineInputBorder(),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(15.0),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(15.0),
+                borderSide: BorderSide(
+                  color: Colors.grey,
+                  width: 1.0,
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(15.0),
+                borderSide: BorderSide(
+                  color: Color(0xFF14213D), // Same blue as the commented AppBar
+                  width: 2.0,
+                ),
+              ),
               prefixIcon: Icon(Icons.search),
+              filled: true,
+              fillColor: Colors.grey[50],
             ),
           ),
           SizedBox(height: 10),
@@ -72,7 +90,7 @@ class _ContactosEscolaresScreenState extends State<ContactosEscolaresScreen> {
                         name: contacto['name']!,
                         phone: contacto['phone']!,
                         email: contacto['email']!,
-                        website: contacto['website']!,
+                        location: contacto['location']!,
                       ))
                   .toList(),
             ),
@@ -86,7 +104,7 @@ class _ContactosEscolaresScreenState extends State<ContactosEscolaresScreen> {
     required String name,
     required String phone,
     required String email,
-    required String website,
+    required String location,
   }) {
     return Card(
       color: Colors.white,
@@ -116,7 +134,7 @@ class _ContactosEscolaresScreenState extends State<ContactosEscolaresScreen> {
                 style: TextStyle(color: Colors.black)), // Gris oscuro
             Text('Correo: $email',
                 style: TextStyle(color: Colors.black)), // Gris oscuro
-            Text('Página Web: $website',
+            Text('Ubicación: $location',
                 style: TextStyle(color: Colors.black)), // Gris oscuro
           ],
         ),
