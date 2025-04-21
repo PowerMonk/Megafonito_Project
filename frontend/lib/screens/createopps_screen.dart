@@ -3,23 +3,22 @@ import 'package:file_picker/file_picker.dart';
 import 'dart:io';
 import '../services/storage_service.dart';
 
-// Random comment for pipeline testing
+class CrearNuevaOportunidadScreen extends StatefulWidget {
+  final Function(String, String, Color, String, bool, String?, String?)?
+      onOportunidadCreada;
 
-class CrearNuevoAnuncioScreen extends StatefulWidget {
-  final Function(String, String, Color, String, bool, String?, String?)
-      onAnuncioCreado;
-
-  CrearNuevoAnuncioScreen({required this.onAnuncioCreado});
+  CrearNuevaOportunidadScreen({this.onOportunidadCreada});
 
   @override
-  _CrearNuevoAnuncioScreenState createState() =>
-      _CrearNuevoAnuncioScreenState();
+  _CrearNuevaOportunidadScreenState createState() =>
+      _CrearNuevaOportunidadScreenState();
 }
 
-class _CrearNuevoAnuncioScreenState extends State<CrearNuevoAnuncioScreen> {
+class _CrearNuevaOportunidadScreenState
+    extends State<CrearNuevaOportunidadScreen> {
   final TextEditingController _tituloController = TextEditingController();
   final TextEditingController _textoController = TextEditingController();
-  String _categoriaSeleccionada = 'Materias';
+  String _categoriaSeleccionada = 'Becas';
   String _grupoSeleccionado = 'Ingeniería en Sistemas Computacionales';
   bool _tieneArchivos = false;
   bool _isUploading = false;
@@ -27,14 +26,11 @@ class _CrearNuevoAnuncioScreenState extends State<CrearNuevoAnuncioScreen> {
   // Store uploaded file details
   List<Map<String, String?>> _archivosAdjuntos = [];
 
-  // Lista de categorías (misma que en NoticesFilter)
+  // Lista de categorías para oportunidades
   final List<String> _categorias = [
-    'Materias',
-    'Convocatorias',
-    'Eventos',
-    'Deportivos',
-    'Culturales',
-    'Comunidad',
+    'Becas',
+    'Cursos y Certificaciones',
+    'Bolsa de trabajo',
   ];
 
   // Lista de grupos académicos
@@ -44,22 +40,26 @@ class _CrearNuevoAnuncioScreenState extends State<CrearNuevoAnuncioScreen> {
     'Ingeniería Electrónica',
   ];
 
-  void _crearAnuncio() {
+  void _crearOportunidad() {
     final String titulo = _tituloController.text;
     final String texto = _textoController.text;
     final Color color = Color(0xFFFFFFFF); // Color blanco por defecto
 
     if (titulo.isNotEmpty && texto.isNotEmpty) {
-      widget.onAnuncioCreado(
-          titulo,
-          texto,
-          color,
-          _categoriaSeleccionada,
-          _tieneArchivos,
-          _archivosAdjuntos.isNotEmpty ? _archivosAdjuntos[0]['fileUrl'] : null,
-          _archivosAdjuntos.isNotEmpty
-              ? _archivosAdjuntos[0]['fileKey']
-              : null);
+      if (widget.onOportunidadCreada != null) {
+        widget.onOportunidadCreada!(
+            titulo,
+            texto,
+            color,
+            _categoriaSeleccionada,
+            _tieneArchivos,
+            _archivosAdjuntos.isNotEmpty
+                ? _archivosAdjuntos[0]['fileUrl']
+                : null,
+            _archivosAdjuntos.isNotEmpty
+                ? _archivosAdjuntos[0]['fileKey']
+                : null);
+      }
       Navigator.pop(context);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -121,14 +121,6 @@ class _CrearNuevoAnuncioScreenState extends State<CrearNuevoAnuncioScreen> {
               },
             ),
             ListTile(
-              leading: Icon(Icons.poll),
-              title: Text('Agregar encuesta'),
-              onTap: () {
-                Navigator.pop(context);
-                // Implementar la lógica para agregar una encuesta
-              },
-            ),
-            ListTile(
               leading: Icon(Icons.delete_sweep),
               title: Text('Eliminar archivos adjuntos'),
               onTap: () {
@@ -139,87 +131,21 @@ class _CrearNuevoAnuncioScreenState extends State<CrearNuevoAnuncioScreen> {
                 });
               },
             ),
-            ListTile(
-              leading: Icon(Icons.save),
-              title: Text('Guardar borrador'),
-              onTap: () {
-                Navigator.pop(context);
-                // Implementar la lógica para guardar el borrador
-              },
-            ),
           ],
         );
       },
     );
   }
 
-  // void _mostrarMenuOpciones(BuildContext context) {
-  //   showMenu(
-  //     context: context,
-  //     position: RelativeRect.fromLTRB(MediaQuery.of(context).size.width - 100,
-  //         56, 10, 0), // Ajusta la posición según sea necesario
-  //     items: [
-  //       PopupMenuItem(
-  //         value: 'programar_envio',
-  //         child: ListTile(
-  //           leading: Icon(Icons.schedule_outlined),
-  //           contentPadding: EdgeInsetsDirectional.only(start: 5),
-  //           title: Text('Programar envío'),
-  //         ),
-  //       ),
-  //       PopupMenuItem(
-  //         value: 'agregar_encuesta',
-  //         child: ListTile(
-  //           leading: Icon(Icons.poll_outlined),
-  //           contentPadding: EdgeInsetsDirectional.only(start: 5),
-  //           title: Text('Agregar encuesta'),
-  //         ),
-  //       ),
-  //       PopupMenuItem(
-  //         value: 'eliminar_archivos',
-  //         child: ListTile(
-  //           leading: Icon(Icons.delete_sweep_outlined),
-  //           contentPadding: EdgeInsetsDirectional.only(start: 5),
-  //           title: Text('Eliminar archivos adjuntos'),
-  //         ),
-  //       ),
-  //       PopupMenuItem(
-  //         value: 'guardar_borrador',
-  //         child: ListTile(
-  //           leading: Icon(Icons.save_outlined),
-  //           contentPadding: EdgeInsetsDirectional.only(start: 5),
-  //           title: Text('Guardar borrador'),
-  //         ),
-  //       ),
-  //     ],
-  //   ).then((value) {
-  //     if (value != null) {
-  //       switch (value) {
-  //         case 'programar_envio':
-  //           // Implementar la lógica para programar el envío
-  //           break;
-  //         case 'agregar_encuesta':
-  //           // Implementar la lógica para agregar una encuesta
-  //           break;
-  //         case 'eliminar_archivos':
-  //           setState(() {
-  //             _archivosAdjuntos.clear();
-  //             _tieneArchivos = false;
-  //           });
-  //           break;
-  //         case 'guardar_borrador':
-  //           // Implementar la lógica para guardar el borrador
-  //           break;
-  //       }
-  //     }
-  //   });
-  // }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: null,
+        title: Text(
+          "Crea una oportunidad",
+          style: TextStyle(
+              fontSize: 18, color: Colors.black, fontWeight: FontWeight.w600),
+        ),
         backgroundColor: Color.fromARGB(255, 250, 250, 250),
         elevation: 0,
         leading: IconButton(
@@ -233,7 +159,7 @@ class _CrearNuevoAnuncioScreenState extends State<CrearNuevoAnuncioScreen> {
           ),
           IconButton(
             icon: Icon(Icons.send, color: Colors.black),
-            onPressed: _crearAnuncio,
+            onPressed: _crearOportunidad,
           ),
           IconButton(
             icon: Icon(Icons.more_vert, color: Colors.black),
@@ -260,9 +186,9 @@ class _CrearNuevoAnuncioScreenState extends State<CrearNuevoAnuncioScreen> {
                           Text(
                             "Autor: ",
                             style: TextStyle(
-                                fontWeight: FontWeight.bold,
+                                fontWeight: FontWeight.w700,
                                 color: Colors.black,
-                                fontSize: 18.0),
+                                fontSize: 16.0),
                           ),
                           Expanded(
                             child: Text(
@@ -281,7 +207,7 @@ class _CrearNuevoAnuncioScreenState extends State<CrearNuevoAnuncioScreen> {
                           Text(
                             "Para: ",
                             style: TextStyle(
-                                fontWeight: FontWeight.bold,
+                                fontWeight: FontWeight.w700,
                                 color: Colors.black,
                                 fontSize: 16),
                           ),
@@ -319,7 +245,7 @@ class _CrearNuevoAnuncioScreenState extends State<CrearNuevoAnuncioScreen> {
                           Text(
                             "Título: ",
                             style: TextStyle(
-                                fontWeight: FontWeight.bold,
+                                fontWeight: FontWeight.w700,
                                 color: Colors.black,
                                 fontSize: 16),
                           ),
@@ -330,7 +256,7 @@ class _CrearNuevoAnuncioScreenState extends State<CrearNuevoAnuncioScreen> {
                                 border: InputBorder.none,
                                 hintText: "Escribe un título",
                                 hintStyle: TextStyle(
-                                    color: Colors.grey, fontSize: 15.0),
+                                    color: Colors.grey, fontSize: 14.0),
                               ),
                               style: TextStyle(
                                   color: Colors.black, fontSize: 14.5),
@@ -344,7 +270,7 @@ class _CrearNuevoAnuncioScreenState extends State<CrearNuevoAnuncioScreen> {
                           Text(
                             "Categoría: ",
                             style: TextStyle(
-                                fontWeight: FontWeight.bold,
+                                fontWeight: FontWeight.w700,
                                 color: Colors.black,
                                 fontSize: 16),
                           ),
@@ -363,7 +289,7 @@ class _CrearNuevoAnuncioScreenState extends State<CrearNuevoAnuncioScreen> {
                                     category,
                                     style: TextStyle(
                                         color: Colors.black,
-                                        fontSize: 14.5,
+                                        fontSize: 14.0,
                                         fontWeight: FontWeight.normal),
                                   ),
                                 );
@@ -380,7 +306,7 @@ class _CrearNuevoAnuncioScreenState extends State<CrearNuevoAnuncioScreen> {
                       TextField(
                         controller: _textoController,
                         decoration: InputDecoration(
-                          hintText: "Redactar un anuncio",
+                          hintText: "Describe la oportunidad",
                           hintStyle:
                               TextStyle(color: Colors.grey, fontSize: 14.0),
                           border: InputBorder.none,
