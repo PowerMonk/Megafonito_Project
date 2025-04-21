@@ -19,7 +19,7 @@ class SoporteMegafonitoScreen extends StatelessWidget {
       // --- Body ---
       // Usamos un Container con color de fondo blanco.
       body: Container(
-        color: Colors.white,
+        color: Color.fromARGB(255, 250, 250, 250),
         // Para que el contenido ocupe todo el espacio vertical disponible,
         // el widget hijo directo del Scaffold (o del Container si es el hijo del Scaffold)
         // debe ser un widget que pueda expandirse, como Column o ListView

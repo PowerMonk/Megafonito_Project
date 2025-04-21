@@ -241,7 +241,7 @@ class _AnunciosScreenState extends State<AnunciosScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF5F5F7),
+      backgroundColor: const Color.fromARGB(255, 250, 250, 250),
       appBar: AppBar(
         title: Text(_screenTitles[_currentIndex],
             style: TextStyle(color: Colors.white)),
