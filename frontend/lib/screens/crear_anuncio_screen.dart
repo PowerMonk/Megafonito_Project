@@ -220,7 +220,7 @@ class _CrearNuevoAnuncioScreenState extends State<CrearNuevoAnuncioScreen> {
     return Scaffold(
       appBar: AppBar(
         title: null,
-        backgroundColor: Colors.white,
+        backgroundColor: Color.fromARGB(255, 250, 250, 250),
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black),
@@ -249,7 +249,7 @@ class _CrearNuevoAnuncioScreenState extends State<CrearNuevoAnuncioScreen> {
                 minHeight: viewportConstraints.maxHeight,
               ),
               child: Container(
-                color: Colors.white,
+                color: Color.fromARGB(255, 245, 245, 245),
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 16.0),
                   child: Column(

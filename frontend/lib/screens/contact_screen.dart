@@ -46,7 +46,7 @@ class _ContactosEscolaresScreenState extends State<ContactosEscolaresScreen> {
     //   ),
     // Return just the content without Scaffold or AppBar
     return Container(
-      color: Colors.white,
+      color: Color.fromARGB(255, 250, 250, 250),
       padding: EdgeInsets.all(16.0),
       child: Column(
         children: [

@@ -100,8 +100,8 @@ class _BeneficiosScreenState extends State<OpportunitiesScreen> {
   Widget build(BuildContext context) {
     // Sobrescribe el método 'build()' que describe la parte de la interfaz de usuario representada por este widget.
     return Container(
-      color:
-          Colors.white, // Establece el color de fondo del contenedor a blanco.
+      color: Color.fromARGB(255, 250, 250,
+          250), // Establece el color de fondo del contenedor a blanco.
       padding: const EdgeInsets.all(
           16.0), // Añade un padding de 16 píxeles en todos los lados del contenedor.
       child: Column(
