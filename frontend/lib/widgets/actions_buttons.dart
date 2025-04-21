@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:ui'; // For ImageFilter
+import '../screens/createopps_screen.dart'; // Add this import
+import '../screens/newmsg_screen.dart'; // Add this import
 
 class ActionButtons extends StatelessWidget {
   final bool isSuperUser;
@@ -72,7 +74,17 @@ class ActionButtons extends StatelessWidget {
                     ),
                     // Circular Button
                     FloatingActionButton(
-                      onPressed: onCreateOpportunity,
+                      onPressed: () {
+                        // Close the menu
+                        onDismissBlur();
+                        // Navigate to the create opportunity screen
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => CrearNuevaOportunidadScreen(),
+                          ),
+                        );
+                      },
                       backgroundColor: Colors.white,
                       heroTag: 'extraFab2',
                       tooltip: 'Crear Nueva Oportunidad',
@@ -109,7 +121,17 @@ class ActionButtons extends StatelessWidget {
                     ),
                     // Circular Button
                     FloatingActionButton(
-                      onPressed: onCreateMessage,
+                      onPressed: () {
+                        // Close the menu
+                        onDismissBlur();
+                        // Navigate to the new message screen
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => NuevoMensajeScreen(),
+                          ),
+                        );
+                      },
                       backgroundColor: Colors.white,
                       heroTag: 'extraFab2',
                       tooltip: 'Crear Nuevo Mensaje',

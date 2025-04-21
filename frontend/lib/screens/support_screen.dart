@@ -93,7 +93,7 @@ class SoporteMegafonitoScreen extends StatelessWidget {
                       child: Text(
                         '¿Prefieres escribirnos directamente?',
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 18,
                           fontWeight: FontWeight.bold, // Texto en negrita.
                           color: Colors.black,
                         ),
