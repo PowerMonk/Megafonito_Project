@@ -153,84 +153,97 @@ class _BeneficiosScreenState extends State<OpportunitiesScreen> {
           .length, // El número de elementos en la lista es igual al número de logos cargados.
       itemBuilder: (context, index) {
         // Función que se llama para construir cada elemento de la lista. 'index' es la posición del elemento actual.
-        return InkWell(
-          // Un widget que hace que su hijo sea receptivo a los toques y añade efectos visuales.
-          // Make the entire row clickable (Comentario que indica que toda la fila será clickeable).
-          onTap: () {
-            // Define la acción que ocurre cuando se toca el elemento.
-            // Navigate to detail screen with the selected title (Comentario que indica la navegación a la pantalla de detalles).
-            Navigator.push(
-              // Navega a una nueva ruta en la pila de navegadores.
-              context,
-              MaterialPageRoute(
-                // Crea una ruta que construye un widget.
-                builder: (context) => OpportunityContentScreen(
-                  // El widget a construir es 'OpportunityContentScreen'.
-                  title: careerLogos[index]['title']!,
-                  // Pasa el título de la categoría seleccionada a la pantalla de detalles.
-                ),
-              ),
-            );
-          },
-          child: Padding(
-            // Añade un padding alrededor de la fila para espaciamiento visual.
-            padding: const EdgeInsets.only(bottom: 16.0),
-            child: Row(
-              // Organiza los widgets hijos horizontalmente.
-              crossAxisAlignment: CrossAxisAlignment
-                  .center, // Alinea los hijos verticalmente al centro.
-              children: [
-                Container(
-                  // Contenedor para el logo de la carrera.
-                  width: containerSize,
-                  height: containerSize,
-                  decoration: BoxDecoration(
-                    // Define la decoración del contenedor (borde y radio de las esquinas).
-                    border: Border.all(
-                        color: const Color.fromARGB(255, 218, 215, 215)),
-                    borderRadius: BorderRadius.circular(15),
+        return Column(
+          // <<--- 1. Envolvemos el contenido en una Columna
+          children: [
+            InkWell(
+              // Un widget que hace que su hijo sea receptivo a los toques y añade efectos visuales.
+              onTap: () {
+                // Define la acción que ocurre cuando se toca el elemento.
+                Navigator.push(
+                  // Navega a una nueva ruta en la pila de navegadores.
+                  context,
+                  MaterialPageRoute(
+                    // Crea una ruta que construye un widget.
+                    builder: (context) => OpportunityContentScreen(
+                      // El widget a construir es 'OpportunityContentScreen'.
+                      title: careerLogos[index]['title']!,
+                      // Pasa el título de la categoría seleccionada a la pantalla de detalles.
+                    ),
                   ),
-                  child: ClipRRect(
-                    // Recorta su hijo usando un rectángulo redondeado.
-                    borderRadius: BorderRadius.circular(14),
-                    child: Padding(
-                      // Añade un padding interno al widget 'Image.asset'.
-                      padding: const EdgeInsets.all(innerPadding),
-                      child: Image.asset(
-                        // Widget para mostrar una imagen desde los assets.
-                        careerLogos[index]['image']!,
-                        fit: BoxFit
-                            .contain, // Ajusta la imagen dentro del contenedor manteniendo su relación de aspecto.
-                        errorBuilder: (context, error, stackTrace) {
-                          // Función que se llama si ocurre un error al cargar la imagen.
-                          print(
-                              "Error cargando imagen: ${careerLogos[index]['image']!} - $error");
-                          return Icon(Icons.image_not_supported,
-                              color: Colors.grey);
-                          // Muestra un icono de imagen no soportada en caso de error.
-                        },
+                );
+              },
+              child: Padding(
+                // Añade un padding alrededor de la fila para espaciamiento visual.
+                // Ajustamos el padding vertical para dar espacio antes del Divider
+                padding: const EdgeInsets.symmetric(vertical: 12.0),
+                child: Row(
+                  // Organiza los widgets hijos horizontalmente.
+                  crossAxisAlignment: CrossAxisAlignment
+                      .center, // Alinea los hijos verticalmente al centro.
+                  children: [
+                    Container(
+                      // Contenedor para el logo de la carrera.
+                      width: containerSize,
+                      height: containerSize,
+                      decoration: BoxDecoration(
+                        // Define la decoración del contenedor (borde y radio de las esquinas).
+                        border: Border.all(
+                            color: const Color.fromARGB(255, 218, 215, 215)),
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: ClipRRect(
+                        // Recorta su hijo usando un rectángulo redondeado.
+                        borderRadius: BorderRadius.circular(14),
+                        child: Padding(
+                          // Añade un padding interno al widget 'Image.asset'.
+                          padding: const EdgeInsets.all(innerPadding),
+                          child: Image.asset(
+                            // Widget para mostrar una imagen desde los assets.
+                            careerLogos[index]['image']!,
+                            fit: BoxFit
+                                .contain, // Ajusta la imagen dentro del contenedor manteniendo su relación de aspecto.
+                            errorBuilder: (context, error, stackTrace) {
+                              // Función que se llama si ocurre un error al cargar la imagen.
+                              print(
+                                  "Error cargando imagen: ${careerLogos[index]['image']!} - $error");
+                              return Icon(Icons.image_not_supported,
+                                  color: Colors.grey);
+                              // Muestra un icono de imagen no soportada en caso de error.
+                            },
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ),
-                SizedBox(
-                    width:
-                        16), // Añade un espacio horizontal de 16 píxeles entre el logo y el título.
-                Expanded(
-                  // Expande el widget hijo para llenar el espacio disponible horizontalmente.
-                  child: Text(
-                    // Widget para mostrar el título de la carrera.
-                    careerLogos[index]['title']!,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black,
+                    SizedBox(
+                        width:
+                            16), // Añade un espacio horizontal de 16 píxeles entre el logo y el título.
+                    Expanded(
+                      // Expande el widget hijo para llenar el espacio disponible horizontalmente.
+                      child: Text(
+                        // Widget para mostrar el título de la carrera.
+                        careerLogos[index]['title']!,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black,
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
-              ],
+              ),
             ),
-          ),
+            // --- > 2. Añadimos el Divider aquí <---
+            Divider(
+              height:
+                  1, // Altura del espacio que ocupa el divider (incluyendo el espacio arriba y abajo)
+              thickness: 1, // Grosor de la línea
+              color: Colors.grey[300], // Color de la línea (puedes ajustarlo)
+              // indent: 16, // Opcional: Espacio a la izquierda antes de que empiece la línea
+              // endIndent: 16, // Opcional: Espacio a la derecha antes de que termine la línea
+            ),
+          ],
         );
       },
     );

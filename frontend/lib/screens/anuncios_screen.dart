@@ -52,7 +52,7 @@ class _AnunciosScreenState extends State<AnunciosScreen>
   final List<Widget> _screens = [
     ContactosEscolaresScreen(),
     OpportunitiesScreen(),
-    ProcesosEscolaresScreen(),
+    SchoolProcessesScreen(),
     UserInfoScreen(
         // name: "OnsaDev",
         // email: "OnsaDev@mgf.com",

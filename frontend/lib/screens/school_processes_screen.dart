@@ -1,174 +1,231 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:photo_view/photo_view.dart';
 
-class ProcesosEscolaresScreen extends StatelessWidget {
+class SchoolProcessesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    // return Scaffold(
-    //   appBar: AppBar(
-    //     title: Text(
-    //       'Procesos Escolares',
-    //       style: TextStyle(color: Colors.white), // Título en blanco
-    //     ),
-    //     backgroundColor: Color(0xFF14213D), // Color del AppBar
-    //     iconTheme:
-    //         IconThemeData(color: Colors.white), // Icono de regreso en blanco
-    //   ),
-    // Return just the content without Scaffold or AppBar
     return Container(
-      color: Color(0xFFF0F0F0), // Fondo gris claro
-      child: Center(
+      // Light gray background color matching other screens
+      color: Color.fromARGB(255, 250, 250, 250),
+      padding: EdgeInsets.all(16.0),
+      child: SingleChildScrollView(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ImageScreen(
-                      title: 'Proceso de Reinscripción',
-                      imagePaths: [
-                        'assets/Reins_1.png',
-                        'assets/Reins_2.png',
-                        'assets/Reins_3.png',
-                      ],
+            // --- Calendar Title with Underline Effect (Centered) ---
+            Center(
+              child: Column(
+                children: [
+                  Padding(
+                    padding: EdgeInsets.only(bottom: 4.0, top: 16.0),
+                    child: Text(
+                      'Calendario escolar',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFFFCA311), // Color del botón
-                padding: EdgeInsets.symmetric(
-                    vertical: 16, horizontal: 30), // Aumentar padding
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10), // Bordes redondeados
-                ),
-              ),
-              child: Text(
-                'Proceso de Reinscripción',
-                style: TextStyle(
-                    fontSize: 20,
-                    color: Colors.black), // Aumentar tamaño de texto
+                  // Divider acting as an underline (centered under text)
+                  Container(
+                    width: 240.0, // Width to match the text approximately
+                    child: Divider(
+                      color: Colors.black,
+                      thickness: 2.0,
+                      height: 1.0,
+                    ),
+                  ),
+                ],
               ),
             ),
-            SizedBox(height: 20), // Espacio entre botones
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ImageScreen(
-                      title: 'Calendario de Reinscripción',
-                      imagePaths: [
-                        'assets/Imag1.png',
-                        'assets/Imag2.png',
-                      ],
-                    ),
-                  ),
+            SizedBox(height: 20.0), // Spacing after title
+
+            // --- Calendar Icon Box (clickable) ---
+            InkWell(
+              onTap: () {
+                // TODO: Implement navigation to calendar screen
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                      content:
+                          Text('Navegación al calendario no implementada')),
                 );
               },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFFFCA311), // Color del botón
-                padding: EdgeInsets.symmetric(
-                    vertical: 16, horizontal: 30), // Aumentar padding
+              borderRadius: BorderRadius.circular(8.0),
+              child: Card(
+                color: Colors.white,
+                elevation: 2.5,
+                margin: EdgeInsets.only(bottom: 16.0),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10), // Bordes redondeados
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                child: Container(
+                  width: double.infinity, // Takes full width
+                  height: 120, // Fixed height
+                  padding: EdgeInsets.all(16.0),
+                  child: Center(
+                    child: SvgPicture.asset(
+                      'assets/icons/horario_icon.svg',
+                      height: 60,
+                      width: 60,
+                    ),
+                  ),
                 ),
               ),
+            ),
+
+            // --- FAQ Section ---
+            Padding(
+              padding: EdgeInsets.only(left: 8.0, bottom: 8.0, top: 24.0),
               child: Text(
-                'Calendario de Reinscripción',
+                'Preguntas frecuentes',
                 style: TextStyle(
-                    fontSize: 20,
-                    color: Colors.black), // Aumentar tamaño de texto
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+
+            // FAQ Questions (clickable text items)
+            _buildFaqQuestion(
+              context: context,
+              question: '¿Cómo puedo solicitar una revisión de calificación?',
+              onTap: () {
+                // TODO: Implement navigation or action for this FAQ
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Pregunta 1 clickeada')),
+                );
+              },
+            ),
+            SizedBox(height: 12),
+
+            _buildFaqQuestion(
+              context: context,
+              question: '¿Cuál es el proceso para dar de baja una materia?',
+              onTap: () {
+                // TODO: Implement navigation or action for this FAQ
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Pregunta 2 clickeada')),
+                );
+              },
+            ),
+            SizedBox(height: 12),
+
+            _buildFaqQuestion(
+              context: context,
+              question: '¿Cómo puedo solicitar una constancia de estudios?',
+              onTap: () {
+                // TODO: Implement navigation or action for this FAQ
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Pregunta 3 clickeada')),
+                );
+              },
+            ),
+            SizedBox(height: 24),
+
+            // --- Enrollment Process Button ---
+            _buildProcessButton(
+              context: context,
+              title: 'Proceso de inscripción',
+              subtitle: 'Ver requisitos y pasos a seguir',
+              onTap: () {
+                // TODO: Implement navigation or action for enrollment process
+                print('Enrollment process button clicked');
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Helper method to build FAQ question items as clickable text
+  Widget _buildFaqQuestion({
+    required BuildContext context,
+    required String question,
+    required VoidCallback onTap,
+  }) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 8.0),
+      child: InkWell(
+        onTap: onTap,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Bullet point
+            Padding(
+              padding: EdgeInsets.only(top: 10.0, right: 8.0),
+              child: Icon(Icons.circle,
+                  size: 8, color: const Color.fromARGB(255, 36, 35, 35)),
+            ),
+            // Question text
+            Expanded(
+              child: Text(
+                question,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.deepPurple[600],
+                  decoration: TextDecoration.underline,
+                  decorationColor: Colors.deepPurple[600],
+                ),
               ),
             ),
           ],
         ),
       ),
     );
-    // );
   }
-}
 
-class ImageScreen extends StatelessWidget {
-  final String title;
-  final List<String> imagePaths;
-
-  ImageScreen({required this.title, required this.imagePaths});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          title,
-          style: TextStyle(color: Colors.white), // Título en blanco
-        ),
-        backgroundColor: Color(0xFF14213D),
-        iconTheme:
-            IconThemeData(color: Colors.white), // Icono de regreso en blanco
-      ),
-      body: SingleChildScrollView(
+  /// Helper method to build process button (like in support screen)
+  Widget _buildProcessButton({
+    required BuildContext context,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.white,
+      elevation: 3.0,
+      borderRadius: BorderRadius.circular(12.0),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12.0),
         child: Container(
-          color: Color(0xFF1D1D1D), // Fondo oscuro para la sección de imágenes
-          child: Column(
-            children: imagePaths.map((imagePath) {
-              return GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          PhotoViewScreen(imagePath: imagePath),
-                    ),
-                  );
-                },
-                child: Container(
-                  margin: EdgeInsets.symmetric(
-                      vertical: 10), // Espacio entre imágenes
-                  decoration: BoxDecoration(
-                    color:
-                        Color(0xFF333333), // Fondo oscuro detrás de la imagen
-                    borderRadius:
-                        BorderRadius.circular(10), // Bordes redondeados
-                    border: Border.all(
-                        color: Color(0xFFFCA311), width: 2), // Borde dorado
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Center(
-                      // Centrar la imagen
-                      child: Image.asset(
-                        imagePath,
-                        fit: BoxFit.cover, // Ajuste para que cubra el espacio
-                        width: double.infinity, // Ancho completo
-                        height: 300, // Altura ajustada a 300
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
+          child: Row(
+            children: [
+              // Column for title and subtitle
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
                       ),
                     ),
-                  ),
+                    SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
                 ),
-              );
-            }).toList(),
+              ),
+              // Arrow icon
+              Icon(
+                Icons.chevron_right,
+                color: Colors.grey[400],
+              ),
+            ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class PhotoViewScreen extends StatelessWidget {
-  final String imagePath;
-
-  PhotoViewScreen({required this.imagePath});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: PhotoView(
-        imageProvider: AssetImage(imagePath),
-        minScale: PhotoViewComputedScale.contained,
-        maxScale: PhotoViewComputedScale.covered * 2,
       ),
     );
   }
