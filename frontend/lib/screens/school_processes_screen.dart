@@ -65,7 +65,7 @@ class SchoolProcessesScreen extends StatelessWidget {
                   padding: EdgeInsets.all(16.0),
                   child: Center(
                     child: SvgPicture.asset(
-                      'assets/icons/horario_icon.svg',
+                      'assets/icons/calendario-escolar_icon.svg',
                       height: 60,
                       width: 60,
                     ),

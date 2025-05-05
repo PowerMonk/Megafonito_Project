@@ -69,13 +69,14 @@ class NoticeCard extends StatelessWidget {
                 children: [
                   Text('Autor:',
                       style: TextStyle(
-                          color: Colors.grey[700])), // Etiqueta "Autor".
+                          color: Colors.grey[700],
+                          fontSize: 13.5)), // Etiqueta "Autor".
                   SizedBox(width: 4), // Pequeño espacio horizontal.
                   Text(
                     authorName,
                     style: TextStyle(
-                        fontWeight:
-                            FontWeight.w500), // Estilo del nombre del autor.
+                        fontWeight: FontWeight.w400,
+                        fontSize: 13.5), // Estilo del nombre del autor.
                     overflow: TextOverflow
                         .ellipsis, // Añade '...' si el texto es muy largo.
                     maxLines: 1, // Limita a una sola línea.
@@ -94,9 +95,9 @@ class NoticeCard extends StatelessWidget {
               Text(
                 title,
                 style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 18,
                     fontWeight: FontWeight.bold), // Estilo del título.
-                maxLines: 2, // Limita el título a 2 líneas.
+                maxLines: 4, // Limita el título a 2 líneas.
                 overflow: TextOverflow.ellipsis, // Añade '...' si es muy largo.
               ),
               Divider(height: 16.0, thickness: 1.0), // --- Divisor visual 2 ---
