@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:path/path.dart' as p;
 
 /// Normalmente se muestra dentro de un Modal Bottom Sheet. Incluye el título,
 /// autor, contenido completo y una vista previa del adjunto si existe.
@@ -82,9 +84,6 @@ class OpportunitiesDetail extends StatelessWidget {
     final bool hasAttachment = oportunidades['has_attachment'] ?? false;
     // Extrae la URL del adjunto del mapa [oportunidades]. Puede ser null si no hay adjunto.
     final String? attachmentUrl = oportunidades['attachment_url'];
-    // URL de una imagen de respaldo que se mostrará si no hay adjunto o si falla la carga del adjunto.
-    final String placeholderImageUrl =
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSdSYD20ZhA_YJ_ijTDssLT1Z-MtyGlMhQe5A&s';
     // Extrae la fecha de expiración del mapa [oportunidades]. Si la clave 'expiry_date' no existe, usa '29 abr' como valor por defecto.
     final String expiryDate = oportunidades['expiry_date'] ?? '29 abr';
 
@@ -171,8 +170,42 @@ class OpportunitiesDetail extends StatelessWidget {
                               style: TextStyle(fontWeight: FontWeight.w500)),
                         ),
                         SizedBox(width: 4),
-                        Icon(Icons.school_outlined,
-                            size: 20.0, color: Colors.grey[700]),
+                        // Convertimos el icono en un InkWell para hacerlo clickeable
+                        InkWell(
+                          onTap: () async {
+                            // URL hardcodeada para testing
+                            const url = 'https://tecuruapan.edu.mx/';
+
+                            // Muestra un SnackBar informando al usuario
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Abriendo $url')),
+                            );
+
+                            try {
+                              final uri = Uri.parse(url);
+                              if (await canLaunchUrl(uri)) {
+                                await launchUrl(uri,
+                                    mode: LaunchMode.externalApplication);
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                      content:
+                                          Text('No se pudo abrir el enlace')),
+                                );
+                              }
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                    content: Text(
+                                        'Error al intentar abrir el enlace: $e')),
+                              );
+                              print('Error al intentar abrir URL: $e');
+                            }
+                          },
+                          borderRadius: BorderRadius.circular(12),
+                          child: Icon(Icons.link,
+                              size: 20.0, color: Colors.blue[800]),
+                        ),
                       ],
                     ),
                     // [Divider] es una línea horizontal que separa visualmente el contenido.
@@ -189,9 +222,8 @@ class OpportunitiesDetail extends StatelessWidget {
                       Text('Información adjunta:',
                           style: TextStyle(fontWeight: FontWeight.bold)),
                       SizedBox(height: 12.0),
-                      // Llama a la función [_buildAttachmentViewer] para mostrar la vista previa del adjunto.
-                      _buildAttachmentViewer(
-                          context, attachmentUrl, placeholderImageUrl),
+                      // Llama a la función [_buildAttachmentDisplay] para mostrar el display del adjunto.
+                      _buildAttachmentDisplay(context, attachmentUrl),
                       SizedBox(height: 16.0),
                     ],
                   ],
@@ -219,72 +251,97 @@ class OpportunitiesDetail extends StatelessWidget {
     );
   }
 
-  /// Widget auxiliar [_buildAttachmentViewer] que construye la vista previa del adjunto (imagen).
-  /// Recibe el [BuildContext], la [attachmentUrl] (puede ser null) y la [placeholderImageUrl].
-  Widget _buildAttachmentViewer(
-      BuildContext context, String? attachmentUrl, String placeholderImageUrl) {
-    // [GestureDetector] detecta gestos táctiles. Aquí, se usa para implementar la funcionalidad de tocar el adjunto.
-    return GestureDetector(
-      // [onTap] es la función que se llama cuando se toca el widget.
-      onTap: () {
-        // [ScaffoldMessenger] se usa para mostrar [SnackBar]s (mensajes cortos en la parte inferior de la pantalla).
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text('Para más información, contacte a la institución')),
-        );
+  /// Función auxiliar para obtener el icono basado en la extensión del archivo.
+  IconData _getFileIcon(String? fileName) {
+    if (fileName == null)
+      return Icons.insert_drive_file; // Icono genérico por defecto
+
+    final extension = p.extension(fileName).toLowerCase();
+    switch (extension) {
+      case '.pdf':
+        return Icons.picture_as_pdf;
+      case '.doc':
+      case '.docx':
+        return Icons.description;
+      case '.xls':
+      case '.xlsx':
+        return Icons.table_chart;
+      case '.ppt':
+      case '.pptx':
+        return Icons.slideshow;
+      case '.jpg':
+      case '.jpeg':
+      case '.png':
+      case '.gif':
+        return Icons.image;
+      case '.zip':
+      case '.rar':
+        return Icons.folder_zip;
+      default:
+        return Icons.insert_drive_file; // Icono genérico para otros tipos
+    }
+  }
+
+  /// Nuevo widget auxiliar [_buildAttachmentDisplay] que construye la visualización del adjunto.
+  /// Recibe el [BuildContext] y la [attachmentUrl].
+  Widget _buildAttachmentDisplay(BuildContext context, String? attachmentUrl) {
+    if (attachmentUrl == null || attachmentUrl.isEmpty) {
+      return Container(); // No mostrar nada si no hay URL de adjunto
+    }
+
+    final fileName =
+        p.basename(attachmentUrl); // Extrae el nombre del archivo de la URL
+    final fileIcon = _getFileIcon(fileName);
+
+    return InkWell(
+      onTap: () async {
+        try {
+          final uri = Uri.parse(attachmentUrl);
+          if (await canLaunchUrl(uri)) {
+            await launchUrl(uri, mode: LaunchMode.externalApplication);
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                  content: Text(
+                      'No se pudo abrir el archivo adjunto. Verifique la URL.')),
+            );
+          }
+        } catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error al intentar abrir el adjunto: $e')),
+          );
+          print('Error al intentar abrir adjunto: $e'); // Para depuración
+        }
       },
-      // [child] es el widget que reacciona a los gestos. Aquí, es un [Center] que contiene la imagen.
-      child: Center(
-        // [ClipRRect] recorta su hijo con un [BorderRadius]. Aquí, redondea las esquinas de la imagen.
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(8.0),
-          // [Image.network] muestra una imagen cargada desde una URL.
-          child: Image.network(
-            // Usa la [attachmentUrl] si no es null, de lo contrario, usa la [placeholderImageUrl].
-            attachmentUrl ?? placeholderImageUrl,
-            // [height] define la altura deseada de la imagen.
-            height: 180,
-            // [fit] define cómo debe ajustarse la imagen dentro de su contenedor.
-            // [BoxFit.contain] escala la imagen para que quepa dentro del contenedor sin recortarla.
-            fit: BoxFit.contain,
-            // [loadingBuilder] es una función que se llama mientras la imagen está cargando.
-            loadingBuilder: (context, child, loadingProgress) {
-              // Si [loadingProgress] es null, significa que la imagen ya cargó, así que devuelve el [child] (la imagen).
-              if (loadingProgress == null) return child;
-              // Mientras la imagen está cargando, muestra un [Container] con un [CircularProgressIndicator].
-              return Container(
-                height: 180,
-                child: Center(
-                  child: CircularProgressIndicator(
-                    // [value] del [CircularProgressIndicator] se basa en el progreso de la carga si está disponible.
-                    value: loadingProgress.expectedTotalBytes != null
-                        ? loadingProgress.cumulativeBytesLoaded /
-                            loadingProgress.expectedTotalBytes!
-                        : null,
-                    color: Color(0xFFFCA311),
-                  ),
+      child: Material(
+        // Usamos Material para poder aplicar elevation
+        elevation: 2.0, // Puedes ajustar este valor
+        borderRadius: BorderRadius.circular(8.0),
+        child: Container(
+          padding: EdgeInsets.all(12.0),
+          decoration: BoxDecoration(
+            color: Colors.grey[
+                100], // Cambié a un color más claro para que la sombra sea más visible
+            borderRadius: BorderRadius.circular(8.0),
+            // Eliminamos el border si usamos elevation, o lo ajustamos si es necesario.
+            // border: Border.all(color: Colors.grey[300]!),
+          ),
+          child: Row(
+            children: [
+              Icon(fileIcon,
+                  size: 30, color: Colors.blue[700]), // Icono representativo
+              SizedBox(width: 12.0),
+              Expanded(
+                child: Text(
+                  fileName,
+                  style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w500),
+                  overflow:
+                      TextOverflow.ellipsis, // Para manejar nombres largos
                 ),
-              );
-            },
-            // [errorBuilder] es una función que se llama si ocurre un error al cargar la imagen.
-            errorBuilder: (context, error, stackTrace) {
-              // Muestra un [Container] con un fondo gris y un icono de imagen rota y un mensaje de error.
-              return Container(
-                height: 180,
-                color: Colors.grey[200],
-                child: Center(
-                    child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.broken_image_outlined,
-                        color: Colors.grey[500], size: 40),
-                    SizedBox(height: 8),
-                    Text("No se pudo cargar la imagen",
-                        style: TextStyle(color: Colors.grey[600]))
-                  ],
-                )),
-              );
-            },
+              ),
+              Icon(Icons.arrow_forward_ios,
+                  size: 16, color: Colors.grey[600]), // Icono de flecha
+            ],
           ),
         ),
       ),

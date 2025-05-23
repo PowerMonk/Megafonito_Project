@@ -27,7 +27,9 @@ class _OpportunityContentScreenState extends State<OpportunityContentScreen> {
   final List<Map<String, String>> becasItems = List.generate(
     10,
     (index) => {
-      'image': 'assets/test_images/Dela_Ousi.jpg',
+      'image': index % 2 == 0
+          ? 'assets/test_images/Beca_movilidad.jpeg'
+          : 'assets/test_images/Beca_santander.png',
       'title': 'Beca ${index + 1}',
     },
   );
@@ -37,7 +39,9 @@ class _OpportunityContentScreenState extends State<OpportunityContentScreen> {
   final List<Map<String, String>> cursosItems = List.generate(
     8,
     (index) => {
-      'image': 'assets/test_images/Dela_Ousi.jpg',
+      'image': index % 2 == 0
+          ? 'assets/test_images/Python_logo.png'
+          : 'assets/test_images/Cisco_logo.png',
       'title': 'Curso ${index + 1}',
     },
   );
@@ -46,7 +50,9 @@ class _OpportunityContentScreenState extends State<OpportunityContentScreen> {
   final List<Map<String, String>> trabajosItems = List.generate(
     12,
     (index) => {
-      'image': 'assets/test_images/Dela_Ousi.jpg',
+      'image': index % 2 == 0
+          ? 'assets/test_images/BMW_logo.png'
+          : 'assets/test_images/Supabase_logo.png',
       'title': 'Trabajo ${index + 1}',
     },
   );
