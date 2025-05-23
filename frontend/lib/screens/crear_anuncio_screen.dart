@@ -317,31 +317,6 @@ class _CrearNuevoAnuncioScreenState extends State<CrearNuevoAnuncioScreen> {
                       Row(
                         children: [
                           Text(
-                            "Título: ",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black,
-                                fontSize: 16),
-                          ),
-                          Expanded(
-                            child: TextField(
-                              controller: _tituloController,
-                              decoration: InputDecoration(
-                                border: InputBorder.none,
-                                hintText: "Escribe un título",
-                                hintStyle: TextStyle(
-                                    color: Colors.grey, fontSize: 15.0),
-                              ),
-                              style: TextStyle(
-                                  color: Colors.black, fontSize: 14.5),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Divider(color: Colors.grey),
-                      Row(
-                        children: [
-                          Text(
                             "Categoría: ",
                             style: TextStyle(
                                 fontWeight: FontWeight.bold,
@@ -377,10 +352,60 @@ class _CrearNuevoAnuncioScreenState extends State<CrearNuevoAnuncioScreen> {
                         ],
                       ),
                       Divider(color: Colors.grey),
+                      Row(
+                        children: [
+                          Text(
+                            "Título: ",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                                fontSize: 16),
+                          ),
+                          Expanded(
+                            child: TextField(
+                              controller: _tituloController,
+                              decoration: InputDecoration(
+                                border: InputBorder.none,
+                                hintText: "Escribe un título",
+                                hintStyle: TextStyle(
+                                    color: Colors.grey, fontSize: 15.0),
+                              ),
+                              style: TextStyle(
+                                  color: Colors.black, fontSize: 14.5),
+                            ),
+                          ),
+                        ],
+                      ),
+                      Divider(color: Colors.grey),
+                      Row(
+                        children: [
+                          Text(
+                            "Link: ",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                                fontSize: 16),
+                          ),
+                          Expanded(
+                            child: TextField(
+                              controller: _tituloController,
+                              decoration: InputDecoration(
+                                border: InputBorder.none,
+                                hintText: "Agrega un enlace (opcional)",
+                                hintStyle: TextStyle(
+                                    color: Colors.grey, fontSize: 15.0),
+                              ),
+                              style: TextStyle(
+                                  color: Colors.black, fontSize: 14.5),
+                            ),
+                          ),
+                        ],
+                      ),
+                      Divider(color: Colors.grey),
                       TextField(
                         controller: _textoController,
                         decoration: InputDecoration(
-                          hintText: "Redactar un anuncio",
+                          hintText: "Redacta un anuncio",
                           hintStyle:
                               TextStyle(color: Colors.grey, fontSize: 14.0),
                           border: InputBorder.none,

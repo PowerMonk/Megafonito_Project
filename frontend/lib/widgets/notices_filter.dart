@@ -76,6 +76,7 @@ class _NoticesFilterState extends State<NoticesFilter> {
             child: PopupMenuButton<String>(
               icon: Icon(Icons.filter_list),
               tooltip: 'Ordenar',
+              color: Color.fromARGB(255, 250, 250, 250),
               onSelected: (value) {
                 setState(() {
                   selectedSortOption = value;

@@ -57,7 +57,7 @@ class _SplashScreenState extends State<SplashScreen> {
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: Color.fromARGB(255, 34, 32, 78),
+                color: Colors.black,
               ),
             ),
             SizedBox(height: 20),
@@ -66,8 +66,8 @@ class _SplashScreenState extends State<SplashScreen> {
               child: LinearProgressIndicator(
                 value: progress,
                 minHeight: 20,
-                backgroundColor: Color(0xFFE5E5E5),
-                color: Color.fromARGB(255, 34, 32, 78),
+                backgroundColor: Colors.white,
+                color: Colors.black,
               ),
             ),
           ],

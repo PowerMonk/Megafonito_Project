@@ -43,7 +43,7 @@ class _CrearNuevaOportunidadScreenState
   void _crearOportunidad() {
     final String titulo = _tituloController.text;
     final String texto = _textoController.text;
-    final Color color = Color(0xFFFFFFFF); // Color blanco por defecto
+    final Color color = Colors.white; // Color blanco por defecto
 
     if (titulo.isNotEmpty && texto.isNotEmpty) {
       if (widget.onOportunidadCreada != null) {
@@ -243,31 +243,6 @@ class _CrearNuevaOportunidadScreenState
                       Row(
                         children: [
                           Text(
-                            "Título: ",
-                            style: TextStyle(
-                                fontWeight: FontWeight.w700,
-                                color: Colors.black,
-                                fontSize: 16),
-                          ),
-                          Expanded(
-                            child: TextField(
-                              controller: _tituloController,
-                              decoration: InputDecoration(
-                                border: InputBorder.none,
-                                hintText: "Escribe un título",
-                                hintStyle: TextStyle(
-                                    color: Colors.grey, fontSize: 14.0),
-                              ),
-                              style: TextStyle(
-                                  color: Colors.black, fontSize: 14.5),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Divider(color: Colors.grey),
-                      Row(
-                        children: [
-                          Text(
                             "Categoría: ",
                             style: TextStyle(
                                 fontWeight: FontWeight.w700,
@@ -298,6 +273,56 @@ class _CrearNuevaOportunidadScreenState
                               underline: Container(height: 0),
                               icon: Icon(Icons.arrow_drop_down,
                                   color: Colors.black),
+                            ),
+                          ),
+                        ],
+                      ),
+                      Divider(color: Colors.grey),
+                      Row(
+                        children: [
+                          Text(
+                            "Título: ",
+                            style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                color: Colors.black,
+                                fontSize: 16),
+                          ),
+                          Expanded(
+                            child: TextField(
+                              controller: _tituloController,
+                              decoration: InputDecoration(
+                                border: InputBorder.none,
+                                hintText: "Escribe un título",
+                                hintStyle: TextStyle(
+                                    color: Colors.grey, fontSize: 14.0),
+                              ),
+                              style: TextStyle(
+                                  color: Colors.black, fontSize: 14.5),
+                            ),
+                          ),
+                        ],
+                      ),
+                      Divider(color: Colors.grey),
+                      Row(
+                        children: [
+                          Text(
+                            "Link: ",
+                            style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                color: Colors.black,
+                                fontSize: 16),
+                          ),
+                          Expanded(
+                            child: TextField(
+                              controller: _tituloController,
+                              decoration: InputDecoration(
+                                border: InputBorder.none,
+                                hintText: "Agrega un enlace (opcional)",
+                                hintStyle: TextStyle(
+                                    color: Colors.grey, fontSize: 14.0),
+                              ),
+                              style: TextStyle(
+                                  color: Colors.black, fontSize: 14.5),
                             ),
                           ),
                         ],
