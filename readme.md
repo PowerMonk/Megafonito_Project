@@ -1,26 +1,84 @@
-# Megafonito App Project
+# 📢 Megafonito - School Announcements App
 
-This is a school announcements/notices app developed using [Flutter](https://flutter.dev/), [Deno](https://deno.com/), [PostgreSQL](https://www.postgresql.org/), [Firebase Authentication](https://firebase.google.com/docs/auth) and future services to be implemented.
+A simple school announcements/notices app that makes communication easier between students, teachers, and staff.
 
-We believe in making communication simpler, which this app intends to achieve.
+## 🛠️ Tech Stack
 
-## 🦇 Where we're at now
+- **Frontend**: Flutter (Android focused)
+- **Backend**: Deno + Oak framework
+- **Database**: PostgreSQL
+- **Authentication**: JWT tokens
+- **File Storage**: AWS S3
 
-We are completely redesigning the UI, therefore the backend services have been put on a pause for now, that said, in order to **take a look** at the app, you may _clone the repo,_ and execute:
+## 🚀 Quick Start
 
+### Prerequisites
+- [Flutter](https://flutter.dev/docs/get-started/install) installed
+- [Deno](https://deno.com/manual/getting_started/installation) installed
+- [PostgreSQL](https://www.postgresql.org/download/) running
+- [Docker](https://www.docker.com/get-started/) (optional)
+
+### Option 1: Run with Docker (Easiest)
 ```bash
-flutter create .
+# Clone the repository
+git clone <your-repo-url>
+cd Megafonito
+
+# Start everything with Docker
+docker-compose up
+```
+The API will be available at `http://localhost:8000`
+
+### Option 2: Run Manually
+
+#### Backend Setup
+```bash
+# Navigate to backend folder
+cd backend
+
+# Run the API server
+deno task server
+```
+
+#### Frontend Setup
+```bash
+# Navigate to frontend folder
+cd frontend
+
+# Install dependencies and run
 flutter pub get
 flutter run
 ```
 
-Due to the **lack of Apple machines** in the team, development has been focused only on Android for now.
+## 📱 Features
 
-## 🤝 How could you contribute?
+- **User Management**: Create, update, and manage user accounts
+- **Role-Based Access**: Admin, Teacher, and Student roles
+- **Notices System**: Create, view, and manage school announcements
+- **File Upload**: Upload and manage files with AWS S3
+- **Authentication**: Secure JWT-based login system
 
-- For any **frontend contributions**, you may:
-  Upload a pdf file into the _UX/UI folder_ as well as a pull request with changes and implementations clearly explained
-- For any **backend contributions**, you may:
-  Create a detailed pull request in which you explain in a detailed manner how and why these changes are beneficial to the project, most importantly, how they will **keep being useful as the project scales**
+## 🔧 API Endpoints
 
-We understand this project is still on its bare bones, but that's how every project comes to life, isn't it? That's where the fun of building lies!!!
+- `GET /healthy` - Health check
+- `POST /login` - User login
+- `POST /users` - Create user (Admin only)
+- `GET /users` - Get all users (Admin only)
+- `POST /notices` - Create notice
+- `GET /notices` - Get user's notices
+- `GET /allnotices` - Get all notices
+- `POST /upload/s3` - Upload files
+
+## 🤝 Contributing
+
+We welcome contributions! Here's how:
+
+**Frontend**: Submit UI designs in the `UX/UI` folder + create a pull request with clear explanations
+
+**Backend**: Create detailed pull requests explaining how changes benefit the project's scalability
+
+## 📝 Notes
+
+- Android development focused (no iOS support yet)
+- UI is being redesigned
+- Backend uses PostgreSQL with migrations in `backend/db/migrations/`
