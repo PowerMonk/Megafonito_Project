@@ -1,223 +1,188 @@
-// lib/screens/login_screen.dart
 import 'package:flutter/material.dart';
-import '../services/auth_service.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+
+import '../services/auth_service.dart';
+import '../theme/app_theme.dart';
 import 'anuncios_screen.dart';
 
 class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
 
-  // Simplified login function - no validation, just bypass
-  void _bypassLogin() async {
-    setState(() {
-      _isLoading = true;
-    });
+  Future<void> _bypassLogin() async {
+    setState(() => _isLoading = true);
 
     try {
-      // Using a default username for development
-      final user = await AuthService.login(context, "dev_user");
+      final user = await AuthService.login(context, 'dev_user');
+      if (!mounted) return;
 
-      setState(() {
-        _isLoading = false;
-      });
-
-      // Navigate to AnunciosScreen with mock user info
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (context) => AnunciosScreen(
             userName: user.name,
             userEmail: user.email,
-            isSuperUser: true, // Always admin for development
+            isSuperUser: true,
           ),
         ),
       );
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-      // Show error if something goes wrong
+    } catch (error) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error bypassing login: $e')),
+        SnackBar(
+            content: Text('No se pudo iniciar el modo de desarrollo: $error')),
       );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: Stack(
-        children: [
-          // Decorative dots at top-left
-          Positioned(
-            top: 40,
-            left: 20,
-            child: Row(
-              children: [
-                _buildDot(),
-                SizedBox(width: 8),
-                _buildDot(),
-                SizedBox(width: 8),
-                _buildDot(),
-              ],
-            ),
-          ),
-
-          // Decorative dots at top-right
-          Positioned(
-            top: 40,
-            right: 20,
-            child: Row(
-              children: [
-                _buildDot(),
-                SizedBox(width: 8),
-                _buildDot(),
-                SizedBox(width: 8),
-                _buildDot(),
-              ],
-            ),
-          ),
-
-          // Main content
-          Column(
-            children: [
-              // Add space at the top to push content down
-              SizedBox(height: MediaQuery.of(context).size.height * 0.15),
-              // Logo and welcome texts (top 3/5 of screen)
-              Expanded(
-                flex: 3,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SvgPicture.asset(
-                      'assets/Megafonito.svg',
-                      height: 130,
-                      width: 130,
+      backgroundColor: AppDesign.page,
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 460),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 116,
+                    height: 116,
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: colorScheme.surface,
+                      borderRadius: BorderRadius.circular(30),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Color(0x1414213D),
+                          blurRadius: 28,
+                          offset: Offset(0, 12),
+                        ),
+                      ],
                     ),
-                    SizedBox(height: 20),
-                    Text(
-                      'MEGAFONITO',
-                      style: TextStyle(
-                        fontSize: 35,
-                        fontWeight: FontWeight.w900,
-                        color: Color.fromARGB(255, 0, 0, 0),
-                      ),
-                    ),
-                    SizedBox(height: 25),
-                    Text(
-                      'Bienvenido',
-                      style: TextStyle(
-                        fontSize: 27,
-                        fontWeight: FontWeight.w400,
-                        color: Color.fromARGB(255, 0, 0, 0),
-                      ),
-                    ),
-                    SizedBox(height: 40),
-                    Text(
-                      '"Enterate de eventos, cambios y avisos oficiales"',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Color.fromARGB(255, 44, 43, 43),
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ),
-
-              // Login container (bottom 2/5 of screen)
-              Container(
-                height: MediaQuery.of(context).size.height * 1 / 3,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: Colors.black,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(60),
-                    topRight: Radius.circular(60),
+                    child: SvgPicture.asset('assets/Megafonito.svg'),
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 10,
-                      spreadRadius: 1,
-                    ),
-                  ],
-                ),
-                padding: EdgeInsets.symmetric(horizontal: 60),
-                child: Column(
-                  children: [
-                    SizedBox(height: 24),
-                    Align(
-                      alignment: Alignment.bottomLeft,
-                      child: Text(
-                        'Modo desarrollo - Login rápido',
-                        style: TextStyle(
-                          color: Color.fromARGB(255, 255, 255, 255),
-                          fontSize: 13,
+                  const SizedBox(height: 22),
+                  Text(
+                    'Megafonito',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          color: AppDesign.navy,
+                          letterSpacing: 0.8,
                         ),
-                      ),
-                    ),
-                    SizedBox(height: 12),
-                    // MODIFIED BUTTON - Now it's a bypass login button
-                    ElevatedButton(
-                      onPressed: _isLoading ? null : _bypassLogin,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color.fromARGB(240, 240, 240, 240),
-                        minimumSize: Size(double.infinity, 50),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Avisos oficiales y novedades de tu comunidad escolar.',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
                         ),
-                      ),
-                      child: _isLoading
-                          ? CircularProgressIndicator()
-                          : Text(
-                              'Entrar como Admin (Modo Dev)',
-                              style: TextStyle(
-                                color: Color.fromARGB(255, 0, 0, 0),
-                              ),
+                  ),
+                  const SizedBox(height: 28),
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(22),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
                             ),
-                    ),
-                    SizedBox(height: 10),
-                    Text(
-                      'No se requiere autenticación',
-                      style: TextStyle(
-                        color: Colors.grey,
-                        fontSize: 13,
+                            decoration: BoxDecoration(
+                              color: colorScheme.tertiaryContainer,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.science_outlined,
+                                  size: 19,
+                                  color: colorScheme.onTertiaryContainer,
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    'Modo de desarrollo',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .labelLarge
+                                        ?.copyWith(
+                                          color:
+                                              colorScheme.onTertiaryContainer,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Accede a la vista de demostración',
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            'Este acceso rápido no valida credenciales ni representa una sesión real.',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                          ),
+                          const SizedBox(height: 20),
+                          FilledButton.icon(
+                            onPressed: _isLoading ? null : _bypassLogin,
+                            icon: _isLoading
+                                ? const SizedBox.square(
+                                    dimension: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : const Icon(Icons.login_rounded),
+                            label: Text(
+                              _isLoading
+                                  ? 'Ingresando…'
+                                  : 'Entrar como administrador demo',
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            'La autenticación y los datos todavía son de prueba.',
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelMedium
+                                ?.copyWith(
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                          ),
+                        ],
                       ),
                     ),
-                    Spacer(),
-                    Text(
-                      'Versión de desarrollo',
-                      style: TextStyle(
-                        color: Colors.grey,
-                        fontSize: 13,
-                      ),
-                    ),
-                    SizedBox(height: 20),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        ],
-      ),
-    );
-  }
-
-  // Helper method to create a decorative dot
-  Widget _buildDot() {
-    return Container(
-      width: 10,
-      height: 10,
-      decoration: BoxDecoration(
-        color: Color.fromARGB(255, 0, 0, 0),
-        shape: BoxShape.circle,
+        ),
       ),
     );
   }

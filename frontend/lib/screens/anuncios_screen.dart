@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'dart:ui'; // Import for ImageFilter
 import '../services/notices_service.dart';
+import '../theme/app_theme.dart';
 import '../widgets/notice_card.dart';
 import '../widgets/notice_detail.dart';
 import '../widgets/notices_filter.dart'; // Add this import
@@ -19,21 +18,20 @@ class AnunciosScreen extends StatefulWidget {
   final String userName;
   final String userEmail;
 
-  AnunciosScreen({
+  const AnunciosScreen({
+    super.key,
     this.isSuperUser = false,
     required this.userName,
     required this.userEmail,
   });
 
   @override
-  _AnunciosScreenState createState() => _AnunciosScreenState();
+  State<AnunciosScreen> createState() => _AnunciosScreenState();
 }
 
-class _AnunciosScreenState extends State<AnunciosScreen>
-    with SingleTickerProviderStateMixin {
+class _AnunciosScreenState extends State<AnunciosScreen> {
   List<Map<String, dynamic>> _anuncios = [];
   String? _selectedCategory;
-  String? _selectedSortOption;
   int _currentIndex = 0;
 
   // Pagination variables
@@ -41,7 +39,7 @@ class _AnunciosScreenState extends State<AnunciosScreen>
   bool _isLoading = false;
   bool _hasMoreData = true;
 
-  final List<String> _screenTitles = [
+  static const List<String> _screenTitles = [
     'Megafonito',
     'Contactos Escolares',
     'Oportunidades',
@@ -49,15 +47,11 @@ class _AnunciosScreenState extends State<AnunciosScreen>
     'Cuenta',
   ];
 
-  final List<Widget> _screens = [
+  static const List<Widget> _screens = [
     ContactosEscolaresScreen(),
     OpportunitiesScreen(),
     SchoolProcessesScreen(),
-    UserInfoScreen(
-        // name: "OnsaDev",
-        // email: "OnsaDev@mgf.com",
-        )
-    // SoporteMegafonitoScreen(),
+    UserInfoScreen(),
   ];
 
   bool _showExtraFabs = false; // State for extra buttons visibility
@@ -91,6 +85,7 @@ class _AnunciosScreenState extends State<AnunciosScreen>
       final List<dynamic> notices = result['data'];
       final pagination = result['pagination'];
 
+      if (!mounted) return;
       setState(() {
         _anuncios.addAll(notices.map((notice) {
           bool hasAttachment = false;
@@ -126,15 +121,14 @@ class _AnunciosScreenState extends State<AnunciosScreen>
         _isLoading = false;
       });
     } catch (e) {
-      print('Error loading notices: $e');
+      debugPrint('Error loading notices: $e');
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
       });
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al cargar anuncios: ${e.toString()}')),
-        );
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al cargar anuncios: ${e.toString()}')),
+      );
     }
   }
 
@@ -158,7 +152,7 @@ class _AnunciosScreenState extends State<AnunciosScreen>
       });
       // Add a small delay to allow the FABs to animate out before navigating
       Future.delayed(Duration(milliseconds: 100), () {
-        _pushCrearAnuncioScreen();
+        if (mounted) _pushCrearAnuncioScreen();
       });
     } else {
       _pushCrearAnuncioScreen();
@@ -185,21 +179,14 @@ class _AnunciosScreenState extends State<AnunciosScreen>
               );
 
               _loadNotices(refresh: true);
-
-              if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Anuncio creado con éxito')),
-                );
-              }
             } catch (e) {
-              print('Error creating announcement: $e');
-              if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                      content:
-                          Text('Error al crear el anuncio: ${e.toString()}')),
-                );
-              }
+              debugPrint('Error creating announcement: $e');
+              if (!context.mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                    content:
+                        Text('Error al crear el anuncio: ${e.toString()}')),
+              );
             }
           },
         ),
@@ -225,64 +212,64 @@ class _AnunciosScreenState extends State<AnunciosScreen>
     });
   }
 
-  void _handleCreateMessage() {
-    // TODO: Implement action for "Nuevo Mensaje"
-    print("Nuevo Mensaje tapped");
-    setState(() => _showExtraFabs = false);
-  }
-
-  void _handleCreateOpportunity() {
-    // TODO: Implement action for "Nuevo Mensaje"
-    print("Oportunidad nueva tapped");
-    setState(() => _showExtraFabs = false);
-  }
-
   // --- UI Building ---
   @override
   Widget build(BuildContext context) {
+    final isWide = MediaQuery.sizeOf(context).width >= 600;
+
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 250, 250, 250),
       appBar: AppBar(
-        title: Text(_screenTitles[_currentIndex],
-            style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.black,
-        iconTheme: IconThemeData(color: Colors.white),
+        title: Text(_screenTitles[_currentIndex]),
         actions: [
           IconButton(
             onPressed: _navigateToSupport,
-            icon: SvgPicture.asset(
-              'assets/icons/bug_icon.svg',
-              height: 24.0,
-              width: 24.0,
-              colorFilter:
-                  const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+            tooltip: 'Soporte',
+            icon: const Icon(Icons.support_agent_outlined),
+          ),
+        ],
+      ),
+      body: Row(
+        children: [
+          if (isWide)
+            AppNavigationRail(
+              currentIndex: _currentIndex,
+              onTap: _handleNavBarTap,
+            ),
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return Align(
+                  alignment: Alignment.topCenter,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 1120),
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: constraints.maxHeight,
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          _buildBody(),
+                          if (_currentIndex == 0)
+                            ActionButtons(
+                              isSuperUser: widget.isSuperUser,
+                              showExtraFabs: _showExtraFabs,
+                              onShowExtraFabs: _handleShowExtraFabs,
+                              onCreateNotice: _navigateToCrearNuevoAnuncio,
+                              onDismissBlur: _handleDismissBlur,
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
             ),
           ),
         ],
       ),
-      body: Stack(
-        children: [
-          // Main content
-          _buildBody(),
-
-          // Action Buttons - use the modular component
-          if (_currentIndex == 0)
-            ActionButtons(
-              isSuperUser: widget.isSuperUser,
-              showExtraFabs: _showExtraFabs,
-              onShowExtraFabs: _handleShowExtraFabs,
-              onCreateNotice: _navigateToCrearNuevoAnuncio,
-              onCreateMessage: _handleCreateMessage,
-              onCreateOpportunity: _handleCreateOpportunity,
-              onDismissBlur: _handleDismissBlur,
-            ),
-        ],
-      ),
-      // Use the modularized navbar
-      bottomNavigationBar: AppNavBar(
-        currentIndex: _currentIndex,
-        onTap: _handleNavBarTap,
-      ),
+      bottomNavigationBar: isWide
+          ? null
+          : AppNavBar(currentIndex: _currentIndex, onTap: _handleNavBarTap),
       // We don't need floatingActionButton here anymore as it's part of ActionButtons
     );
   }
@@ -300,10 +287,7 @@ class _AnunciosScreenState extends State<AnunciosScreen>
               });
               _filterAnuncios();
             },
-            onSortOptionSelected: (sortOption) {
-              setState(() {
-                _selectedSortOption = sortOption.isEmpty ? null : sortOption;
-              });
+            onSortOptionSelected: (_) {
               _filterAnuncios();
             },
           ),
@@ -322,7 +306,7 @@ class _AnunciosScreenState extends State<AnunciosScreen>
           children: _screens,
         );
       } else {
-        return Center(child: Text("Pantalla no encontrada"));
+        return const Center(child: Text('Pantalla no encontrada'));
       }
     }
   }
@@ -330,18 +314,33 @@ class _AnunciosScreenState extends State<AnunciosScreen>
   // Helper method for building the notices content
   Widget _buildNoticesContent() {
     if (_isLoading && _anuncios.isEmpty) {
-      return Center(child: CircularProgressIndicator());
+      return const Center(child: CircularProgressIndicator());
     }
     if (_anuncios.isEmpty) {
-      return Center(child: Text('No hay anuncios disponibles.'));
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(AppDesign.pagePadding),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.campaign_outlined,
+                  size: 44, color: Theme.of(context).colorScheme.primary),
+              const SizedBox(height: 12),
+              Text(
+                'No hay anuncios disponibles',
+                style: Theme.of(context).textTheme.titleMedium,
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      );
     }
 
     return RefreshIndicator(
       onRefresh: () => _loadNotices(refresh: true),
       child: ListView.builder(
-        // Add proper padding all around the content
-        padding: EdgeInsets.fromLTRB(16.0, 16.0, 16.0,
-            80.0), // Left, top, right, bottom (extra at bottom for FAB)
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 104),
         itemCount: _anuncios.length + (_hasMoreData ? 1 : 0),
         itemBuilder: (context, index) {
           // If we're at the end and have more data, show loading indicator

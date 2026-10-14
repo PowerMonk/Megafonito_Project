@@ -13,9 +13,9 @@ class OpportunitiesDetail extends StatelessWidget {
 
   /// Constructor para [NoticeDetail]. Recibe el mapa [oportunidad] requerido.
   const OpportunitiesDetail({
-    Key? key,
+    super.key,
     required this.oportunidades,
-  }) : super(key: key);
+  });
 
   /// El método [build] es el punto de entrada para construir la UI del widget.
   /// En este caso, simplemente llama a [_buildContent] para construir el contenido real.
@@ -72,6 +72,7 @@ class OpportunitiesDetail extends StatelessWidget {
   /// Recibe el [BuildContext] actual y el [ScrollController] del [DraggableScrollableSheet].
   Widget _buildContent(
       BuildContext context, ScrollController scrollController) {
+    final colorScheme = Theme.of(context).colorScheme;
     // Extrae el título del mapa [oportunidades]. Si la clave 'title' no existe, usa 'Detalle de la Oportunidad' como valor por defecto.
     final String title = oportunidades['title'] ?? 'Detalle de la Oportunidad';
     // Extrae el nombre del autor del mapa [oportunidades]. Si la clave 'author_name' no existe, usa 'Autor Desconocido' como valor por defecto.
@@ -91,8 +92,8 @@ class OpportunitiesDetail extends StatelessWidget {
     return Container(
       // [decoration] define la apariencia visual del [Container], en este caso, el color de fondo y los bordes redondeados en la parte superior.
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(22.0)),
+        color: colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
       ),
       // [child] contiene la estructura de la UI dentro del [Container].
       child: Column(
@@ -112,7 +113,7 @@ class OpportunitiesDetail extends StatelessWidget {
               // [child] contiene el contenido desplazable, envuelto en un [Padding].
               child: Padding(
                 // [padding] añade espacio alrededor del contenido interior.
-                padding: EdgeInsets.all(16.0),
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
                 // [child] es una [Column] que organiza los elementos verticalmente dentro del [Padding].
                 child: Column(
                   // [crossAxisAlignment] alinea los hijos al inicio del eje transversal (izquierda).
@@ -130,7 +131,7 @@ class OpportunitiesDetail extends StatelessWidget {
                         height: 5,
                         margin: EdgeInsets.only(bottom: 10.0),
                         decoration: BoxDecoration(
-                          color: Colors.grey[300],
+                          color: colorScheme.outlineVariant,
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
@@ -152,8 +153,7 @@ class OpportunitiesDetail extends StatelessWidget {
                         Expanded(
                           child: Text(
                             title,
-                            style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
+                            style: Theme.of(context).textTheme.titleLarge,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -162,8 +162,9 @@ class OpportunitiesDetail extends StatelessWidget {
                     SizedBox(height: 8.0),
                     Row(
                       children: [
-                        Text('Institución:',
-                            style: TextStyle(color: Colors.grey[700])),
+                        Text('Institución',
+                            style:
+                                TextStyle(color: colorScheme.onSurfaceVariant)),
                         SizedBox(width: 4),
                         Expanded(
                           child: Text(authorName,
@@ -171,8 +172,9 @@ class OpportunitiesDetail extends StatelessWidget {
                         ),
                         SizedBox(width: 4),
                         // Convertimos el icono en un InkWell para hacerlo clickeable
-                        InkWell(
-                          onTap: () async {
+                        IconButton(
+                          tooltip: 'Abrir sitio de la institución',
+                          onPressed: () async {
                             // URL hardcodeada para testing
                             const url = 'https://tecuruapan.edu.mx/';
 
@@ -183,7 +185,9 @@ class OpportunitiesDetail extends StatelessWidget {
 
                             try {
                               final uri = Uri.parse(url);
-                              if (await canLaunchUrl(uri)) {
+                              final canOpen = await canLaunchUrl(uri);
+                              if (!context.mounted) return;
+                              if (canOpen) {
                                 await launchUrl(uri,
                                     mode: LaunchMode.externalApplication);
                               } else {
@@ -194,17 +198,17 @@ class OpportunitiesDetail extends StatelessWidget {
                                 );
                               }
                             } catch (e) {
+                              if (!context.mounted) return;
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                     content: Text(
                                         'Error al intentar abrir el enlace: $e')),
                               );
-                              print('Error al intentar abrir URL: $e');
+                              debugPrint('Error al intentar abrir URL: $e');
                             }
                           },
-                          borderRadius: BorderRadius.circular(12),
-                          child: Icon(Icons.link,
-                              size: 20.0, color: Colors.blue[800]),
+                          icon: Icon(Icons.open_in_new_rounded,
+                              size: 20.0, color: colorScheme.primary),
                         ),
                       ],
                     ),
@@ -219,8 +223,8 @@ class OpportunitiesDetail extends StatelessWidget {
                     // [if (hasAttachment) ...] es una forma condicional de añadir widgets a la lista.
                     // Si [hasAttachment] es true, los widgets dentro de los corchetes se añaden.
                     if (hasAttachment) ...[
-                      Text('Información adjunta:',
-                          style: TextStyle(fontWeight: FontWeight.bold)),
+                      Text('Información adjunta',
+                          style: Theme.of(context).textTheme.titleMedium),
                       SizedBox(height: 12.0),
                       // Llama a la función [_buildAttachmentDisplay] para mostrar el display del adjunto.
                       _buildAttachmentDisplay(context, attachmentUrl),
@@ -242,7 +246,7 @@ class OpportunitiesDetail extends StatelessWidget {
             // [Text] que muestra la fecha de expiración.
             child: Text(
               'Fecha de expiración: $expiryDate',
-              style: TextStyle(color: Colors.black),
+              style: Theme.of(context).textTheme.bodyMedium,
               textAlign: TextAlign.left,
             ),
           ),
@@ -253,8 +257,9 @@ class OpportunitiesDetail extends StatelessWidget {
 
   /// Función auxiliar para obtener el icono basado en la extensión del archivo.
   IconData _getFileIcon(String? fileName) {
-    if (fileName == null)
+    if (fileName == null) {
       return Icons.insert_drive_file; // Icono genérico por defecto
+    }
 
     final extension = p.extension(fileName).toLowerCase();
     switch (extension) {
@@ -285,6 +290,7 @@ class OpportunitiesDetail extends StatelessWidget {
   /// Nuevo widget auxiliar [_buildAttachmentDisplay] que construye la visualización del adjunto.
   /// Recibe el [BuildContext] y la [attachmentUrl].
   Widget _buildAttachmentDisplay(BuildContext context, String? attachmentUrl) {
+    final colorScheme = Theme.of(context).colorScheme;
     if (attachmentUrl == null || attachmentUrl.isEmpty) {
       return Container(); // No mostrar nada si no hay URL de adjunto
     }
@@ -297,7 +303,9 @@ class OpportunitiesDetail extends StatelessWidget {
       onTap: () async {
         try {
           final uri = Uri.parse(attachmentUrl);
-          if (await canLaunchUrl(uri)) {
+          final canOpen = await canLaunchUrl(uri);
+          if (!context.mounted) return;
+          if (canOpen) {
             await launchUrl(uri, mode: LaunchMode.externalApplication);
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -307,40 +315,30 @@ class OpportunitiesDetail extends StatelessWidget {
             );
           }
         } catch (e) {
+          if (!context.mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Error al intentar abrir el adjunto: $e')),
           );
-          print('Error al intentar abrir adjunto: $e'); // Para depuración
+          debugPrint('Error al intentar abrir adjunto: $e');
         }
       },
-      child: Material(
-        // Usamos Material para poder aplicar elevation
-        elevation: 2.0, // Puedes ajustar este valor
-        borderRadius: BorderRadius.circular(8.0),
-        child: Container(
-          padding: EdgeInsets.all(12.0),
-          decoration: BoxDecoration(
-            color: Colors.grey[
-                100], // Cambié a un color más claro para que la sombra sea más visible
-            borderRadius: BorderRadius.circular(8.0),
-            // Eliminamos el border si usamos elevation, o lo ajustamos si es necesario.
-            // border: Border.all(color: Colors.grey[300]!),
-          ),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(14),
           child: Row(
             children: [
-              Icon(fileIcon,
-                  size: 30, color: Colors.blue[700]), // Icono representativo
-              SizedBox(width: 12.0),
+              Icon(fileIcon, size: 30, color: colorScheme.primary),
+              const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   fileName,
-                  style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w500),
+                  style: Theme.of(context).textTheme.titleSmall,
                   overflow:
                       TextOverflow.ellipsis, // Para manejar nombres largos
                 ),
               ),
-              Icon(Icons.arrow_forward_ios,
-                  size: 16, color: Colors.grey[600]), // Icono de flecha
+              Icon(Icons.open_in_new_rounded,
+                  size: 18, color: colorScheme.primary),
             ],
           ),
         ),

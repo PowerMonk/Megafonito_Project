@@ -3,68 +3,47 @@ import 'package:flutter/material.dart';
 class NoticeTag extends StatelessWidget {
   final String category;
 
-  NoticeTag({required this.category});
+  const NoticeTag({super.key, required this.category});
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
       decoration: BoxDecoration(
-        color: _getCategoryColor(),
-        borderRadius: BorderRadius.circular(12),
+        color: colorScheme.secondaryContainer,
+        borderRadius: BorderRadius.circular(24),
       ),
       child: Text(
         category,
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 12,
-          fontWeight: FontWeight.bold,
-        ),
+        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: colorScheme.onSecondaryContainer,
+              fontWeight: FontWeight.w700,
+            ),
       ),
     );
-  }
-
-  Color _getCategoryColor() {
-    return Color.fromRGBO(5, 99, 171, 1.0); // Custom RGB(5,99,171) color
-    // Return different colors based on category
-    // switch (category) {
-    //   case 'Materias':
-    //     return Colors.blue; // Tomato
-    //   case 'Convocatorias':
-    //     return Colors.purple;
-    //   case 'Eventos':
-    //     return Colors.orange;
-    //   case 'Deportivos':
-    //     return Colors.green;
-    //   case 'Culturales':
-    //     return Colors.pink;
-    //   case 'Comunidad':
-    //     return Colors.red;
-    //   default:
-    //     return Colors.grey;
-    // }
   }
 }
 
 class FileAttachmentIcon extends StatelessWidget {
+  const FileAttachmentIcon({super.key});
+
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Container(
-      padding: EdgeInsets.all(4),
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 4,
-          ),
-        ],
+        border: Border.all(color: colorScheme.outlineVariant),
       ),
       child: Icon(
-        Icons.attach_file,
-        color: Colors.black54,
-        size: 16,
+        Icons.attach_file_rounded,
+        color: colorScheme.primary,
+        size: 18,
       ),
     );
   }

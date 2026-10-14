@@ -30,9 +30,11 @@ class AuthService {
 
       return _currentUser!;
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Mock login error: $e')),
-      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Mock login error: $e')),
+        );
+      }
       rethrow;
     }
   }
@@ -54,9 +56,11 @@ class AuthService {
 
       return user;
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Mock registration error: $e')),
-      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Mock registration error: $e')),
+        );
+      }
       rethrow;
     }
   }

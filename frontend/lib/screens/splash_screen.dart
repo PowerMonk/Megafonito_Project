@@ -1,15 +1,21 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'dart:async';
+
+import '../theme/app_theme.dart';
 import 'login_screen.dart';
 
 class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+
   @override
-  _SplashScreenState createState() => _SplashScreenState();
+  State<SplashScreen> createState() => _SplashScreenState();
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  double progress = 0;
+  double _progress = 0;
+  Timer? _loadingTimer;
 
   @override
   void initState() {
@@ -18,59 +24,99 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   void _startLoading() {
-    Timer.periodic(Duration(milliseconds: 100), (timer) {
-      setState(() {
-        progress += 0.1;
-      });
+    _loadingTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
 
-      if (progress >= 1) {
+      setState(() => _progress = (_progress + 0.1).clamp(0, 1));
+      if (_progress >= 1) {
         timer.cancel();
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => LoginScreen()),
+          MaterialPageRoute(builder: (context) => const LoginScreen()),
         );
       }
     });
   }
 
   @override
+  void dispose() {
+    _loadingTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      backgroundColor: Color.fromARGB(255, 255, 255, 255),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Image.asset(
-            //   'assets/MegafonitoJPEG.jpeg',
-            //   width: 200,
-            //   height: 200,
-            // ),
-            SizedBox(height: 20),
-            SvgPicture.asset(
-              'assets/Megafonito.svg',
-              height: 200,
-              width: 200,
-            ),
-            SizedBox(height: 20),
-            Text(
-              'Cargando...',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
+      backgroundColor: AppDesign.page,
+      body: SafeArea(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 360),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 188,
+                    height: 188,
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: colorScheme.surface,
+                      borderRadius: BorderRadius.circular(44),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Color(0x1414213D),
+                          blurRadius: 36,
+                          offset: Offset(0, 18),
+                        ),
+                      ],
+                    ),
+                    child: SvgPicture.asset('assets/Megafonito.svg'),
+                  ),
+                  const SizedBox(height: 26),
+                  Text(
+                    'MEGAFONITO',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          color: AppDesign.navy,
+                          letterSpacing: 2.4,
+                          fontWeight: FontWeight.w800,
+                        ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'La información importante, en un solo lugar.',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                  ),
+                  const SizedBox(height: 34),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: LinearProgressIndicator(
+                      value: _progress,
+                      minHeight: 7,
+                      backgroundColor: colorScheme.secondaryContainer,
+                      color: AppDesign.amber,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Preparando tu espacio escolar',
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                  ),
+                ],
               ),
             ),
-            SizedBox(height: 20),
-            Container(
-              width: 300,
-              child: LinearProgressIndicator(
-                value: progress,
-                minHeight: 20,
-                backgroundColor: Colors.white,
-                color: Colors.black,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

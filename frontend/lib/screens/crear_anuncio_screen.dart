@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:file_picker/file_picker.dart';
-import 'dart:io';
 import '../services/storage_service.dart';
 
 // Random comment for pipeline testing
@@ -9,10 +7,10 @@ class CrearNuevoAnuncioScreen extends StatefulWidget {
   final Function(String, String, Color, String, bool, String?, String?)
       onAnuncioCreado;
 
-  CrearNuevoAnuncioScreen({required this.onAnuncioCreado});
+  const CrearNuevoAnuncioScreen({super.key, required this.onAnuncioCreado});
 
   @override
-  _CrearNuevoAnuncioScreenState createState() =>
+  State<CrearNuevoAnuncioScreen> createState() =>
       _CrearNuevoAnuncioScreenState();
 }
 
@@ -25,7 +23,14 @@ class _CrearNuevoAnuncioScreenState extends State<CrearNuevoAnuncioScreen> {
   bool _isUploading = false;
 
   // Store uploaded file details
-  List<Map<String, String?>> _archivosAdjuntos = [];
+  final List<Map<String, String?>> _archivosAdjuntos = [];
+
+  @override
+  void dispose() {
+    _tituloController.dispose();
+    _textoController.dispose();
+    super.dispose();
+  }
 
   // Lista de categorías (misma que en NoticesFilter)
   final List<String> _categorias = [
@@ -75,6 +80,7 @@ class _CrearNuevoAnuncioScreenState extends State<CrearNuevoAnuncioScreen> {
 
     try {
       final result = await StorageService.pickAndUploadFile(context);
+      if (!mounted) return;
 
       if (result != null) {
         setState(() {
@@ -87,7 +93,7 @@ class _CrearNuevoAnuncioScreenState extends State<CrearNuevoAnuncioScreen> {
           _isUploading = false;
         });
 
-        print(
+        debugPrint(
             'File uploaded successfully: URL=${result['fileUrl']}, Key=${result['fileKey']}');
       } else {
         setState(() {
@@ -95,6 +101,7 @@ class _CrearNuevoAnuncioScreenState extends State<CrearNuevoAnuncioScreen> {
         });
       }
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _isUploading = false;
       });
@@ -107,7 +114,7 @@ class _CrearNuevoAnuncioScreenState extends State<CrearNuevoAnuncioScreen> {
   void _mostrarMenuOpciones(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       builder: (BuildContext context) {
         return Column(
           mainAxisSize: MainAxisSize.min,
@@ -219,24 +226,21 @@ class _CrearNuevoAnuncioScreenState extends State<CrearNuevoAnuncioScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: null,
-        backgroundColor: Color.fromARGB(255, 250, 250, 250),
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
+        title: const Text('Nuevo anuncio'),
         actions: [
           IconButton(
-            icon: Icon(Icons.attach_file, color: Colors.black),
-            onPressed: _agregarArchivo,
+            tooltip: 'Adjuntar archivo',
+            icon: const Icon(Icons.attach_file_rounded),
+            onPressed: _isUploading ? null : _agregarArchivo,
           ),
           IconButton(
-            icon: Icon(Icons.send, color: Colors.black),
-            onPressed: _crearAnuncio,
+            tooltip: 'Publicar anuncio',
+            icon: const Icon(Icons.send_rounded),
+            onPressed: _isUploading ? null : _crearAnuncio,
           ),
           IconButton(
-            icon: Icon(Icons.more_vert, color: Colors.black),
+            tooltip: 'Más opciones',
+            icon: const Icon(Icons.more_vert_rounded),
             onPressed: () => _mostrarMenuOpciones(context),
           ),
         ],
@@ -244,197 +248,206 @@ class _CrearNuevoAnuncioScreenState extends State<CrearNuevoAnuncioScreen> {
       body: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints viewportConstraints) {
           return SingleChildScrollView(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minHeight: viewportConstraints.maxHeight,
-              ),
-              child: Container(
-                color: Color.fromARGB(255, 250, 250, 250),
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
+            padding: const EdgeInsets.all(16),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 900),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: viewportConstraints.maxHeight,
+                  ),
+                  child: Card(
+                    margin: EdgeInsets.zero,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            "Autor: ",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black,
-                                fontSize: 18.0),
-                          ),
-                          Expanded(
-                            child: Text(
-                              "mgfdev@itsuruapan.edu.mx",
-                              style: TextStyle(
-                                  color: Colors.black, fontSize: 14.0),
-                            ),
-                          ),
-                          Icon(Icons.person_outline_outlined,
-                              color: Colors.black),
-                        ],
-                      ),
-                      Divider(color: Colors.grey),
-                      Row(
-                        children: [
-                          Text(
-                            "Para: ",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black,
-                                fontSize: 16),
-                          ),
-                          Expanded(
-                            child: DropdownButton<String>(
-                              value: _grupoSeleccionado,
-                              onChanged: (String? newValue) {
-                                setState(() {
-                                  _grupoSeleccionado = newValue!;
-                                });
-                              },
-                              items: _grupos.map((String group) {
-                                return DropdownMenuItem<String>(
-                                  value: group,
-                                  child: Text(
-                                    group,
-                                    style: TextStyle(
-                                        color: Colors.black,
-                                        fontSize: 14.0,
-                                        fontWeight: FontWeight.normal),
-                                  ),
-                                );
-                              }).toList(),
-                              isExpanded: true,
-                              underline: Container(height: 0),
-                              icon: Icon(Icons.arrow_drop_down,
-                                  color: Colors.black),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Divider(color: Colors.grey),
-                      Row(
-                        children: [
-                          Text(
-                            "Categoría: ",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black,
-                                fontSize: 16),
-                          ),
-                          Expanded(
-                            child: DropdownButton<String>(
-                              value: _categoriaSeleccionada,
-                              onChanged: (String? newValue) {
-                                setState(() {
-                                  _categoriaSeleccionada = newValue!;
-                                });
-                              },
-                              items: _categorias.map((String category) {
-                                return DropdownMenuItem<String>(
-                                  value: category,
-                                  child: Text(
-                                    category,
-                                    style: TextStyle(
-                                        color: Colors.black,
-                                        fontSize: 14.5,
-                                        fontWeight: FontWeight.normal),
-                                  ),
-                                );
-                              }).toList(),
-                              isExpanded: true,
-                              underline: Container(height: 0),
-                              icon: Icon(Icons.arrow_drop_down,
-                                  color: Colors.black),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Divider(color: Colors.grey),
-                      Row(
-                        children: [
-                          Text(
-                            "Título: ",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black,
-                                fontSize: 16),
-                          ),
-                          Expanded(
-                            child: TextField(
-                              controller: _tituloController,
-                              decoration: InputDecoration(
-                                border: InputBorder.none,
-                                hintText: "Escribe un título",
-                                hintStyle: TextStyle(
-                                    color: Colors.grey, fontSize: 15.0),
+                          if (_isUploading) const LinearProgressIndicator(),
+                          if (_isUploading) const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              Text(
+                                "Autor: ",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                    fontSize: 18.0),
                               ),
-                              style: TextStyle(
-                                  color: Colors.black, fontSize: 14.5),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Divider(color: Colors.grey),
-                      Row(
-                        children: [
-                          Text(
-                            "Link: ",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black,
-                                fontSize: 16),
-                          ),
-                          Expanded(
-                            child: TextField(
-                              controller: _tituloController,
-                              decoration: InputDecoration(
-                                border: InputBorder.none,
-                                hintText: "Agrega un enlace (opcional)",
-                                hintStyle: TextStyle(
-                                    color: Colors.grey, fontSize: 15.0),
-                              ),
-                              style: TextStyle(
-                                  color: Colors.black, fontSize: 14.5),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Divider(color: Colors.grey),
-                      TextField(
-                        controller: _textoController,
-                        decoration: InputDecoration(
-                          hintText: "Redacta un anuncio",
-                          hintStyle:
-                              TextStyle(color: Colors.grey, fontSize: 14.0),
-                          border: InputBorder.none,
-                        ),
-                        style: TextStyle(color: Colors.black, fontSize: 14.0),
-                        maxLines: null, // Permite que el TextField se expanda
-                        keyboardType: TextInputType.multiline,
-                      ),
-                      if (_archivosAdjuntos.isNotEmpty)
-                        Container(
-                          height:
-                              200, // Altura para la vista previa de los archivos
-                          child: ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: _archivosAdjuntos.length,
-                            itemBuilder: (context, index) {
-                              return Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Image.network(
-                                  _archivosAdjuntos[index]['fileUrl']!,
-                                  width: 100,
-                                  height: 100,
-                                  fit: BoxFit.cover,
+                              Expanded(
+                                child: Text(
+                                  "mgfdev@itsuruapan.edu.mx",
+                                  style: TextStyle(
+                                      color: Colors.black, fontSize: 14.0),
                                 ),
-                              );
-                            },
+                              ),
+                              Icon(Icons.person_outline_outlined,
+                                  color: Colors.black),
+                            ],
                           ),
-                        ),
-                    ],
+                          Divider(color: Colors.grey),
+                          Row(
+                            children: [
+                              Text(
+                                "Para: ",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                    fontSize: 16),
+                              ),
+                              Expanded(
+                                child: DropdownButton<String>(
+                                  value: _grupoSeleccionado,
+                                  onChanged: (String? newValue) {
+                                    setState(() {
+                                      _grupoSeleccionado = newValue!;
+                                    });
+                                  },
+                                  items: _grupos.map((String group) {
+                                    return DropdownMenuItem<String>(
+                                      value: group,
+                                      child: Text(
+                                        group,
+                                        style: TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 14.0,
+                                            fontWeight: FontWeight.normal),
+                                      ),
+                                    );
+                                  }).toList(),
+                                  isExpanded: true,
+                                  underline: Container(height: 0),
+                                  icon: Icon(Icons.arrow_drop_down,
+                                      color: Colors.black),
+                                ),
+                              ),
+                            ],
+                          ),
+                          Divider(color: Colors.grey),
+                          Row(
+                            children: [
+                              Text(
+                                "Categoría: ",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                    fontSize: 16),
+                              ),
+                              Expanded(
+                                child: DropdownButton<String>(
+                                  value: _categoriaSeleccionada,
+                                  onChanged: (String? newValue) {
+                                    setState(() {
+                                      _categoriaSeleccionada = newValue!;
+                                    });
+                                  },
+                                  items: _categorias.map((String category) {
+                                    return DropdownMenuItem<String>(
+                                      value: category,
+                                      child: Text(
+                                        category,
+                                        style: TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 14.5,
+                                            fontWeight: FontWeight.normal),
+                                      ),
+                                    );
+                                  }).toList(),
+                                  isExpanded: true,
+                                  underline: Container(height: 0),
+                                  icon: Icon(Icons.arrow_drop_down,
+                                      color: Colors.black),
+                                ),
+                              ),
+                            ],
+                          ),
+                          Divider(color: Colors.grey),
+                          Row(
+                            children: [
+                              Text(
+                                "Título: ",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                    fontSize: 16),
+                              ),
+                              Expanded(
+                                child: TextField(
+                                  controller: _tituloController,
+                                  decoration: InputDecoration(
+                                    border: InputBorder.none,
+                                    hintText: "Escribe un título",
+                                    hintStyle: TextStyle(
+                                        color: Colors.grey, fontSize: 15.0),
+                                  ),
+                                  style: TextStyle(
+                                      color: Colors.black, fontSize: 14.5),
+                                ),
+                              ),
+                            ],
+                          ),
+                          Divider(color: Colors.grey),
+                          Row(
+                            children: [
+                              Text(
+                                "Link: ",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                    fontSize: 16),
+                              ),
+                              Expanded(
+                                child: TextField(
+                                  controller: _tituloController,
+                                  decoration: InputDecoration(
+                                    border: InputBorder.none,
+                                    hintText: "Agrega un enlace (opcional)",
+                                    hintStyle: TextStyle(
+                                        color: Colors.grey, fontSize: 15.0),
+                                  ),
+                                  style: TextStyle(
+                                      color: Colors.black, fontSize: 14.5),
+                                ),
+                              ),
+                            ],
+                          ),
+                          Divider(color: Colors.grey),
+                          TextField(
+                            controller: _textoController,
+                            decoration: InputDecoration(
+                              hintText: "Redacta un anuncio",
+                              hintStyle:
+                                  TextStyle(color: Colors.grey, fontSize: 14.0),
+                              border: InputBorder.none,
+                            ),
+                            style:
+                                TextStyle(color: Colors.black, fontSize: 14.0),
+                            maxLines:
+                                null, // Permite que el TextField se expanda
+                            keyboardType: TextInputType.multiline,
+                          ),
+                          if (_archivosAdjuntos.isNotEmpty)
+                            SizedBox(
+                              height: 200,
+                              child: ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                itemCount: _archivosAdjuntos.length,
+                                itemBuilder: (context, index) {
+                                  return Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Image.network(
+                                      _archivosAdjuntos[index]['fileUrl']!,
+                                      width: 100,
+                                      height: 100,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ),
