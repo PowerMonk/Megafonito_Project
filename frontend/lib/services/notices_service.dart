@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
 import '../models/notice_model.dart';
 import 'api_service.dart';
 import 'auth_service.dart';
@@ -7,9 +6,6 @@ import 'auth_service.dart';
 /// Mock notices service with no real backend connections
 /// Uses in-memory storage for temporary notices data
 class NoticesService {
-  // Mock in-memory notices storage
-  static List<Notice> _cachedNotices = [];
-
   // Notice loading logic (using mock data)
   static Future<Map<String, dynamic>> loadNotices({
     int page = 1,
@@ -25,7 +21,7 @@ class NoticesService {
         hasFiles: hasFiles,
       );
     } catch (e) {
-      print('Error loading notices: $e');
+      debugPrint('Error loading notices: $e');
       rethrow;
     }
   }
@@ -61,13 +57,17 @@ class NoticesService {
       final notices = ApiService.getMockNotices();
       (notices['data'] as List).insert(0, mockNotice);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Anuncio creado con éxito (modo desarrollo)')),
-      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Anuncio creado con éxito (modo desarrollo)'),
+          ),
+        );
+      }
 
       return;
     } catch (e) {
-      print('Error creating announcement: $e');
+      debugPrint('Error creating announcement: $e');
       rethrow;
     }
   }
@@ -98,7 +98,7 @@ class NoticesService {
       List<dynamic> noticesData = apiResponse['data'];
       return noticesData.map((data) => Notice.fromJson(data)).toList();
     } catch (e) {
-      print('Error converting API response to notices: $e');
+      debugPrint('Error converting API response to notices: $e');
       return [];
     }
   }

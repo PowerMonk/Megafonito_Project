@@ -1,20 +1,23 @@
 import 'package:flutter/material.dart';
 
-class NoticesFilter extends StatefulWidget {
-  final Function(String) onCategorySelected;
-  final Function(String) onSortOptionSelected;
+import '../theme/app_theme.dart';
 
-  NoticesFilter({
+class NoticesFilter extends StatefulWidget {
+  final ValueChanged<String> onCategorySelected;
+  final ValueChanged<String> onSortOptionSelected;
+
+  const NoticesFilter({
+    super.key,
     required this.onCategorySelected,
     required this.onSortOptionSelected,
   });
 
   @override
-  _NoticesFilterState createState() => _NoticesFilterState();
+  State<NoticesFilter> createState() => _NoticesFilterState();
 }
 
 class _NoticesFilterState extends State<NoticesFilter> {
-  final List<String> categories = [
+  static const List<String> _categories = [
     'Materias',
     'Convocatorias',
     'Eventos',
@@ -23,82 +26,93 @@ class _NoticesFilterState extends State<NoticesFilter> {
     'Comunidad',
   ];
 
-  String? selectedCategory;
-  String? selectedSortOption;
+  String? _selectedCategory;
+  String? _selectedSortOption;
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+      padding: const EdgeInsets.fromLTRB(
+        AppDesign.pagePadding,
+        8,
+        AppDesign.pagePadding - 4,
+        4,
+      ),
       child: Row(
         children: [
-          // Category filters - takes most of the width
           Expanded(
-            flex: 7,
-            child: Container(
-              height: 40,
-              child: ListView.builder(
+            child: SizedBox(
+              height: 48,
+              child: ListView.separated(
                 scrollDirection: Axis.horizontal,
-                physics: BouncingScrollPhysics(),
-                itemCount: categories.length,
+                physics: const BouncingScrollPhysics(),
+                itemCount: _categories.length,
+                separatorBuilder: (context, index) => const SizedBox(width: 8),
                 itemBuilder: (context, index) {
-                  final category = categories[index];
-                  final isSelected = selectedCategory == category;
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 8.0),
-                    child: ChoiceChip(
-                      label: Text(category),
-                      selected: isSelected,
-                      selectedColor: Color(0xFFFCA311),
-                      backgroundColor: Colors.white,
-                      labelStyle: TextStyle(
-                        color: isSelected ? Colors.white : Colors.black,
-                      ),
-                      // shape: RoundedRectangleBorder(
-                      //   side: BorderSide(color: Colors.black),
-                      //   borderRadius: BorderRadius.circular(15),
-                      // ),
-                      onSelected: (selected) {
-                        setState(() {
-                          selectedCategory = selected ? category : null;
-                        });
-                        widget.onCategorySelected(selectedCategory ?? '');
-                      },
+                  final category = _categories[index];
+                  final isSelected = _selectedCategory == category;
+
+                  return ChoiceChip(
+                    label: Text(category),
+                    selected: isSelected,
+                    showCheckmark: false,
+                    selectedColor: colorScheme.secondaryContainer,
+                    backgroundColor: colorScheme.surface,
+                    side: BorderSide(
+                      color: isSelected
+                          ? colorScheme.secondaryContainer
+                          : colorScheme.outlineVariant,
                     ),
+                    labelStyle: TextStyle(
+                      color: isSelected
+                          ? colorScheme.onSecondaryContainer
+                          : colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    onSelected: (selected) {
+                      setState(() {
+                        _selectedCategory = selected ? category : null;
+                      });
+                      widget.onCategorySelected(_selectedCategory ?? '');
+                    },
                   );
                 },
               ),
             ),
           ),
-
-          // Filter button - takes remaining width
-          Container(
-            child: PopupMenuButton<String>(
-              icon: Icon(Icons.filter_list),
-              tooltip: 'Ordenar',
-              color: Color.fromARGB(255, 250, 250, 250),
-              onSelected: (value) {
-                setState(() {
-                  selectedSortOption = value;
-                });
-                widget.onSortOptionSelected(selectedSortOption ?? '');
-              },
-              itemBuilder: (context) => [
-                PopupMenuItem(
-                  value: 'Más recientes',
-                  child: Text('Más recientes'),
-                ),
-                PopupMenuItem(
-                  value: 'Más antiguos',
-                  child: Text('Más antiguos'),
-                ),
-                PopupMenuItem(
-                  value: 'Con archivos',
-                  child: Text('Con archivos'),
-                ),
-              ],
+          const SizedBox(width: 4),
+          PopupMenuButton<String>(
+            tooltip: 'Filtrar y ordenar anuncios',
+            icon: const Icon(Icons.tune_rounded),
+            onSelected: (value) {
+              setState(() => _selectedSortOption = value);
+              widget.onSortOptionSelected(value);
+            },
+            itemBuilder: (context) => [
+              _menuItem('Más recientes'),
+              _menuItem('Más antiguos'),
+              _menuItem('Con archivos'),
+            ],
+            color: colorScheme.surface,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppDesign.controlRadius),
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  PopupMenuItem<String> _menuItem(String label) {
+    return PopupMenuItem<String>(
+      value: label,
+      child: Row(
+        children: [
+          Expanded(child: Text(label)),
+          if (_selectedSortOption == label)
+            const Icon(Icons.check_rounded, size: 18),
         ],
       ),
     );

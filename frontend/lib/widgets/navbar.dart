@@ -1,111 +1,86 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../theme/app_theme.dart';
+
 class AppNavBar extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
 
   const AppNavBar({
-    Key? key,
+    super.key,
     required this.currentIndex,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
-    return BottomNavigationBar(
-      currentIndex: currentIndex,
-      backgroundColor: Colors.black,
-      selectedItemColor: Color(0xFFFCA311),
-      unselectedItemColor: Colors.white,
-      type: BottomNavigationBarType.fixed,
-      showUnselectedLabels: true,
-      iconSize: 24.0,
-      selectedLabelStyle: TextStyle(fontSize: 12.0, letterSpacing: -0.2),
-      unselectedLabelStyle: TextStyle(fontSize: 12.0, letterSpacing: -0.2),
-      items: [
-        BottomNavigationBarItem(
-          icon: SvgPicture.asset(
-            'assets/icons/inicio_icon.svg',
-            height: 24.0,
-            width: 24.0,
-            colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-          ),
-          activeIcon: SvgPicture.asset(
-            'assets/icons/inicio_icon.svg',
-            height: 24.0,
-            width: 24.0,
-            colorFilter:
-                const ColorFilter.mode(Color(0xFFFCA311), BlendMode.srcIn),
-          ),
-          label: 'Inicio',
-        ),
-        BottomNavigationBarItem(
-          icon: SvgPicture.asset(
-            'assets/icons/contactov2_icon.svg',
-            height: 24.0,
-            width: 24.0,
-            colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-          ),
-          activeIcon: SvgPicture.asset(
-            'assets/icons/contactov2_icon.svg',
-            height: 24.0,
-            width: 24.0,
-            colorFilter:
-                const ColorFilter.mode(Color(0xFFFCA311), BlendMode.srcIn),
-          ),
-          label: 'Contactos',
-        ),
-        BottomNavigationBarItem(
-          icon: SvgPicture.asset(
-            'assets/icons/oportunidades_icon.svg',
-            height: 24.0,
-            width: 24.0,
-            colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-          ),
-          activeIcon: SvgPicture.asset(
-            'assets/icons/oportunidades_icon.svg',
-            height: 24.0,
-            width: 24.0,
-            colorFilter:
-                const ColorFilter.mode(Color(0xFFFCA311), BlendMode.srcIn),
-          ),
-          label: 'Oportunidades',
-        ),
-        BottomNavigationBarItem(
-          icon: SvgPicture.asset(
-            'assets/icons/procesos_icon.svg',
-            height: 24.0,
-            width: 24.0,
-            colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-          ),
-          activeIcon: SvgPicture.asset(
-            'assets/icons/procesos_icon.svg',
-            height: 24.0,
-            width: 24.0,
-            colorFilter:
-                const ColorFilter.mode(Color(0xFFFCA311), BlendMode.srcIn),
-          ),
-          label: 'Procesos',
-        ),
-        BottomNavigationBarItem(
-          icon: SvgPicture.asset(
-            'assets/icons/cuenta_icon.svg',
-            height: 24.0,
-            width: 24.0,
-            colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-          ),
-          activeIcon: SvgPicture.asset(
-            'assets/icons/cuenta_icon.svg',
-            height: 24.0,
-            width: 24.0,
-            colorFilter:
-                const ColorFilter.mode(Color(0xFFFCA311), BlendMode.srcIn),
-          ),
-          label: 'Cuenta',
-        ),
-      ],
-      onTap: onTap,
+    return NavigationBar(
+      selectedIndex: currentIndex,
+      onDestinationSelected: onTap,
+      destinations: _navigationItems.map((item) {
+        return NavigationDestination(
+          icon:
+              _icon(item.asset, Theme.of(context).colorScheme.onSurfaceVariant),
+          selectedIcon: _icon(item.asset, AppDesign.navy),
+          label: item.label,
+        );
+      }).toList(),
     );
   }
 }
+
+class AppNavigationRail extends StatelessWidget {
+  final int currentIndex;
+  final ValueChanged<int> onTap;
+
+  const AppNavigationRail({
+    super.key,
+    required this.currentIndex,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return NavigationRail(
+      selectedIndex: currentIndex,
+      onDestinationSelected: onTap,
+      labelType: NavigationRailLabelType.all,
+      groupAlignment: 0,
+      destinations: _navigationItems.map((item) {
+        return NavigationRailDestination(
+          icon: _icon(item.asset, colorScheme.onSurfaceVariant),
+          selectedIcon: _icon(item.asset, AppDesign.navy),
+          label: Text(item.label),
+        );
+      }).toList(),
+    );
+  }
+}
+
+Widget _icon(String asset, Color color) {
+  return SvgPicture.asset(
+    asset,
+    height: 24,
+    width: 24,
+    colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+    excludeFromSemantics: true,
+  );
+}
+
+class _NavigationItem {
+  final String label;
+  final String asset;
+
+  const _NavigationItem(this.label, this.asset);
+}
+
+const List<_NavigationItem> _navigationItems = [
+  _NavigationItem('Inicio', 'assets/icons/inicio_icon.svg'),
+  _NavigationItem('Contactos', 'assets/icons/contactov2_icon.svg'),
+  _NavigationItem('Oportunidades', 'assets/icons/oportunidades_icon.svg'),
+  _NavigationItem('Procesos', 'assets/icons/procesos_icon.svg'),
+  _NavigationItem('Cuenta', 'assets/icons/cuenta_icon.svg'),
+];

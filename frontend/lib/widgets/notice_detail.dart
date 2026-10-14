@@ -14,9 +14,9 @@ class NoticeDetail extends StatelessWidget {
 
   /// Constructor para [NoticeDetail]. Recibe el mapa [anuncio] requerido.
   const NoticeDetail({
-    Key? key,
+    super.key,
     required this.anuncio,
-  }) : super(key: key);
+  });
 
   /// El método [build] es el punto de entrada para construir la UI del widget.
   /// En este caso, simplemente llama a [_buildContent] para construir el contenido real.
@@ -73,6 +73,7 @@ class NoticeDetail extends StatelessWidget {
   /// Recibe el [BuildContext] actual y el [ScrollController] del [DraggableScrollableSheet].
   Widget _buildContent(
       BuildContext context, ScrollController scrollController) {
+    final colorScheme = Theme.of(context).colorScheme;
     // Extrae el título del mapa [anuncio]. Si la clave 'title' no existe, usa 'Detalle del Anuncio' como valor por defecto.
     final String title = anuncio['title'] ?? 'Detalle del Anuncio';
     // Extrae el nombre del autor del mapa [anuncio]. Si la clave 'author_name' no existe, usa 'Autor Desconocido' como valor por defecto.
@@ -90,8 +91,8 @@ class NoticeDetail extends StatelessWidget {
     return Container(
       // [decoration] define la apariencia visual del [Container], en este caso, el color de fondo y los bordes redondeados en la parte superior.
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(22.0)),
+        color: colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
       ),
       // [child] contiene la estructura de la UI dentro del [Container].
       child: Column(
@@ -111,7 +112,7 @@ class NoticeDetail extends StatelessWidget {
               // [child] contiene el contenido desplazable, envuelto en un [Padding].
               child: Padding(
                 // [padding] añade espacio alrededor del contenido interior.
-                padding: EdgeInsets.all(16.0),
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
                 // [child] es una [Column] que organiza los elementos verticalmente dentro del [Padding].
                 child: Column(
                   // [crossAxisAlignment] alinea los hijos al inicio del eje transversal (izquierda).
@@ -127,9 +128,9 @@ class NoticeDetail extends StatelessWidget {
                       child: Container(
                         width: 40,
                         height: 5,
-                        margin: EdgeInsets.only(bottom: 10.0),
+                        margin: const EdgeInsets.only(bottom: 10.0),
                         decoration: BoxDecoration(
-                          color: Colors.grey[300],
+                          color: colorScheme.outlineVariant,
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
@@ -151,8 +152,7 @@ class NoticeDetail extends StatelessWidget {
                         Expanded(
                           child: Text(
                             title,
-                            style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
+                            style: Theme.of(context).textTheme.titleLarge,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -161,16 +161,17 @@ class NoticeDetail extends StatelessWidget {
                     SizedBox(height: 8.0),
                     Row(
                       children: [
-                        Text('Autor:',
-                            style: TextStyle(color: Colors.grey[700])),
+                        Text('Publicado por',
+                            style:
+                                TextStyle(color: colorScheme.onSurfaceVariant)),
                         SizedBox(width: 4),
                         Expanded(
                           child: Text(authorName,
                               style: TextStyle(fontWeight: FontWeight.w500)),
                         ),
                         SizedBox(width: 4),
-                        Icon(Icons.person_outline,
-                            size: 20.0, color: Colors.grey[700]),
+                        Icon(Icons.person_outline_rounded,
+                            size: 20.0, color: colorScheme.primary),
                       ],
                     ),
                     // [Divider] es una línea horizontal que separa visualmente el contenido.
@@ -178,14 +179,14 @@ class NoticeDetail extends StatelessWidget {
                     // [Text] muestra texto en la pantalla.
                     Text(
                       content,
-                      style: TextStyle(fontSize: 15.0, height: 1.4),
+                      style: Theme.of(context).textTheme.bodyLarge,
                     ),
                     SizedBox(height: 16.0),
                     // [if (hasAttachment) ...] es una forma condicional de añadir widgets a la lista.
                     // Si [hasAttachment] es true, los widgets dentro de los corchetes se añaden.
                     if (hasAttachment) ...[
-                      Text('Archivo adjunto:', // Cambiado de 'Attachment:'
-                          style: TextStyle(fontWeight: FontWeight.bold)),
+                      Text('Archivo adjunto',
+                          style: Theme.of(context).textTheme.titleMedium),
                       SizedBox(height: 12.0),
                       // Llama a la función [_buildAttachmentDisplay] para mostrar el display del adjunto.
                       _buildAttachmentDisplay(context, attachmentUrl),
@@ -207,7 +208,7 @@ class NoticeDetail extends StatelessWidget {
             // [Text] que muestra la fecha de expiración.
             child: Text(
               'Fecha de expiración: $expiryDate',
-              style: TextStyle(color: Colors.black),
+              style: Theme.of(context).textTheme.bodyMedium,
               textAlign: TextAlign.left,
             ),
           ),
@@ -218,8 +219,9 @@ class NoticeDetail extends StatelessWidget {
 
   /// Función auxiliar para obtener el icono basado en la extensión del archivo.
   IconData _getFileIcon(String? fileName) {
-    if (fileName == null)
+    if (fileName == null) {
       return Icons.insert_drive_file; // Icono genérico por defecto
+    }
 
     final extension = p.extension(fileName).toLowerCase();
     switch (extension) {
@@ -250,6 +252,7 @@ class NoticeDetail extends StatelessWidget {
   /// Nuevo widget auxiliar [_buildAttachmentDisplay] que construye la visualización del adjunto.
   /// Recibe el [BuildContext] y la [attachmentUrl].
   Widget _buildAttachmentDisplay(BuildContext context, String? attachmentUrl) {
+    final colorScheme = Theme.of(context).colorScheme;
     // Si no hay URL de adjunto, aún así mostramos un placeholder con el nombre fijo.
     // Esto es diferente a OpportunitiesDetail donde no se mostraba nada si no había URL.
     final String displayFileName = 'Archivo_importante.pdf';
@@ -268,7 +271,9 @@ class NoticeDetail extends StatelessWidget {
 
         try {
           final uri = Uri.parse(attachmentUrl);
-          if (await canLaunchUrl(uri)) {
+          final canOpen = await canLaunchUrl(uri);
+          if (!context.mounted) return;
+          if (canOpen) {
             await launchUrl(uri, mode: LaunchMode.externalApplication);
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -278,37 +283,30 @@ class NoticeDetail extends StatelessWidget {
             );
           }
         } catch (e) {
+          if (!context.mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Error al intentar abrir el adjunto: $e')),
           );
-          print('Error al intentar abrir adjunto: $e'); // Para depuración
+          debugPrint('Error al intentar abrir adjunto: $e');
         }
       },
-      child: Material(
-        elevation: 2.0, // Puedes ajustar este valor
-        borderRadius: BorderRadius.circular(8.0),
-        child: Container(
-          padding: EdgeInsets.all(12.0),
-          decoration: BoxDecoration(
-            color: Colors.grey[
-                100], // Cambié a un color más claro para que la sombra sea más visible
-            borderRadius: BorderRadius.circular(8.0),
-          ),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(14),
           child: Row(
             children: [
-              Icon(fileIcon,
-                  size: 30, color: Colors.blue[700]), // Icono representativo
-              SizedBox(width: 12.0),
+              Icon(fileIcon, size: 30, color: colorScheme.primary),
+              const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   displayFileName, // Usamos el nombre fijo aquí
-                  style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w500),
+                  style: Theme.of(context).textTheme.titleSmall,
                   overflow:
                       TextOverflow.ellipsis, // Para manejar nombres largos
                 ),
               ),
-              Icon(Icons.arrow_forward_ios,
-                  size: 16, color: Colors.grey[600]), // Icono de flecha
+              Icon(Icons.open_in_new_rounded,
+                  size: 18, color: colorScheme.primary),
             ],
           ),
         ),

@@ -1,270 +1,234 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'dart:ui'; // For ImageFilter
-import '../screens/createopps_screen.dart'; // Add this import
-import '../screens/newmsg_screen.dart'; // Add this import
+
+import '../screens/createopps_screen.dart';
+import '../screens/newmsg_screen.dart';
+import '../theme/app_theme.dart';
 
 class ActionButtons extends StatelessWidget {
   final bool isSuperUser;
   final bool showExtraFabs;
   final VoidCallback onShowExtraFabs;
   final VoidCallback onCreateNotice;
-  final VoidCallback onCreateMessage;
-  final VoidCallback onCreateOpportunity;
   final VoidCallback onDismissBlur;
 
   const ActionButtons({
-    Key? key,
+    super.key,
     required this.isSuperUser,
     required this.showExtraFabs,
     required this.onShowExtraFabs,
     required this.onCreateNotice,
-    required this.onCreateMessage,
-    required this.onCreateOpportunity,
     required this.onDismissBlur,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
-    // Only build if superuser (first tab check is handled by parent)
-    if (!isSuperUser) {
-      return SizedBox.shrink();
-    }
+    if (!isSuperUser) return const SizedBox.shrink();
 
     return Stack(
       children: [
-        // Blur and extra buttons layer (conditional)
         if (showExtraFabs)
-          // Dismiss layer on tap
-          GestureDetector(
-            onTap: onDismissBlur,
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 3.0, sigmaY: 3.0),
-              child: Container(
-                color: Colors.black.withOpacity(0.6), // Semi-transparent black
+          Positioned.fill(
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: onDismissBlur,
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
+                child: Container(color: const Color(0x990B1426)),
               ),
             ),
           ),
-
-        // The two new FABs (conditional)
         if (showExtraFabs)
           Positioned(
-            bottom: 22.0,
-            right: 18.0,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                // Third option: Oportunidad nueva
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // Text Label
-                    Padding(
-                      padding: const EdgeInsets.only(right: 12.0),
-                      child: Text(
-                        'Oportunidad nueva',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w500,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ),
-                    // Circular Button
-                    FloatingActionButton(
-                      onPressed: () {
-                        // Close the menu
-                        onDismissBlur();
-                        // Navigate to the create opportunity screen
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => CrearNuevaOportunidadScreen(),
-                          ),
-                        );
-                      },
-                      backgroundColor: Colors.white,
-                      heroTag: 'extraFab2',
-                      tooltip: 'Crear Nueva Oportunidad',
-                      elevation: 4.0,
-                      mini: false,
-                      shape: CircleBorder(),
-                      child: SvgPicture.asset(
-                        'assets/icons/newopp_icon.svg',
-                        height: 35.0,
-                        width: 35.0,
-                        colorFilter: ColorFilter.mode(
-                            Color(0xFFFCA311), BlendMode.srcIn),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 20.0),
-                // Second Option: Nuevo Mensaje
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // Text Label
-                    Padding(
-                      padding: const EdgeInsets.only(right: 12.0),
-                      child: Text(
-                        'Nuevo mensaje',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w500,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ),
-                    // Circular Button
-                    FloatingActionButton(
-                      onPressed: () {
-                        // Close the menu
-                        onDismissBlur();
-                        // Navigate to the new message screen
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => NuevoMensajeScreen(),
-                          ),
-                        );
-                      },
-                      backgroundColor: Colors.white,
-                      heroTag: 'extraFab2',
-                      tooltip: 'Crear Nuevo Mensaje',
-                      elevation: 4.0,
-                      mini: false,
-                      shape: CircleBorder(),
-                      child: SvgPicture.asset(
-                        'assets/icons/nuevomensaje_icon.svg',
-                        height: 24.0,
-                        width: 24.0,
-                        colorFilter: ColorFilter.mode(
-                            Color(0xFFFCA311), BlendMode.srcIn),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 20.0),
-
-                // First Option: Anuncio Nuevo
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // Text Label
-                    Padding(
-                      padding: const EdgeInsets.only(right: 12.0),
-                      child: Text(
-                        'Anuncio nuevo',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w500,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ),
-                    // Circular Button
-                    Transform.scale(
-                      scale: 1.15,
-                      child: FloatingActionButton(
-                        onPressed: onCreateNotice,
-                        backgroundColor: Color(0xFFFCA311),
-                        heroTag: 'extraFab1',
-                        tooltip: 'Crear Nuevo Anuncio',
-                        elevation: 4.0,
-                        mini: false,
-                        shape: CircleBorder(),
-                        child: SvgPicture.asset(
-                          'assets/icons/nuevoanuncio_icon.svg',
-                          height: 26.0,
-                          width: 26.0,
-                          colorFilter:
-                              ColorFilter.mode(Colors.white, BlendMode.srcIn),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-
-        // Segmented FAB (only if extra FABs are not shown)
-        if (!showExtraFabs)
-          Positioned(
-            bottom: 16.0,
-            right: 16.0,
-            child: _buildSegmentedFab(context),
-          ),
-      ],
-    );
-  }
-
-  Widget _buildSegmentedFab(BuildContext context) {
-    return Container(
-      height: 50,
-      decoration: BoxDecoration(
-        color: Color(0xFFFCA311),
-        borderRadius: BorderRadius.circular(25),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            spreadRadius: 1,
-            blurRadius: 3,
-            offset: Offset(0, 1),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Left Segment: Create Notice
-          InkWell(
-            onTap: onCreateNotice,
-            borderRadius: BorderRadius.horizontal(left: Radius.circular(25)),
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-              child: Row(
+            bottom: 24,
+            right: 20,
+            child: SafeArea(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  SvgPicture.asset(
-                    'assets/icons/nuevoanuncio_icon.svg',
-                    height: 20,
-                    width: 20,
-                    colorFilter: ColorFilter.mode(
-                        Colors.white, BlendMode.srcIn), // White icon
+                  _buildExtraAction(
+                    context,
+                    label: 'Oportunidad nueva',
+                    tooltip: 'Crear nueva oportunidad',
+                    heroTag: 'megafonito-create-opportunity',
+                    asset: 'assets/icons/newopp_icon.svg',
+                    onPressed: () {
+                      onDismissBlur();
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => CrearNuevaOportunidadScreen(),
+                        ),
+                      );
+                    },
                   ),
-                  SizedBox(width: 8),
-                  Text(
-                    'Anuncio nuevo',
-                    style: TextStyle(
-                        color: Colors.white, fontWeight: FontWeight.w700),
+                  const SizedBox(height: 14),
+                  _buildExtraAction(
+                    context,
+                    label: 'Nuevo mensaje',
+                    tooltip: 'Crear nuevo mensaje',
+                    heroTag: 'megafonito-create-message',
+                    asset: 'assets/icons/nuevomensaje_icon.svg',
+                    onPressed: () {
+                      onDismissBlur();
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => NuevoMensajeScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 14),
+                  _buildExtraAction(
+                    context,
+                    label: 'Anuncio nuevo',
+                    tooltip: 'Crear nuevo anuncio',
+                    heroTag: 'megafonito-create-notice-expanded',
+                    asset: 'assets/icons/nuevoanuncio_icon.svg',
+                    emphasized: true,
+                    onPressed: onCreateNotice,
                   ),
                 ],
               ),
             ),
           ),
-          // Separator
+        if (!showExtraFabs)
+          Positioned(
+            bottom: 18,
+            right: 18,
+            child: SafeArea(child: _buildSegmentedFab(context)),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildExtraAction(
+    BuildContext context, {
+    required String label,
+    required String tooltip,
+    required String heroTag,
+    required String asset,
+    required VoidCallback onPressed,
+    bool emphasized = false,
+  }) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final foreground = colorScheme.primary;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Flexible(
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 220),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: colorScheme.surface,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Text(
+              label,
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: colorScheme.onSurface,
+                    fontWeight: FontWeight.w700,
+                  ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        FloatingActionButton(
+          onPressed: onPressed,
+          heroTag: heroTag,
+          tooltip: tooltip,
+          backgroundColor: emphasized ? AppDesign.amber : colorScheme.surface,
+          foregroundColor: foreground,
+          child: SvgPicture.asset(
+            asset,
+            height: 25,
+            width: 25,
+            colorFilter: ColorFilter.mode(foreground, BlendMode.srcIn),
+            excludeFromSemantics: true,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSegmentedFab(BuildContext context) {
+    return Material(
+      color: AppDesign.amber,
+      elevation: 5,
+      shadowColor: const Color(0x3814213D),
+      borderRadius: BorderRadius.circular(28),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Semantics(
+            button: true,
+            label: 'Crear un anuncio nuevo',
+            child: InkWell(
+              onTap: onCreateNotice,
+              borderRadius:
+                  const BorderRadius.horizontal(left: Radius.circular(28)),
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SvgPicture.asset(
+                      'assets/icons/nuevoanuncio_icon.svg',
+                      height: 20,
+                      width: 20,
+                      colorFilter: const ColorFilter.mode(
+                        AppDesign.navy,
+                        BlendMode.srcIn,
+                      ),
+                      excludeFromSemantics: true,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Anuncio nuevo',
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                            color: AppDesign.navy,
+                            fontWeight: FontWeight.w700,
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
           Container(
             width: 1,
             height: 30,
-            color: Colors.white, // White separator
+            color: const Color(0x7314213D),
           ),
-          // Right Segment: Show Extra Options
-          InkWell(
-            onTap: onShowExtraFabs,
-            borderRadius: BorderRadius.horizontal(right: Radius.circular(25)),
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-              child: SvgPicture.asset(
-                'assets/icons/opciones_icon.svg',
-                height: 20,
-                width: 20,
-                colorFilter: ColorFilter.mode(
-                    Colors.white, BlendMode.srcIn), // White icon
+          Semantics(
+            button: true,
+            label: 'Más acciones de creación',
+            child: InkWell(
+              onTap: onShowExtraFabs,
+              borderRadius:
+                  const BorderRadius.horizontal(right: Radius.circular(28)),
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                child: SvgPicture.asset(
+                  'assets/icons/opciones_icon.svg',
+                  height: 20,
+                  width: 20,
+                  colorFilter: const ColorFilter.mode(
+                    AppDesign.navy,
+                    BlendMode.srcIn,
+                  ),
+                  excludeFromSemantics: true,
+                ),
               ),
             ),
           ),

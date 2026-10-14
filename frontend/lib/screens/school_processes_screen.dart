@@ -1,232 +1,162 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:photo_view/photo_view.dart';
+
+import '../theme/app_theme.dart';
 
 class SchoolProcessesScreen extends StatelessWidget {
+  const SchoolProcessesScreen({super.key});
+
+  static const List<String> _questions = [
+    '¿Cómo puedo solicitar una revisión de calificación?',
+    '¿Cuál es el proceso para dar de baja una materia?',
+    '¿Cómo puedo solicitar una constancia de estudios?',
+  ];
+
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Container(
-      // Light gray background color matching other screens
-      color: Color.fromARGB(255, 250, 250, 250),
-      padding: EdgeInsets.all(16.0),
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // --- Calendar Title with Underline Effect (Centered) ---
-            Center(
-              child: Column(
-                children: [
-                  Padding(
-                    padding: EdgeInsets.only(bottom: 4.0, top: 16.0),
-                    child: Text(
-                      'Calendario escolar',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  // Divider acting as an underline (centered under text)
-                  Container(
-                    width: 240.0, // Width to match the text approximately
-                    child: Divider(
-                      color: Colors.black,
-                      thickness: 2.0,
-                      height: 1.0,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(height: 20.0), // Spacing after title
-
-            // --- Calendar Icon Box (clickable) ---
-            InkWell(
-              onTap: () {
-                // TODO: Implement navigation to calendar screen
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                      content:
-                          Text('Navegación al calendario no implementada')),
-                );
-              },
-              borderRadius: BorderRadius.circular(8.0),
-              child: Card(
-                color: Colors.white,
-                elevation: 2.5,
-                margin: EdgeInsets.only(bottom: 16.0),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                child: Container(
-                  width: double.infinity, // Takes full width
-                  height: 120, // Fixed height
-                  padding: EdgeInsets.all(16.0),
-                  child: Center(
-                    child: SvgPicture.asset(
-                      'assets/icons/calendario-escolar_icon.svg',
-                      height: 60,
-                      width: 60,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-
-            // --- FAQ Section ---
-            Padding(
-              padding: EdgeInsets.only(left: 8.0, bottom: 8.0, top: 24.0),
-              child: Text(
-                'Preguntas frecuentes',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-
-            // FAQ Questions (clickable text items)
-            _buildFaqQuestion(
-              context: context,
-              question: '¿Cómo puedo solicitar una revisión de calificación?',
-              onTap: () {
-                // TODO: Implement navigation or action for this FAQ
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Pregunta 1 clickeada')),
-                );
-              },
-            ),
-            SizedBox(height: 12),
-
-            _buildFaqQuestion(
-              context: context,
-              question: '¿Cuál es el proceso para dar de baja una materia?',
-              onTap: () {
-                // TODO: Implement navigation or action for this FAQ
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Pregunta 2 clickeada')),
-                );
-              },
-            ),
-            SizedBox(height: 12),
-
-            _buildFaqQuestion(
-              context: context,
-              question: '¿Cómo puedo solicitar una constancia de estudios?',
-              onTap: () {
-                // TODO: Implement navigation or action for this FAQ
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Pregunta 3 clickeada')),
-                );
-              },
-            ),
-            SizedBox(height: 24),
-
-            // --- Enrollment Process Button ---
-            _buildProcessButton(
-              context: context,
-              title: 'Proceso de inscripción',
-              subtitle: 'Ver requisitos y pasos a seguir',
-              onTap: () {
-                // TODO: Implement navigation or action for enrollment process
-                print('Enrollment process button clicked');
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// Helper method to build FAQ question items as clickable text
-  Widget _buildFaqQuestion({
-    required BuildContext context,
-    required String question,
-    required VoidCallback onTap,
-  }) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 8.0),
-      child: InkWell(
-        onTap: onTap,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Bullet point
-            Padding(
-              padding: EdgeInsets.only(top: 10.0, right: 8.0),
-              child: Icon(Icons.circle,
-                  size: 8, color: const Color.fromARGB(255, 36, 35, 35)),
-            ),
-            // Question text
-            Expanded(
-              child: Text(
-                question,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.deepPurple[600],
-                  decoration: TextDecoration.underline,
-                  decorationColor: Colors.deepPurple[600],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// Helper method to build process button (like in support screen)
-  Widget _buildProcessButton({
-    required BuildContext context,
-    required String title,
-    required String subtitle,
-    required VoidCallback onTap,
-  }) {
-    return Material(
-      color: Colors.white,
-      elevation: 3.0,
-      borderRadius: BorderRadius.circular(12.0),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12.0),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
-          child: Row(
+      color: AppDesign.page,
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 900),
+          child: ListView(
+            padding: const EdgeInsets.all(AppDesign.pagePadding),
             children: [
-              // Column for title and subtitle
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
+              Text(
+                'Procesos escolares',
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Consulta fechas importantes y respuestas rápidas.',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
                     ),
-                    SizedBox(height: 4),
-                    Text(
-                      subtitle,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.grey[600],
-                      ),
+              ),
+              const SizedBox(height: 20),
+              Card(
+                clipBehavior: Clip.antiAlias,
+                child: InkWell(
+                  onTap: () => _showPlaceholder(
+                    context,
+                    'Navegación al calendario no implementada',
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(18),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 64,
+                          height: 64,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: colorScheme.primaryContainer,
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          child: SvgPicture.asset(
+                            'assets/icons/calendario-escolar_icon.svg',
+                            height: 36,
+                            width: 36,
+                            colorFilter: ColorFilter.mode(
+                              colorScheme.onPrimaryContainer,
+                              BlendMode.srcIn,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Calendario escolar',
+                                style: Theme.of(context).textTheme.titleMedium,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Revisa periodos y fechas clave',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(
+                                      color: colorScheme.onSurfaceVariant,
+                                    ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Icon(Icons.chevron_right_rounded,
+                            color: colorScheme.onSurfaceVariant),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
-              // Arrow icon
-              Icon(
-                Icons.chevron_right,
-                color: Colors.grey[400],
+              const SizedBox(height: 26),
+              Text(
+                'Preguntas frecuentes',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 12),
+              ..._questions.asMap().entries.map((entry) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: Card(
+                    child: ListTile(
+                      minVerticalPadding: 14,
+                      leading: Icon(
+                        Icons.help_outline_rounded,
+                        color: colorScheme.primary,
+                      ),
+                      title: Text(
+                        entry.value,
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
+                      trailing: const Icon(Icons.chevron_right_rounded),
+                      onTap: () => _showPlaceholder(
+                        context,
+                        'Pregunta ${entry.key + 1} seleccionada',
+                      ),
+                    ),
+                  ),
+                );
+              }),
+              const SizedBox(height: 16),
+              Card(
+                child: ListTile(
+                  minVerticalPadding: 16,
+                  leading: CircleAvatar(
+                    backgroundColor: colorScheme.secondaryContainer,
+                    foregroundColor: colorScheme.onSecondaryContainer,
+                    child: const Icon(Icons.assignment_outlined),
+                  ),
+                  title: Text(
+                    'Proceso de inscripción',
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                  subtitle: const Padding(
+                    padding: EdgeInsets.only(top: 4),
+                    child: Text('Ver requisitos y pasos a seguir'),
+                  ),
+                  trailing: const Icon(Icons.chevron_right_rounded),
+                  onTap: () => _showPlaceholder(
+                    context,
+                    'Proceso de inscripción seleccionado',
+                  ),
+                ),
               ),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  void _showPlaceholder(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
     );
   }
 }

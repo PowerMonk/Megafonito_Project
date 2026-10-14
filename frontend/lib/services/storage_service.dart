@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 
@@ -12,9 +11,11 @@ class StorageService {
       FilePickerResult? result = await FilePicker.platform.pickFiles();
 
       if (result == null || result.files.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('No se seleccionó ningún archivo')),
-        );
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('No se seleccionó ningún archivo')),
+          );
+        }
         return null;
       }
 
@@ -29,11 +30,15 @@ class StorageService {
       final mockFileUrl = 'https://example.com/mock-files/$timestamp-$fileName';
       final mockFileKey = 'mock-key-$timestamp-$fileName';
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
             content: Text(
-                'Archivo "$fileName" subido correctamente (modo desarrollo)')),
-      );
+              'Archivo "$fileName" subido correctamente (modo desarrollo)',
+            ),
+          ),
+        );
+      }
 
       // Return mock file details
       return {
@@ -41,10 +46,12 @@ class StorageService {
         'fileKey': mockFileKey,
       };
     } catch (e) {
-      print('File upload error: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al subir archivo: $e')),
-      );
+      debugPrint('File upload error: $e');
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al subir archivo: $e')),
+        );
+      }
       return null;
     }
   }
@@ -52,7 +59,7 @@ class StorageService {
   static Future<void> deleteFile(String fileKey) async {
     // Mock file deletion
     await Future.delayed(Duration(milliseconds: 800));
-    print('File deleted (mock): $fileKey');
+    debugPrint('File deleted (mock): $fileKey');
     return;
   }
 }

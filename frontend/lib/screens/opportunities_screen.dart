@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Importa la librería para interactuar con los assets del proyecto.
 import 'dart:convert'; // Importa la librería para trabajar con la codificación y decodificación de JSON.
 import 'oppscontent_screen.dart'; // Importa la pantalla de detalles 'OppsContentScreen'.
+import '../theme/app_theme.dart';
 
 class OpportunitiesScreen extends StatefulWidget {
   // Define un StatefulWidget llamado 'OpportunitiesScreen'. Los StatefulWidget son widgets cuyo estado puede cambiar dinámicamente.
+  const OpportunitiesScreen({super.key});
+
   @override
-  _BeneficiosScreenState createState() => _BeneficiosScreenState();
+  State<OpportunitiesScreen> createState() => _BeneficiosScreenState();
   // Sobrescribe el método 'createState()' para crear la instancia del estado mutable asociado a este widget.
   // Notar que el nombre del estado es '_BeneficiosScreenState', aunque el widget se llama 'OpportunitiesScreen'.
   // Esto podría ser un error tipográfico y debería ser '_OpportunitiesScreenState' para mayor claridad.
@@ -60,10 +63,12 @@ class _BeneficiosScreenState extends State<OpportunitiesScreen> {
       // Ordena la lista de rutas de imágenes.
       bool aIsItsu = a.contains('itsu_logo');
       bool bIsItsu = b.contains('itsu_logo');
-      if (aIsItsu)
+      if (aIsItsu) {
         return -1; // Si la ruta 'a' contiene 'itsu_logo', la coloca al principio.
-      if (bIsItsu)
+      }
+      if (bIsItsu) {
         return 1; // Si la ruta 'b' contiene 'itsu_logo', la coloca después de 'a' (si 'a' no es itsu).
+      }
       return a.compareTo(
           b); // Para las demás rutas, realiza una comparación alfabética.
     });
@@ -99,151 +104,88 @@ class _BeneficiosScreenState extends State<OpportunitiesScreen> {
   @override
   Widget build(BuildContext context) {
     // Sobrescribe el método 'build()' que describe la parte de la interfaz de usuario representada por este widget.
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
-      color: Color.fromARGB(255, 250, 250,
-          250), // Establece el color de fondo del contenedor a blanco.
-      padding: const EdgeInsets.all(
-          16.0), // Añade un padding de 16 píxeles en todos los lados del contenedor.
-      child: Column(
-        // Organiza los widgets hijos verticalmente.
-        crossAxisAlignment: CrossAxisAlignment
-            .start, // Alinea los hijos al inicio (izquierda) horizontalmente.
-        children: [
-          Text(
-            // Widget para mostrar el título de la sección.
-            'Categorías',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
+      color: AppDesign.page,
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 900),
+          child: Padding(
+            padding: const EdgeInsets.all(AppDesign.pagePadding),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Explora oportunidades',
+                    style: Theme.of(context).textTheme.headlineSmall),
+                const SizedBox(height: 6),
+                Text(
+                  'Recursos organizados por área académica.',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                ),
+                const SizedBox(height: 18),
+                Expanded(
+                  child: careerLogos.isEmpty
+                      ? const Center(child: CircularProgressIndicator())
+                      : _buildListView(),
+                ),
+              ],
             ),
           ),
-          SizedBox(
-              height:
-                  16), // Añade un espacio vertical de 16 píxeles entre el título y la lista.
-          Expanded(
-            // Expande el widget hijo para llenar el espacio disponible en la dirección del padre (vertical en este caso).
-            child: careerLogos.isEmpty
-                ? Center(
-                    child: CircularProgressIndicator(color: Color(0xFFFCA311)))
-                // Si la lista 'careerLogos' está vacía (mientras se cargan los datos),
-                // muestra un indicador de carga circular en el centro.
-                : _buildListView(),
-            // Si 'careerLogos' no está vacía, llama al método '_buildListView()' para construir la lista de categorías.
-          ),
-        ],
+        ),
       ),
     );
   }
 
   Widget _buildListView() {
     // Método para construir la lista de logos de carreras como filas clickeables.
-    final screenWidth =
-        MediaQuery.of(context).size.width; // Obtiene el ancho de la pantalla.
-    double containerSize = screenWidth *
-        0.22; // Define un tamaño para el contenedor del logo basado en el ancho de la pantalla.
-    containerSize = containerSize.clamp(80.0,
-        120.0); // Asegura que el tamaño esté dentro de un rango mínimo y máximo.
-    const double innerPadding =
-        8.0; // Define un padding interno para el logo dentro de su contenedor.
-
-    return ListView.builder(
+    return ListView.separated(
       // Construye una lista desplazable de widgets bajo demanda.
       itemCount: careerLogos
           .length, // El número de elementos en la lista es igual al número de logos cargados.
+      padding: EdgeInsets.zero,
+      separatorBuilder: (context, index) => const SizedBox(height: 10),
       itemBuilder: (context, index) {
-        // Función que se llama para construir cada elemento de la lista. 'index' es la posición del elemento actual.
-        return Column(
-          // <<--- 1. Envolvemos el contenido en una Columna
-          children: [
-            InkWell(
-              // Un widget que hace que su hijo sea receptivo a los toques y añade efectos visuales.
-              onTap: () {
-                // Define la acción que ocurre cuando se toca el elemento.
-                Navigator.push(
-                  // Navega a una nueva ruta en la pila de navegadores.
-                  context,
-                  MaterialPageRoute(
-                    // Crea una ruta que construye un widget.
-                    builder: (context) => OpportunityContentScreen(
-                      // El widget a construir es 'OpportunityContentScreen'.
-                      title: careerLogos[index]['title']!,
-                      // Pasa el título de la categoría seleccionada a la pantalla de detalles.
-                    ),
-                  ),
-                );
-              },
-              child: Padding(
-                // Añade un padding alrededor de la fila para espaciamiento visual.
-                // Ajustamos el padding vertical para dar espacio antes del Divider
-                padding: const EdgeInsets.symmetric(vertical: 12.0),
-                child: Row(
-                  // Organiza los widgets hijos horizontalmente.
-                  crossAxisAlignment: CrossAxisAlignment
-                      .center, // Alinea los hijos verticalmente al centro.
-                  children: [
-                    Container(
-                      // Contenedor para el logo de la carrera.
-                      width: containerSize,
-                      height: containerSize,
-                      decoration: BoxDecoration(
-                        // Define la decoración del contenedor (borde y radio de las esquinas).
-                        border: Border.all(
-                            color: const Color.fromARGB(255, 218, 215, 215)),
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      child: ClipRRect(
-                        // Recorta su hijo usando un rectángulo redondeado.
-                        borderRadius: BorderRadius.circular(14),
-                        child: Padding(
-                          // Añade un padding interno al widget 'Image.asset'.
-                          padding: const EdgeInsets.all(innerPadding),
-                          child: Image.asset(
-                            // Widget para mostrar una imagen desde los assets.
-                            careerLogos[index]['image']!,
-                            fit: BoxFit
-                                .contain, // Ajusta la imagen dentro del contenedor manteniendo su relación de aspecto.
-                            errorBuilder: (context, error, stackTrace) {
-                              // Función que se llama si ocurre un error al cargar la imagen.
-                              print(
-                                  "Error cargando imagen: ${careerLogos[index]['image']!} - $error");
-                              return Icon(Icons.image_not_supported,
-                                  color: Colors.grey);
-                              // Muestra un icono de imagen no soportada en caso de error.
-                            },
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                        width:
-                            16), // Añade un espacio horizontal de 16 píxeles entre el logo y el título.
-                    Expanded(
-                      // Expande el widget hijo para llenar el espacio disponible horizontalmente.
-                      child: Text(
-                        // Widget para mostrar el título de la carrera.
-                        careerLogos[index]['title']!,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ),
-                  ],
+        final item = careerLogos[index];
+        return Card(
+          child: ListTile(
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            leading: Container(
+              width: 64,
+              height: 64,
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.outlineVariant,
+                ),
+              ),
+              child: Image.asset(
+                item['image']!,
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) => const Icon(
+                  Icons.image_not_supported_outlined,
                 ),
               ),
             ),
-            // --- > 2. Añadimos el Divider aquí <---
-            Divider(
-              height:
-                  1, // Altura del espacio que ocupa el divider (incluyendo el espacio arriba y abajo)
-              thickness: 1, // Grosor de la línea
-              color: Colors.grey[300], // Color de la línea (puedes ajustarlo)
-              // indent: 16, // Opcional: Espacio a la izquierda antes de que empiece la línea
-              // endIndent: 16, // Opcional: Espacio a la derecha antes de que termine la línea
+            title: Text(
+              item['title']!,
+              style: Theme.of(context).textTheme.titleSmall,
             ),
-          ],
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      OpportunityContentScreen(title: item['title']!),
+                ),
+              );
+            },
+          ),
         );
       },
     );
