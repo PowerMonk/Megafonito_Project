@@ -4,6 +4,7 @@ import 'package:flutter_megafonito/main.dart';
 import 'package:flutter_megafonito/screens/anuncios_screen.dart';
 import 'package:flutter_megafonito/screens/contact_screen.dart';
 import 'package:flutter_megafonito/screens/crear_anuncio_screen.dart';
+import 'package:flutter_megafonito/screens/oppscontent_screen.dart';
 import 'package:flutter_megafonito/theme/app_theme.dart';
 import 'package:flutter_megafonito/widgets/actions_buttons.dart';
 import 'package:flutter_megafonito/widgets/navbar.dart';
@@ -187,9 +188,39 @@ void main() {
 
     expect(find.text('Nuevo anuncio'), findsOneWidget);
     expect(find.byType(TextField), findsNWidgets(3));
+    expect(find.byType(Card), findsNothing);
+    for (final textField
+        in tester.widgetList<TextField>(find.byType(TextField))) {
+      expect(textField.decoration?.filled, isFalse);
+      expect(textField.decoration?.enabledBorder, InputBorder.none);
+    }
     await tester.drag(
         find.byType(SingleChildScrollView), const Offset(0, -220));
     await tester.pump();
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('opportunity art is contained and the next card is previewed',
+      (tester) async {
+    _setLogicalSize(tester, const Size(390, 844));
+    addTearDown(() => _resetLogicalSize(tester));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light,
+        home: const OpportunityContentScreen(title: 'Ingeniería en Sistemas'),
+      ),
+    );
+    await tester.pump();
+
+    final firstCard = find.byType(Card).first;
+    final cardSize = tester.getSize(firstCard);
+    expect(cardSize.width, 148);
+    expect(tester.widget<Image>(find.byType(Image).first).fit, BoxFit.contain);
+
+    final nextCardTitle = tester.getRect(find.text('Beca 3'));
+    expect(nextCardTitle.left, lessThan(390));
+    expect(nextCardTitle.right, greaterThan(390));
     expect(tester.takeException(), isNull);
   });
 
@@ -222,6 +253,30 @@ void main() {
     expect(find.byTooltip('Crear nuevo anuncio'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('create actions transition smoothly without backdrop blur',
+      (tester) async {
+    _setLogicalSize(tester, const Size(390, 844));
+    addTearDown(() => _resetLogicalSize(tester));
+    final semantics = tester.ensureSemantics();
+
+    await tester.pumpWidget(const _ActionMenuHarness());
+    expect(find.bySemanticsLabel('Más acciones de creación'), findsOneWidget);
+
+    await tester.tap(find.bySemanticsLabel('Más acciones de creación'));
+    await tester.pump(const Duration(milliseconds: 60));
+    await tester.pumpAndSettle();
+
+    expect(find.byTooltip('Crear nueva oportunidad'), findsOneWidget);
+    expect(find.byType(BackdropFilter), findsNothing);
+    expect(tester.takeException(), isNull);
+
+    await tester.tapAt(const Offset(10, 100));
+    await tester.pumpAndSettle();
+    expect(find.bySemanticsLabel('Más acciones de creación'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    semantics.dispose();
+  });
 }
 
 Widget _shell({Key? key}) {
@@ -244,6 +299,37 @@ void _ignoreCreatedNotice(
   String? fileUrl,
   String? fileKey,
 ) {}
+
+class _ActionMenuHarness extends StatefulWidget {
+  const _ActionMenuHarness();
+
+  @override
+  State<_ActionMenuHarness> createState() => _ActionMenuHarnessState();
+}
+
+class _ActionMenuHarnessState extends State<_ActionMenuHarness> {
+  bool _isExpanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      theme: AppTheme.light,
+      home: Scaffold(
+        body: Stack(
+          children: [
+            ActionButtons(
+              isSuperUser: true,
+              showExtraFabs: _isExpanded,
+              onShowExtraFabs: () => setState(() => _isExpanded = true),
+              onCreateNotice: () {},
+              onDismissBlur: () => setState(() => _isExpanded = false),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 void _setLogicalSize(WidgetTester tester, Size size) {
   tester.view.devicePixelRatio = 1;

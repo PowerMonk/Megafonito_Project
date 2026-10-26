@@ -6,15 +6,15 @@
 
 ## Frontend baseline and current result
 
-Local Flutter at inspection time: **3.35.7 stable** with **Dart 3.9.2**. Resolving packages on this SDK changed 14 transitive entries within existing dependency constraints; no direct dependencies or UI libraries were added. The updated `pubspec.lock` now matches the tested graph, and `flutter pub get --enforce-lockfile --offline` succeeds.
+Local Flutter at inspection time: **3.47.7 stable** with **Dart 3.13.5**. Resolving packages on this SDK changed 14 transitive entries within existing dependency constraints; no direct dependencies or UI libraries were added. The updated `pubspec.lock` matches the tested graph, and `flutter pub get --enforce-lockfile --offline` succeeds.
 
 Baseline `flutter analyze` before the UI work reported **116 diagnostics**. Those lint and async-context issues were addressed during the update; current `flutter analyze --no-pub` reports **no issues**.
 
 The repository previously ignored `frontend/test/` and had an untracked generated counter example there. The counter test did not match this application and was removed; the ignore rules now allow the project-specific `frontend/test/ui_smoke_test.dart` suite to be tracked.
 
-Current widget suite: **7 passing tests**. It covers Material 3 activation, five-destination navigation and Support on compact/wide layouts, navigation through the current destinations, notice metadata/tap behavior, category-chip selection/clear, large-text contact layout and 48dp copy target, keyboard-constrained notice composer scrolling, and distinct expanded action Hero tags. The test runner prints non-fatal `flutter_svg` warnings for embedded `<font>`, `<style>`, and `<metadata>` elements in the current logo SVG.
+Current widget suite: **9 passing tests**. It covers Material 3 activation, five-destination navigation and Support on compact/wide layouts, navigation through the current destinations, notice metadata/tap behavior, category-chip selection/clear, large-text contact layout and 48dp copy target, keyboard-constrained notice composer scrolling, opportunity image containment/peek of the next card, distinct expanded action Hero tags, and animated action-menu open/close behavior. The test runner prints non-fatal `flutter_svg` warnings for embedded `<font>`, `<style>`, and `<metadata>` elements in the current logo SVG.
 
-The Android toolchain was aligned to Gradle 8.7, Android Gradle Plugin 8.6.0, Kotlin Gradle Plugin 2.1.0, and Flutter's `minSdkVersion` value. `flutter build apk --debug --no-pub` passed with this configuration. The final release build could not complete in this Windows workspace: R8 failed while deleting a locked intermediate `classes.dex` under `build/app/intermediates/dex/release/minifyReleaseWithR8`. The release task reached minification; this is recorded as an environment/file-lock blocker, not a passed release check. No Android emulator was connected, so manual Android screenshot review was unavailable.
+The Android toolchain was aligned to Gradle 8.14, Android Gradle Plugin 8.11.1, Kotlin Gradle Plugin 2.2.20, and Flutter's `minSdkVersion` value. Both `flutter build apk --debug --no-pub` and `flutter build apk --release --no-pub` passed. Flutter 3.47.7 warns that these Gradle/AGP/Kotlin versions will be unsupported in a future release; they are the current non-AGP-9 combination that builds this project with its existing Kotlin Gradle plugins. The Flutter migrator added `android.builtInKotlin=false` and `android.newDsl=false`. No Android emulator was connected, so manual Android screenshot review was unavailable.
 
 ## Backend baseline
 

@@ -45,7 +45,7 @@ Findings below reflect source inspection, not a penetration test or production e
 - Frontend SDK minimums disagree: the README says Flutter 3.19.5+, `pubspec.yaml` says Dart 3.3.1+, but the current resolved lockfile requires Flutter 3.27+ / Dart 3.8+.
 - Flutter source contains hardcoded sample profile data and sample/mock data. Keep these out of docs/screenshots shared publicly unless sanitized.
 - The logo SVG includes embedded font/style/metadata elements that cause non-fatal parser warnings during widget tests.
-- Final release APK verification in this workspace remains blocked by Windows failing to delete an R8 `classes.dex` intermediate; the debug APK builds successfully with the updated Android toolchain.
+- Flutter 3.47.7 reports that the current Gradle/AGP/Kotlin combination will be unsupported in a future release; upgrading to AGP 9 currently conflicts with the duplicate `org.chromium.net` namespace from the existing Cronet dependencies. Both debug and release APKs currently build with Gradle 8.14 / AGP 8.11.1 / Kotlin 2.2.20.
 
 ## Suggested separate follow-up work (outside visual scope)
 
