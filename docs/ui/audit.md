@@ -32,7 +32,9 @@ Visual corrections may make existing metadata legible and layouts robust (such a
 
 - A single Material 3 theme now supplies brand colors, typography, component styling, and 48dp icon-button minimums.
 - The home shell has a compact NavigationBar and a wide NavigationRail at 600 logical pixels, preserving all five destinations. Support remains an app-bar route.
-- Feed cards now show actual `created_at`, use flexible metadata layouts, and style loading/empty/detail states consistently. Action menu Hero tags are distinct.
+- Feed cards now show actual `created_at`, use flexible metadata layouts, and style loading/empty/detail states consistently. The create-action menu uses a fade/slide transition, avoids the expensive full-screen blur filter, and has distinct Hero tags.
+- The notice composer sits directly on the page surface rather than a floating card; its text fields are transparent and borderless to align with the surrounding recipient/category rows.
+- Opportunity cards use smaller square image frames with `BoxFit.contain`, and show a slice of the next card to cue horizontal scrolling.
 - Contacts, Opportunities, Processes, Account, Support, login/register/splash, and all three composers now use the shared surface, spacing, typography, and accessible control styles.
 - Composer forms and screen content are width-constrained and scrollable; mock auth remains visibly marked as development.
 - Focused widget tests cover compact/wide layout, navigation, touch target size, text scaling, keyboard-inset scrolling, and existing interaction callbacks.

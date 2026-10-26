@@ -76,7 +76,7 @@ class _OpportunityContentScreenState extends State<OpportunityContentScreen> {
         Text(title, style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(height: 12),
         SizedBox(
-          height: 216,
+          height: 198,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: items.length,
@@ -84,7 +84,7 @@ class _OpportunityContentScreenState extends State<OpportunityContentScreen> {
             itemBuilder: (context, index) {
               final item = items[index];
               return SizedBox(
-                width: 164,
+                width: 148,
                 child: Card(
                   clipBehavior: Clip.antiAlias,
                   child: InkWell(
@@ -100,7 +100,7 @@ class _OpportunityContentScreenState extends State<OpportunityContentScreen> {
                               child: Image.asset(
                                 item['image']!,
                                 width: double.infinity,
-                                fit: BoxFit.cover,
+                                fit: BoxFit.contain,
                                 errorBuilder: (context, error, stackTrace) =>
                                     ColoredBox(
                                   color: AppDesign.page,

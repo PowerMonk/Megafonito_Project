@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -29,79 +27,109 @@ class ActionButtons extends StatelessWidget {
 
     return Stack(
       children: [
-        if (showExtraFabs)
-          Positioned.fill(
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: onDismissBlur,
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
-                child: Container(color: const Color(0x990B1426)),
+        Positioned.fill(
+          child: AnimatedOpacity(
+            duration: const Duration(milliseconds: 180),
+            curve: Curves.easeOut,
+            opacity: showExtraFabs ? 1 : 0,
+            child: IgnorePointer(
+              ignoring: !showExtraFabs,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: onDismissBlur,
+                child: const ColoredBox(color: Color(0x990B1426)),
               ),
             ),
           ),
-        if (showExtraFabs)
-          Positioned(
-            bottom: 24,
-            right: 20,
-            child: SafeArea(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.end,
+        ),
+        Positioned(
+          bottom: 18,
+          right: 18,
+          child: SafeArea(
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 240),
+              switchInCurve: Curves.easeOutCubic,
+              switchOutCurve: Curves.easeInCubic,
+              transitionBuilder: (child, animation) {
+                final slide = Tween<Offset>(
+                  begin: const Offset(0, 0.12),
+                  end: Offset.zero,
+                ).animate(animation);
+
+                return FadeTransition(
+                  opacity: animation,
+                  child: SlideTransition(position: slide, child: child),
+                );
+              },
+              layoutBuilder: (currentChild, previousChildren) => Stack(
+                alignment: Alignment.bottomRight,
                 children: [
-                  _buildExtraAction(
-                    context,
-                    label: 'Oportunidad nueva',
-                    tooltip: 'Crear nueva oportunidad',
-                    heroTag: 'megafonito-create-opportunity',
-                    asset: 'assets/icons/newopp_icon.svg',
-                    onPressed: () {
-                      onDismissBlur();
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => CrearNuevaOportunidadScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 14),
-                  _buildExtraAction(
-                    context,
-                    label: 'Nuevo mensaje',
-                    tooltip: 'Crear nuevo mensaje',
-                    heroTag: 'megafonito-create-message',
-                    asset: 'assets/icons/nuevomensaje_icon.svg',
-                    onPressed: () {
-                      onDismissBlur();
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => NuevoMensajeScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 14),
-                  _buildExtraAction(
-                    context,
-                    label: 'Anuncio nuevo',
-                    tooltip: 'Crear nuevo anuncio',
-                    heroTag: 'megafonito-create-notice-expanded',
-                    asset: 'assets/icons/nuevoanuncio_icon.svg',
-                    emphasized: true,
-                    onPressed: onCreateNotice,
-                  ),
+                  ...previousChildren,
+                  if (currentChild != null) currentChild,
                 ],
               ),
+              child: RepaintBoundary(
+                key: ValueKey(showExtraFabs),
+                child: showExtraFabs
+                    ? _buildExtraActions(context)
+                    : _buildSegmentedFab(context),
+              ),
             ),
           ),
-        if (!showExtraFabs)
-          Positioned(
-            bottom: 18,
-            right: 18,
-            child: SafeArea(child: _buildSegmentedFab(context)),
-          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildExtraActions(BuildContext context) {
+    return Column(
+      key: const ValueKey('expanded-create-actions'),
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        _buildExtraAction(
+          context,
+          label: 'Oportunidad nueva',
+          tooltip: 'Crear nueva oportunidad',
+          heroTag: 'megafonito-create-opportunity',
+          asset: 'assets/icons/newopp_icon.svg',
+          onPressed: () {
+            onDismissBlur();
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const CrearNuevaOportunidadScreen(),
+              ),
+            );
+          },
+        ),
+        const SizedBox(height: 12),
+        _buildExtraAction(
+          context,
+          label: 'Nuevo mensaje',
+          tooltip: 'Crear nuevo mensaje',
+          heroTag: 'megafonito-create-message',
+          asset: 'assets/icons/nuevomensaje_icon.svg',
+          onPressed: () {
+            onDismissBlur();
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const NuevoMensajeScreen(),
+              ),
+            );
+          },
+        ),
+        const SizedBox(height: 12),
+        _buildExtraAction(
+          context,
+          label: 'Anuncio nuevo',
+          tooltip: 'Crear nuevo anuncio',
+          heroTag: 'megafonito-create-notice-expanded',
+          asset: 'assets/icons/nuevoanuncio_icon.svg',
+          emphasized: true,
+          onPressed: onCreateNotice,
+        ),
       ],
     );
   }

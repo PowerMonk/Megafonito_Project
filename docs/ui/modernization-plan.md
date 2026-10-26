@@ -91,16 +91,16 @@ Apply the same theme and hierarchy to Contacts/search/copy rows, Opportunities/c
 
 **Implemented.** The current Flutter screens and flows now use the shared Material 3 theme, adaptive five-destination navigation, refreshed reusable surfaces, and clearer development-mode login. The original layout architecture and mock/service boundaries remain in place. No new UI package was added.
 
-Verification on local Flutter 3.35.7 / Dart 3.9.2:
+Verification on local Flutter 3.47.7 / Dart 3.13.5:
 
 | Check | Result |
 | --- | --- |
 | `dart format` on changed Dart files | Passed. |
 | `flutter analyze --no-pub` | Passed: no issues found. |
 | `flutter pub get --enforce-lockfile --offline` | Passed after refreshing 14 compatible transitive lockfile entries; no new direct packages were added. |
-| `flutter test --no-pub` | Passed: 7 UI/widget tests. SVG parser emitted non-fatal warnings for embedded font/style/metadata tags. |
-| `flutter build apk --debug --no-pub` | Passed with Gradle 8.7, AGP 8.6.0, Kotlin Gradle Plugin 2.1.0. |
-| `flutter build apk --release --no-pub` | Blocked at R8 cleanup because Windows could not delete a locked `classes.dex` intermediate. Do not count as passed. |
+| `flutter test --no-pub` | Passed: 9 UI/widget tests. SVG parser emitted non-fatal warnings for embedded font/style/metadata tags. |
+| `flutter build apk --debug --no-pub` | Passed with Gradle 8.14, AGP 8.11.1, Kotlin Gradle Plugin 2.2.20. |
+| `flutter build apk --release --no-pub` | Passed with the same Android toolchain. Flutter warns that these dependency versions will be unsupported in a future SDK release. |
 | Device screenshots / manual Android review | Not run; no Android device or emulator was connected. |
 
-The local host exposed Windows desktop and Chrome/Edge, not an Android emulator. Release file-lock diagnostics and the SVG test warnings are recorded in [Build and tests](../as-built/build-and-tests.md) and [Known gaps](../as-built/known-gaps.md). Production authentication, server integration, privacy, and persistence remain separate work.
+The local host exposed Windows desktop and Chrome/Edge, not an Android emulator. Android toolchain compatibility and the SVG test warnings are recorded in [Build and tests](../as-built/build-and-tests.md) and [Known gaps](../as-built/known-gaps.md). Production authentication, server integration, privacy, and persistence remain separate work.
