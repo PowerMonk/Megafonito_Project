@@ -24,9 +24,8 @@ class SoporteMegafonitoScreen extends StatelessWidget {
               const SizedBox(height: 6),
               Text(
                 'Comparte un problema o una idea para mejorar Megafonito.',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
+                style: Theme.of(context).textTheme.bodyMedium
+                    ?.copyWith(color: colorScheme.onSurfaceVariant),
               ),
               const SizedBox(height: 20),
               _SupportTile(
@@ -50,15 +49,15 @@ class SoporteMegafonitoScreen extends StatelessWidget {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(Icons.volunteer_activism_outlined,
-                          color: colorScheme.onPrimaryContainer),
+                      Icon(
+                        Icons.volunteer_activism_outlined,
+                        color: colorScheme.onPrimaryContainer,
+                      ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
                           'Cada reporte y sugerencia nos ayuda a construir una mejor app para toda la comunidad estudiantil. ¡Gracias por ser parte del cambio!',
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyMedium
+                          style: Theme.of(context).textTheme.bodyMedium
                               ?.copyWith(color: colorScheme.onPrimaryContainer),
                         ),
                       ),

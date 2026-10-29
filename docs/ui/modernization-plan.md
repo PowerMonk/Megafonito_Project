@@ -45,7 +45,7 @@ Do not represent placeholders as complete workflows. Fixing the title/link data 
 
 ### Phase 1 — Shared visual foundation
 
-1. Add one Material 3 app theme using built-in Flutter APIs compatible with the declared Flutter 3.19.5+ baseline.
+1. Add one Material 3 app theme using built-in Flutter APIs compatible with the updated Flutter 3.44+ baseline.
 2. Establish readable color/text/spacing/shape tokens and shared component defaults.
 3. Refresh the shell's AppBar, compact NavigationBar, wide NavigationRail, scaffold surfaces, and selected states.
 
@@ -89,7 +89,7 @@ Apply the same theme and hierarchy to Contacts/search/copy rows, Opportunities/c
 
 ## Completion record
 
-**Implemented.** The current Flutter screens and flows now use the shared Material 3 theme, adaptive five-destination navigation, refreshed reusable surfaces, and clearer development-mode login. The original layout architecture and mock/service boundaries remain in place. No new UI package was added.
+**Implemented.** The current Flutter screens and flows now use the shared Material 3 theme, adaptive floating five-destination navigation, refreshed rounded surfaces and toolbar controls, and clearer development-mode login. The announcement action menu has local state and no longer rebuilds the feed when toggled. The original screen organization and mock/service boundaries remain in place. No new UI package was added.
 
 Verification on local Flutter 3.47.7 / Dart 3.13.5:
 
@@ -97,10 +97,10 @@ Verification on local Flutter 3.47.7 / Dart 3.13.5:
 | --- | --- |
 | `dart format` on changed Dart files | Passed. |
 | `flutter analyze --no-pub` | Passed: no issues found. |
-| `flutter pub get --enforce-lockfile --offline` | Passed after refreshing 14 compatible transitive lockfile entries; no new direct packages were added. |
+| `flutter pub get --enforce-lockfile --offline` | Passed with the file_picker 13.3.0 update and unused Cronet adapter removal. |
 | `flutter test --no-pub` | Passed: 9 UI/widget tests. SVG parser emitted non-fatal warnings for embedded font/style/metadata tags. |
-| `flutter build apk --debug --no-pub` | Passed with Gradle 8.14, AGP 8.11.1, Kotlin Gradle Plugin 2.2.20. |
-| `flutter build apk --release --no-pub` | Passed with the same Android toolchain. Flutter warns that these dependency versions will be unsupported in a future SDK release. |
+| `flutter build apk --debug --no-pub` | Passed with Gradle 9.3.1, AGP 9.1.0, and built-in Kotlin. |
+| `flutter build apk --release --no-pub` | Passed with the same Android toolchain; the previous version-support warnings are gone. |
 | Device screenshots / manual Android review | Not run; no Android device or emulator was connected. |
 
 The local host exposed Windows desktop and Chrome/Edge, not an Android emulator. Android toolchain compatibility and the SVG test warnings are recorded in [Build and tests](../as-built/build-and-tests.md) and [Known gaps](../as-built/known-gaps.md). Production authentication, server integration, privacy, and persistence remain separate work.

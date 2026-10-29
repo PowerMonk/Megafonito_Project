@@ -17,9 +17,8 @@ class UserInfoScreen extends StatelessWidget {
   Future<void> _copy(BuildContext context, String text) async {
     await Clipboard.setData(ClipboardData(text: text));
     if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Copiado al portapapeles')),
-    );
+    ScaffoldMessenger.of(context)
+        .showSnackBar(const SnackBar(content: Text('Copiado al portapapeles')));
   }
 
   @override
@@ -62,9 +61,7 @@ class UserInfoScreen extends StatelessWidget {
                                 const SizedBox(height: 3),
                                 Text(
                                   'Información de usuario',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyMedium
+                                  style: Theme.of(context).textTheme.bodyMedium
                                       ?.copyWith(
                                         color: colorScheme.onSurfaceVariant,
                                       ),
@@ -85,7 +82,10 @@ class UserInfoScreen extends StatelessWidget {
                       ),
                       const Divider(height: 20),
                       _buildInfoRow(
-                          context, 'Número de control', _controlNumber),
+                        context,
+                        'Número de control',
+                        _controlNumber,
+                      ),
                       _buildInfoRow(context, 'Carrera', _career),
                       _buildInfoRow(context, 'Semestre', _semester),
                       _buildInfoRow(context, 'Correo electrónico', _email),
@@ -157,13 +157,14 @@ class UserInfoScreen extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
+                  style: Theme.of(context).textTheme.labelLarge
+                      ?.copyWith(color: colorScheme.onSurfaceVariant),
                 ),
                 const SizedBox(height: 3),
-                SelectableText(value,
-                    style: Theme.of(context).textTheme.bodyLarge),
+                SelectableText(
+                  value,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
               ],
             ),
           ),

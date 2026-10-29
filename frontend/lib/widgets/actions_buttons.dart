@@ -5,25 +5,46 @@ import '../screens/createopps_screen.dart';
 import '../screens/newmsg_screen.dart';
 import '../theme/app_theme.dart';
 
-class ActionButtons extends StatelessWidget {
+class ActionButtons extends StatefulWidget {
   final bool isSuperUser;
-  final bool showExtraFabs;
-  final VoidCallback onShowExtraFabs;
   final VoidCallback onCreateNotice;
-  final VoidCallback onDismissBlur;
 
   const ActionButtons({
     super.key,
     required this.isSuperUser,
-    required this.showExtraFabs,
-    required this.onShowExtraFabs,
     required this.onCreateNotice,
-    required this.onDismissBlur,
   });
 
   @override
+  State<ActionButtons> createState() => _ActionButtonsState();
+}
+
+class _ActionButtonsState extends State<ActionButtons> {
+  bool _showExtraFabs = false;
+
+  void _toggleExtraActions() {
+    setState(() => _showExtraFabs = !_showExtraFabs);
+  }
+
+  void _dismissExtraActions() {
+    if (_showExtraFabs) setState(() => _showExtraFabs = false);
+  }
+
+  void _createNotice() {
+    if (!_showExtraFabs) {
+      widget.onCreateNotice();
+      return;
+    }
+
+    _dismissExtraActions();
+    Future<void>.delayed(const Duration(milliseconds: 100), () {
+      if (mounted) widget.onCreateNotice();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (!isSuperUser) return const SizedBox.shrink();
+    if (!widget.isSuperUser) return const SizedBox.shrink();
 
     return Stack(
       children: [
@@ -31,12 +52,12 @@ class ActionButtons extends StatelessWidget {
           child: AnimatedOpacity(
             duration: const Duration(milliseconds: 180),
             curve: Curves.easeOut,
-            opacity: showExtraFabs ? 1 : 0,
+            opacity: _showExtraFabs ? 1 : 0,
             child: IgnorePointer(
-              ignoring: !showExtraFabs,
+              ignoring: !_showExtraFabs,
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
-                onTap: onDismissBlur,
+                onTap: _dismissExtraActions,
                 child: const ColoredBox(color: Color(0x990B1426)),
               ),
             ),
@@ -69,8 +90,8 @@ class ActionButtons extends StatelessWidget {
                 ],
               ),
               child: RepaintBoundary(
-                key: ValueKey(showExtraFabs),
-                child: showExtraFabs
+                key: ValueKey(_showExtraFabs),
+                child: _showExtraFabs
                     ? _buildExtraActions(context)
                     : _buildSegmentedFab(context),
               ),
@@ -92,9 +113,9 @@ class ActionButtons extends StatelessWidget {
           label: 'Oportunidad nueva',
           tooltip: 'Crear nueva oportunidad',
           heroTag: 'megafonito-create-opportunity',
-          asset: 'assets/icons/newopp_icon.svg',
+          icon: Icons.school_outlined,
           onPressed: () {
-            onDismissBlur();
+            _dismissExtraActions();
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -109,9 +130,9 @@ class ActionButtons extends StatelessWidget {
           label: 'Nuevo mensaje',
           tooltip: 'Crear nuevo mensaje',
           heroTag: 'megafonito-create-message',
-          asset: 'assets/icons/nuevomensaje_icon.svg',
+          icon: Icons.mail_outline_rounded,
           onPressed: () {
-            onDismissBlur();
+            _dismissExtraActions();
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -126,9 +147,9 @@ class ActionButtons extends StatelessWidget {
           label: 'Anuncio nuevo',
           tooltip: 'Crear nuevo anuncio',
           heroTag: 'megafonito-create-notice-expanded',
-          asset: 'assets/icons/nuevoanuncio_icon.svg',
+          icon: Icons.campaign_outlined,
           emphasized: true,
-          onPressed: onCreateNotice,
+          onPressed: _createNotice,
         ),
       ],
     );
@@ -139,12 +160,12 @@ class ActionButtons extends StatelessWidget {
     required String label,
     required String tooltip,
     required String heroTag,
-    required String asset,
+    required IconData icon,
     required VoidCallback onPressed,
     bool emphasized = false,
   }) {
     final colorScheme = Theme.of(context).colorScheme;
-    final foreground = colorScheme.primary;
+    const foreground = AppDesign.navy;
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -160,9 +181,9 @@ class ActionButtons extends StatelessWidget {
             child: Text(
               label,
               style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    color: colorScheme.onSurface,
-                    fontWeight: FontWeight.w700,
-                  ),
+                color: colorScheme.onSurface,
+                fontWeight: FontWeight.w700,
+              ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
@@ -175,13 +196,7 @@ class ActionButtons extends StatelessWidget {
           tooltip: tooltip,
           backgroundColor: emphasized ? AppDesign.amber : colorScheme.surface,
           foregroundColor: foreground,
-          child: SvgPicture.asset(
-            asset,
-            height: 25,
-            width: 25,
-            colorFilter: ColorFilter.mode(foreground, BlendMode.srcIn),
-            excludeFromSemantics: true,
-          ),
+          child: Icon(icon, size: 25, color: foreground),
         ),
       ],
     );
@@ -200,12 +215,15 @@ class ActionButtons extends StatelessWidget {
             button: true,
             label: 'Crear un anuncio nuevo',
             child: InkWell(
-              onTap: onCreateNotice,
-              borderRadius:
-                  const BorderRadius.horizontal(left: Radius.circular(28)),
+              onTap: _createNotice,
+              borderRadius: const BorderRadius.horizontal(
+                left: Radius.circular(28),
+              ),
               child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -223,30 +241,29 @@ class ActionButtons extends StatelessWidget {
                     Text(
                       'Anuncio nuevo',
                       style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                            color: AppDesign.navy,
-                            fontWeight: FontWeight.w700,
-                          ),
+                        color: AppDesign.navy,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ],
                 ),
               ),
             ),
           ),
-          Container(
-            width: 1,
-            height: 30,
-            color: const Color(0x7314213D),
-          ),
+          Container(width: 1, height: 30, color: const Color(0x7314213D)),
           Semantics(
             button: true,
             label: 'Más acciones de creación',
             child: InkWell(
-              onTap: onShowExtraFabs,
-              borderRadius:
-                  const BorderRadius.horizontal(right: Radius.circular(28)),
+              onTap: _toggleExtraActions,
+              borderRadius: const BorderRadius.horizontal(
+                right: Radius.circular(28),
+              ),
               child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 14,
+                ),
                 child: SvgPicture.asset(
                   'assets/icons/opciones_icon.svg',
                   height: 20,

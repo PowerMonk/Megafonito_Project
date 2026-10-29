@@ -54,8 +54,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     children: [
                       CircleAvatar(
                         radius: 34,
-                        backgroundColor:
-                            Theme.of(context).colorScheme.primaryContainer,
+                        backgroundColor: Theme.of(context)
+                            .colorScheme
+                            .primaryContainer,
                         child: Image.asset(
                           'assets/LogoMegafon_V2.png',
                           width: 48,
@@ -112,8 +113,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         icon: _isLoading
                             ? const SizedBox.square(
                                 dimension: 20,
-                                child:
-                                    CircularProgressIndicator(strokeWidth: 2),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
                               )
                             : const Icon(Icons.person_add_alt_1_rounded),
                         label: Text(_isLoading ? 'Registrando…' : 'Registrar'),

@@ -37,17 +37,18 @@ class _OpportunitiesScreenState extends State<OpportunitiesScreen> {
 
     try {
       final manifest = await AssetManifest.loadFromAssetBundle(rootBundle);
-      final imagePaths = manifest
-          .listAssets()
-          .where((path) => path.startsWith('assets/logos_carreras/'))
-          .toList()
-        ..sort((a, b) {
-          final aIsItsu = a.contains('itsu_logo');
-          final bIsItsu = b.contains('itsu_logo');
-          if (aIsItsu) return -1;
-          if (bIsItsu) return 1;
-          return a.compareTo(b);
-        });
+      final imagePaths =
+          manifest
+              .listAssets()
+              .where((path) => path.startsWith('assets/logos_carreras/'))
+              .toList()
+            ..sort((a, b) {
+              final aIsItsu = a.contains('itsu_logo');
+              final bIsItsu = b.contains('itsu_logo');
+              if (aIsItsu) return -1;
+              if (bIsItsu) return 1;
+              return a.compareTo(b);
+            });
 
       final logos = imagePaths.map((path) {
         final filename = path.split('/').last;
@@ -56,7 +57,8 @@ class _OpportunitiesScreenState extends State<OpportunitiesScreen> {
             : filename;
         return {
           'image': path,
-          'title': titleMapping[filenameBase] ??
+          'title':
+              titleMapping[filenameBase] ??
               filenameBase.replaceAll('_logo', '').replaceAll('_', ' '),
         };
       }).toList();
@@ -75,7 +77,8 @@ class _OpportunitiesScreenState extends State<OpportunitiesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    // commented since it was only used in the text at the top of the screen
+    // final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
       color: AppDesign.page,
@@ -91,13 +94,12 @@ class _OpportunitiesScreenState extends State<OpportunitiesScreen> {
                   'Explora oportunidades',
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
-                const SizedBox(height: 6),
-                Text(
-                  'Recursos organizados por área académica.',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                ),
+                // const SizedBox(height: 6),
+                // Text(
+                //   'Recursos organizados por área académica.',
+                //   style: Theme.of(context).textTheme.bodyMedium
+                //       ?.copyWith(color: colorScheme.onSurfaceVariant),
+                // ),
                 const SizedBox(height: 18),
                 Expanded(
                   child: _careerLogos.isEmpty
@@ -144,8 +146,10 @@ class _OpportunitiesScreenState extends State<OpportunitiesScreen> {
         final item = _careerLogos[index];
         return Card(
           child: ListTile(
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 8,
+            ),
             leading: Container(
               width: 64,
               height: 64,
@@ -160,9 +164,8 @@ class _OpportunitiesScreenState extends State<OpportunitiesScreen> {
               child: Image.asset(
                 item['image']!,
                 fit: BoxFit.contain,
-                errorBuilder: (context, error, stackTrace) => const Icon(
-                  Icons.image_not_supported_outlined,
-                ),
+                errorBuilder: (context, error, stackTrace) =>
+                    const Icon(Icons.image_not_supported_outlined),
               ),
             ),
             title: Text(

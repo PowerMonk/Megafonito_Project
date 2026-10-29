@@ -42,10 +42,10 @@ Findings below reflect source inspection, not a penetration test or production e
 - Root README, backend readme, API notes, compose comments, SQL migration state, and active code have discrepancies.
 - `backend/docs.md` cannot currently be read as ordinary Markdown; a later cleanup should determine whether to recover or replace it.
 - Frontend CI has no analysis/test gate. The project now has tracked widget tests and a clean local analyzer result, but CI does not run them.
-- Frontend SDK minimums disagree: the README says Flutter 3.19.5+, `pubspec.yaml` says Dart 3.3.1+, but the current resolved lockfile requires Flutter 3.27+ / Dart 3.8+.
+- The Dart/Flutter minimums were aligned to the current lockfile and file_picker release; consumers must use Flutter 3.44+ / Dart 3.13+.
 - Flutter source contains hardcoded sample profile data and sample/mock data. Keep these out of docs/screenshots shared publicly unless sanitized.
 - The logo SVG includes embedded font/style/metadata elements that cause non-fatal parser warnings during widget tests.
-- Flutter 3.47.7 reports that the current Gradle/AGP/Kotlin combination will be unsupported in a future release; upgrading to AGP 9 currently conflicts with the duplicate `org.chromium.net` namespace from the existing Cronet dependencies. Both debug and release APKs currently build with Gradle 8.14 / AGP 8.11.1 / Kotlin 2.2.20.
+- Android Gradle support is now aligned with Flutter 3.47: Gradle 9.3.1 / AGP 9.1.0, using built-in Kotlin with the legacy DSL compatibility flag. The prior Cronet namespace conflict was resolved by removing its unused package dependency. Revisit the Android dependency matrix when Flutter updates its supported toolchain.
 
 ## Suggested separate follow-up work (outside visual scope)
 

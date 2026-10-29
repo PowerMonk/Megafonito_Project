@@ -12,10 +12,7 @@ class OpportunitiesDetail extends StatelessWidget {
   final Map<String, dynamic> oportunidades;
 
   /// Constructor para [NoticeDetail]. Recibe el mapa [oportunidad] requerido.
-  const OpportunitiesDetail({
-    super.key,
-    required this.oportunidades,
-  });
+  const OpportunitiesDetail({super.key, required this.oportunidades});
 
   /// El método [build] es el punto de entrada para construir la UI del widget.
   /// En este caso, simplemente llama a [_buildContent] para construir el contenido real.
@@ -71,7 +68,9 @@ class OpportunitiesDetail extends StatelessWidget {
   /// Widget [_buildContent] que construye la UI principal del detalle del oportunidad.
   /// Recibe el [BuildContext] actual y el [ScrollController] del [DraggableScrollableSheet].
   Widget _buildContent(
-      BuildContext context, ScrollController scrollController) {
+    BuildContext context,
+    ScrollController scrollController,
+  ) {
     final colorScheme = Theme.of(context).colorScheme;
     // Extrae el título del mapa [oportunidades]. Si la clave 'title' no existe, usa 'Detalle de la Oportunidad' como valor por defecto.
     final String title = oportunidades['title'] ?? 'Detalle de la Oportunidad';
@@ -162,13 +161,16 @@ class OpportunitiesDetail extends StatelessWidget {
                     SizedBox(height: 8.0),
                     Row(
                       children: [
-                        Text('Institución',
-                            style:
-                                TextStyle(color: colorScheme.onSurfaceVariant)),
+                        Text(
+                          'Institución',
+                          style: TextStyle(color: colorScheme.onSurfaceVariant),
+                        ),
                         SizedBox(width: 4),
                         Expanded(
-                          child: Text(authorName,
-                              style: TextStyle(fontWeight: FontWeight.w500)),
+                          child: Text(
+                            authorName,
+                            style: TextStyle(fontWeight: FontWeight.w500),
+                          ),
                         ),
                         SizedBox(width: 4),
                         // Convertimos el icono en un InkWell para hacerlo clickeable
@@ -188,27 +190,34 @@ class OpportunitiesDetail extends StatelessWidget {
                               final canOpen = await canLaunchUrl(uri);
                               if (!context.mounted) return;
                               if (canOpen) {
-                                await launchUrl(uri,
-                                    mode: LaunchMode.externalApplication);
+                                await launchUrl(
+                                  uri,
+                                  mode: LaunchMode.externalApplication,
+                                );
                               } else {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                      content:
-                                          Text('No se pudo abrir el enlace')),
+                                    content: Text('No se pudo abrir el enlace'),
+                                  ),
                                 );
                               }
                             } catch (e) {
                               if (!context.mounted) return;
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                    content: Text(
-                                        'Error al intentar abrir el enlace: $e')),
+                                  content: Text(
+                                    'Error al intentar abrir el enlace: $e',
+                                  ),
+                                ),
                               );
                               debugPrint('Error al intentar abrir URL: $e');
                             }
                           },
-                          icon: Icon(Icons.open_in_new_rounded,
-                              size: 20.0, color: colorScheme.primary),
+                          icon: Icon(
+                            Icons.open_in_new_rounded,
+                            size: 20.0,
+                            color: colorScheme.primary,
+                          ),
                         ),
                       ],
                     ),
@@ -223,8 +232,10 @@ class OpportunitiesDetail extends StatelessWidget {
                     // [if (hasAttachment) ...] es una forma condicional de añadir widgets a la lista.
                     // Si [hasAttachment] es true, los widgets dentro de los corchetes se añaden.
                     if (hasAttachment) ...[
-                      Text('Información adjunta',
-                          style: Theme.of(context).textTheme.titleMedium),
+                      Text(
+                        'Información adjunta',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
                       SizedBox(height: 12.0),
                       // Llama a la función [_buildAttachmentDisplay] para mostrar el display del adjunto.
                       _buildAttachmentDisplay(context, attachmentUrl),
@@ -295,8 +306,9 @@ class OpportunitiesDetail extends StatelessWidget {
       return Container(); // No mostrar nada si no hay URL de adjunto
     }
 
-    final fileName =
-        p.basename(attachmentUrl); // Extrae el nombre del archivo de la URL
+    final fileName = p.basename(
+      attachmentUrl,
+    ); // Extrae el nombre del archivo de la URL
     final fileIcon = _getFileIcon(fileName);
 
     return InkWell(
@@ -310,8 +322,10 @@ class OpportunitiesDetail extends StatelessWidget {
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                  content: Text(
-                      'No se pudo abrir el archivo adjunto. Verifique la URL.')),
+                content: Text(
+                  'No se pudo abrir el archivo adjunto. Verifique la URL.',
+                ),
+              ),
             );
           }
         } catch (e) {
@@ -337,8 +351,11 @@ class OpportunitiesDetail extends StatelessWidget {
                       TextOverflow.ellipsis, // Para manejar nombres largos
                 ),
               ),
-              Icon(Icons.open_in_new_rounded,
-                  size: 18, color: colorScheme.primary),
+              Icon(
+                Icons.open_in_new_rounded,
+                size: 18,
+                color: colorScheme.primary,
+              ),
             ],
           ),
         ),
