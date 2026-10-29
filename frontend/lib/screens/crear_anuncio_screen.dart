@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+
 import '../services/storage_service.dart';
 
 // Random comment for pipeline testing
 
 class CrearNuevoAnuncioScreen extends StatefulWidget {
   final Function(String, String, Color, String, bool, String?, String?)
-      onAnuncioCreado;
+  onAnuncioCreado;
 
   const CrearNuevoAnuncioScreen({super.key, required this.onAnuncioCreado});
 
@@ -56,15 +57,14 @@ class _CrearNuevoAnuncioScreenState extends State<CrearNuevoAnuncioScreen> {
 
     if (titulo.isNotEmpty && texto.isNotEmpty) {
       widget.onAnuncioCreado(
-          titulo,
-          texto,
-          color,
-          _categoriaSeleccionada,
-          _tieneArchivos,
-          _archivosAdjuntos.isNotEmpty ? _archivosAdjuntos[0]['fileUrl'] : null,
-          _archivosAdjuntos.isNotEmpty
-              ? _archivosAdjuntos[0]['fileKey']
-              : null);
+        titulo,
+        texto,
+        color,
+        _categoriaSeleccionada,
+        _tieneArchivos,
+        _archivosAdjuntos.isNotEmpty ? _archivosAdjuntos[0]['fileUrl'] : null,
+        _archivosAdjuntos.isNotEmpty ? _archivosAdjuntos[0]['fileKey'] : null,
+      );
       Navigator.pop(context);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -94,7 +94,8 @@ class _CrearNuevoAnuncioScreenState extends State<CrearNuevoAnuncioScreen> {
         });
 
         debugPrint(
-            'File uploaded successfully: URL=${result['fileUrl']}, Key=${result['fileKey']}');
+          'File uploaded successfully: URL=${result['fileUrl']}, Key=${result['fileKey']}',
+        );
       } else {
         setState(() {
           _isUploading = false;
@@ -263,9 +264,10 @@ class _CrearNuevoAnuncioScreenState extends State<CrearNuevoAnuncioScreen> {
                       Text(
                         "Autor: ",
                         style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                            fontSize: 18.0),
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                          fontSize: 18.0,
+                        ),
                       ),
                       Expanded(
                         child: Text(
@@ -282,9 +284,10 @@ class _CrearNuevoAnuncioScreenState extends State<CrearNuevoAnuncioScreen> {
                       Text(
                         "Para: ",
                         style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                            fontSize: 16),
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                          fontSize: 16,
+                        ),
                       ),
                       Expanded(
                         child: DropdownButton<String>(
@@ -300,16 +303,19 @@ class _CrearNuevoAnuncioScreenState extends State<CrearNuevoAnuncioScreen> {
                               child: Text(
                                 group,
                                 style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 14.0,
-                                    fontWeight: FontWeight.normal),
+                                  color: Colors.black,
+                                  fontSize: 14.0,
+                                  fontWeight: FontWeight.normal,
+                                ),
                               ),
                             );
                           }).toList(),
                           isExpanded: true,
                           underline: Container(height: 0),
-                          icon:
-                              Icon(Icons.arrow_drop_down, color: Colors.black),
+                          icon: Icon(
+                            Icons.arrow_drop_down,
+                            color: Colors.black,
+                          ),
                         ),
                       ),
                     ],
@@ -320,9 +326,10 @@ class _CrearNuevoAnuncioScreenState extends State<CrearNuevoAnuncioScreen> {
                       Text(
                         "Categoría: ",
                         style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                            fontSize: 16),
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                          fontSize: 16,
+                        ),
                       ),
                       Expanded(
                         child: DropdownButton<String>(
@@ -338,16 +345,19 @@ class _CrearNuevoAnuncioScreenState extends State<CrearNuevoAnuncioScreen> {
                               child: Text(
                                 category,
                                 style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 14.5,
-                                    fontWeight: FontWeight.normal),
+                                  color: Colors.black,
+                                  fontSize: 14.5,
+                                  fontWeight: FontWeight.normal,
+                                ),
                               ),
                             );
                           }).toList(),
                           isExpanded: true,
                           underline: Container(height: 0),
-                          icon:
-                              Icon(Icons.arrow_drop_down, color: Colors.black),
+                          icon: Icon(
+                            Icons.arrow_drop_down,
+                            color: Colors.black,
+                          ),
                         ),
                       ),
                     ],
@@ -358,9 +368,10 @@ class _CrearNuevoAnuncioScreenState extends State<CrearNuevoAnuncioScreen> {
                       Text(
                         "Título: ",
                         style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                            fontSize: 16),
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                          fontSize: 16,
+                        ),
                       ),
                       Expanded(
                         child: TextField(
@@ -370,11 +381,14 @@ class _CrearNuevoAnuncioScreenState extends State<CrearNuevoAnuncioScreen> {
                             enabledBorder: InputBorder.none,
                             focusedBorder: InputBorder.none,
                             filled: false,
-                            contentPadding:
-                                const EdgeInsets.symmetric(vertical: 12),
+                            contentPadding: const EdgeInsets.symmetric(
+                              vertical: 12,
+                            ),
                             hintText: "Escribe un título",
-                            hintStyle:
-                                TextStyle(color: Colors.grey, fontSize: 15.0),
+                            hintStyle: TextStyle(
+                              color: Colors.grey,
+                              fontSize: 15.0,
+                            ),
                           ),
                           style: TextStyle(color: Colors.black, fontSize: 14.5),
                         ),
@@ -387,9 +401,10 @@ class _CrearNuevoAnuncioScreenState extends State<CrearNuevoAnuncioScreen> {
                       Text(
                         "Link: ",
                         style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                            fontSize: 16),
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                          fontSize: 16,
+                        ),
                       ),
                       Expanded(
                         child: TextField(
@@ -399,11 +414,14 @@ class _CrearNuevoAnuncioScreenState extends State<CrearNuevoAnuncioScreen> {
                             enabledBorder: InputBorder.none,
                             focusedBorder: InputBorder.none,
                             filled: false,
-                            contentPadding:
-                                const EdgeInsets.symmetric(vertical: 12),
+                            contentPadding: const EdgeInsets.symmetric(
+                              vertical: 12,
+                            ),
                             hintText: "Agrega un enlace (opcional)",
-                            hintStyle:
-                                TextStyle(color: Colors.grey, fontSize: 15.0),
+                            hintStyle: TextStyle(
+                              color: Colors.grey,
+                              fontSize: 15.0,
+                            ),
                           ),
                           style: TextStyle(color: Colors.black, fontSize: 14.5),
                         ),
@@ -418,9 +436,7 @@ class _CrearNuevoAnuncioScreenState extends State<CrearNuevoAnuncioScreen> {
                       filled: false,
                       enabledBorder: InputBorder.none,
                       focusedBorder: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(
-                        vertical: 12,
-                      ),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 12),
                       hintStyle: TextStyle(color: Colors.grey, fontSize: 14.0),
                       border: InputBorder.none,
                     ),

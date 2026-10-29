@@ -7,11 +7,7 @@ class NoticeCard extends StatelessWidget {
   final Map<String, dynamic> anuncio;
   final ValueChanged<Map<String, dynamic>> onTap;
 
-  const NoticeCard({
-    super.key,
-    required this.anuncio,
-    required this.onTap,
-  });
+  const NoticeCard({super.key, required this.anuncio, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -51,18 +47,14 @@ class NoticeCard extends StatelessWidget {
                           authorName,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleSmall
+                          style: Theme.of(context).textTheme.titleSmall
                               ?.copyWith(fontWeight: FontWeight.w700),
                         ),
                         const SizedBox(height: 2),
                         Text(
                           'Anuncio escolar',
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: colorScheme.onSurfaceVariant,
-                                  ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: colorScheme.onSurfaceVariant),
                         ),
                       ],
                     ),
@@ -70,9 +62,8 @@ class NoticeCard extends StatelessWidget {
                   const SizedBox(width: 8),
                   Text(
                     createdAt,
-                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
+                    style: Theme.of(context).textTheme.labelMedium
+                        ?.copyWith(color: colorScheme.onSurfaceVariant),
                     textAlign: TextAlign.end,
                   ),
                 ],
@@ -101,11 +92,11 @@ class NoticeCard extends StatelessWidget {
                         category,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style:
-                            Theme.of(context).textTheme.labelMedium?.copyWith(
-                                  color: colorScheme.onSecondaryContainer,
-                                  fontWeight: FontWeight.w700,
-                                ),
+                        style: Theme.of(context).textTheme.labelMedium
+                            ?.copyWith(
+                              color: colorScheme.onSecondaryContainer,
+                              fontWeight: FontWeight.w700,
+                            ),
                       ),
                     ),
                   ),
@@ -136,8 +127,9 @@ class NoticeCard extends StatelessWidget {
   }
 
   String _formatCreatedAt(dynamic value) {
-    final DateTime? date =
-        value is DateTime ? value : DateTime.tryParse(value?.toString() ?? '');
+    final DateTime? date = value is DateTime
+        ? value
+        : DateTime.tryParse(value?.toString() ?? '');
     if (date == null) return 'Fecha pendiente';
 
     const months = [
@@ -186,10 +178,7 @@ class NoticesContent extends StatelessWidget {
         itemCount: anuncios.length + (hasMoreData ? 1 : 0),
         itemBuilder: (context, index) {
           if (index < anuncios.length) {
-            return NoticeCard(
-              anuncio: anuncios[index],
-              onTap: onNoticeTap,
-            );
+            return NoticeCard(anuncio: anuncios[index], onTap: onNoticeTap);
           }
           if (isLoading) {
             return const Padding(

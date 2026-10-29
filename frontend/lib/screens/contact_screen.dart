@@ -50,17 +50,18 @@ class _ContactosEscolaresScreenState extends State<ContactosEscolaresScreen> {
   Future<void> _copy(BuildContext context, String text) async {
     await Clipboard.setData(ClipboardData(text: text));
     if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Copiado al portapapeles')),
-    );
+    ScaffoldMessenger.of(context)
+        .showSnackBar(const SnackBar(content: Text('Copiado al portapapeles')));
   }
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final filteredContacts = _contactos
-        .where((contact) =>
-            contact['name']!.toLowerCase().contains(_query.toLowerCase()))
+        .where(
+          (contact) =>
+              contact['name']!.toLowerCase().contains(_query.toLowerCase()),
+        )
         .toList();
 
     return Container(
@@ -77,13 +78,12 @@ class _ContactosEscolaresScreenState extends State<ContactosEscolaresScreen> {
                   'Directorio escolar',
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
-                const SizedBox(height: 6),
-                Text(
-                  'Encuentra y comparte la información de contacto.',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                ),
+                // const SizedBox(height: 6),
+                // Text(
+                //   'Encuentra y comparte la información de contacto.',
+                //   style: Theme.of(context).textTheme.bodyMedium
+                //       ?.copyWith(color: colorScheme.onSurfaceVariant),
+                // ),
                 const SizedBox(height: 18),
                 TextField(
                   onChanged: (value) => setState(() => _query = value),
@@ -138,10 +138,7 @@ class _ContactosEscolaresScreenState extends State<ContactosEscolaresScreen> {
     );
   }
 
-  Widget _buildContactCard(
-    BuildContext context,
-    Map<String, String> contact,
-  ) {
+  Widget _buildContactCard(BuildContext context, Map<String, String> contact) {
     final name = contact['name']!;
     final phone = contact['phone']!;
     final email = contact['email']!;
@@ -209,9 +206,8 @@ class _ContactosEscolaresScreenState extends State<ContactosEscolaresScreen> {
               children: [
                 Text(
                   label,
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
+                  style: Theme.of(context).textTheme.labelLarge
+                      ?.copyWith(color: colorScheme.onSurfaceVariant),
                 ),
                 const SizedBox(height: 2),
                 SelectableText(

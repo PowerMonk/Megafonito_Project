@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../services/notices_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/notice_card.dart';
@@ -54,8 +55,6 @@ class _AnunciosScreenState extends State<AnunciosScreen> {
     UserInfoScreen(),
   ];
 
-  bool _showExtraFabs = false; // State for extra buttons visibility
-
   @override
   void initState() {
     super.initState();
@@ -87,28 +86,30 @@ class _AnunciosScreenState extends State<AnunciosScreen> {
 
       if (!mounted) return;
       setState(() {
-        _anuncios.addAll(notices.map((notice) {
-          bool hasAttachment = false;
-          if (notice['has_attachment'] is bool) {
-            hasAttachment = notice['has_attachment'];
-          } else if (notice['has_attachment'] is int) {
-            hasAttachment = notice['has_attachment'] == 1;
-          }
+        _anuncios.addAll(
+          notices.map((notice) {
+            bool hasAttachment = false;
+            if (notice['has_attachment'] is bool) {
+              hasAttachment = notice['has_attachment'];
+            } else if (notice['has_attachment'] is int) {
+              hasAttachment = notice['has_attachment'] == 1;
+            }
 
-          return {
-            'id': notice['id'],
-            'title': notice['title'] ?? 'Sin Título',
-            'content': notice['content'] ?? '',
-            'category': notice['category'] ?? 'General',
-            'author_name': notice['author_name'] ?? 'Autor Desconocido',
-            'created_at': notice['created_at'] != null
-                ? DateTime.tryParse(notice['created_at']) ?? DateTime.now()
-                : DateTime.now(),
-            'has_attachment': hasAttachment,
-            'attachment_url': notice['attachment_url'],
-            'attachment_key': notice['attachment_key'],
-          };
-        }).toList());
+            return {
+              'id': notice['id'],
+              'title': notice['title'] ?? 'Sin Título',
+              'content': notice['content'] ?? '',
+              'category': notice['category'] ?? 'General',
+              'author_name': notice['author_name'] ?? 'Autor Desconocido',
+              'created_at': notice['created_at'] != null
+                  ? DateTime.tryParse(notice['created_at']) ?? DateTime.now()
+                  : DateTime.now(),
+              'has_attachment': hasAttachment,
+              'attachment_url': notice['attachment_url'],
+              'attachment_key': notice['attachment_key'],
+            };
+          }).toList(),
+        );
 
         final int currentPage = pagination['currentPage'] as int? ?? 1;
         final int totalPages = pagination['totalPages'] as int? ?? 1;
@@ -145,50 +146,44 @@ class _AnunciosScreenState extends State<AnunciosScreen> {
   }
 
   void _navigateToCrearNuevoAnuncio() {
-    // Close extra FABs if open before navigating
-    if (_showExtraFabs) {
-      setState(() {
-        _showExtraFabs = false;
-      });
-      // Add a small delay to allow the FABs to animate out before navigating
-      Future.delayed(Duration(milliseconds: 100), () {
-        if (mounted) _pushCrearAnuncioScreen();
-      });
-    } else {
-      _pushCrearAnuncioScreen();
-    }
-  }
-
-  // Helper method to avoid duplication
-  void _pushCrearAnuncioScreen() {
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => CrearNuevoAnuncioScreen(
-          onAnuncioCreado: (titulo, texto, color, categoria, tieneArchivos,
-              fileUrl, fileKey) async {
-            try {
-              await NoticesService.createNotice(
-                context,
-                title: titulo,
-                content: texto,
-                category: categoria,
-                hasFile: tieneArchivos,
-                fileUrl: fileUrl,
-                fileKey: fileKey,
-              );
+          onAnuncioCreado:
+              (
+                titulo,
+                texto,
+                color,
+                categoria,
+                tieneArchivos,
+                fileUrl,
+                fileKey,
+              ) async {
+                try {
+                  await NoticesService.createNotice(
+                    context,
+                    title: titulo,
+                    content: texto,
+                    category: categoria,
+                    hasFile: tieneArchivos,
+                    fileUrl: fileUrl,
+                    fileKey: fileKey,
+                  );
 
-              _loadNotices(refresh: true);
-            } catch (e) {
-              debugPrint('Error creating announcement: $e');
-              if (!context.mounted) return;
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                    content:
-                        Text('Error al crear el anuncio: ${e.toString()}')),
-              );
-            }
-          },
+                  _loadNotices(refresh: true);
+                } catch (e) {
+                  debugPrint('Error creating announcement: $e');
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Error al crear el anuncio: ${e.toString()}',
+                      ),
+                    ),
+                  );
+                }
+              },
         ),
       ),
     );
@@ -197,18 +192,6 @@ class _AnunciosScreenState extends State<AnunciosScreen> {
   void _handleNavBarTap(int index) {
     setState(() {
       _currentIndex = index;
-    });
-  }
-
-  void _handleShowExtraFabs() {
-    setState(() {
-      _showExtraFabs = true;
-    });
-  }
-
-  void _handleDismissBlur() {
-    setState(() {
-      _showExtraFabs = false;
     });
   }
 
@@ -252,10 +235,7 @@ class _AnunciosScreenState extends State<AnunciosScreen> {
                           if (_currentIndex == 0)
                             ActionButtons(
                               isSuperUser: widget.isSuperUser,
-                              showExtraFabs: _showExtraFabs,
-                              onShowExtraFabs: _handleShowExtraFabs,
                               onCreateNotice: _navigateToCrearNuevoAnuncio,
-                              onDismissBlur: _handleDismissBlur,
                             ),
                         ],
                       ),
@@ -293,18 +273,13 @@ class _AnunciosScreenState extends State<AnunciosScreen> {
           ),
 
           // NoticesContent fills the remaining space
-          Expanded(
-            child: _buildNoticesContent(),
-          ),
+          Expanded(child: _buildNoticesContent()),
         ],
       );
     } else {
       int stackIndex = _currentIndex - 1;
       if (stackIndex >= 0 && stackIndex < _screens.length) {
-        return IndexedStack(
-          index: stackIndex,
-          children: _screens,
-        );
+        return IndexedStack(index: stackIndex, children: _screens);
       } else {
         return const Center(child: Text('Pantalla no encontrada'));
       }
@@ -323,8 +298,11 @@ class _AnunciosScreenState extends State<AnunciosScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.campaign_outlined,
-                  size: 44, color: Theme.of(context).colorScheme.primary),
+              Icon(
+                Icons.campaign_outlined,
+                size: 44,
+                color: Theme.of(context).colorScheme.primary,
+              ),
               const SizedBox(height: 12),
               Text(
                 'No hay anuncios disponibles',

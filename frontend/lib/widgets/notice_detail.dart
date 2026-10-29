@@ -13,10 +13,7 @@ class NoticeDetail extends StatelessWidget {
   final Map<String, dynamic> anuncio;
 
   /// Constructor para [NoticeDetail]. Recibe el mapa [anuncio] requerido.
-  const NoticeDetail({
-    super.key,
-    required this.anuncio,
-  });
+  const NoticeDetail({super.key, required this.anuncio});
 
   /// El método [build] es el punto de entrada para construir la UI del widget.
   /// En este caso, simplemente llama a [_buildContent] para construir el contenido real.
@@ -72,7 +69,9 @@ class NoticeDetail extends StatelessWidget {
   /// Widget [_buildContent] que construye la UI principal del detalle del anuncio.
   /// Recibe el [BuildContext] actual y el [ScrollController] del [DraggableScrollableSheet].
   Widget _buildContent(
-      BuildContext context, ScrollController scrollController) {
+    BuildContext context,
+    ScrollController scrollController,
+  ) {
     final colorScheme = Theme.of(context).colorScheme;
     // Extrae el título del mapa [anuncio]. Si la clave 'title' no existe, usa 'Detalle del Anuncio' como valor por defecto.
     final String title = anuncio['title'] ?? 'Detalle del Anuncio';
@@ -161,32 +160,37 @@ class NoticeDetail extends StatelessWidget {
                     SizedBox(height: 8.0),
                     Row(
                       children: [
-                        Text('Publicado por',
-                            style:
-                                TextStyle(color: colorScheme.onSurfaceVariant)),
-                        SizedBox(width: 4),
-                        Expanded(
-                          child: Text(authorName,
-                              style: TextStyle(fontWeight: FontWeight.w500)),
+                        Text(
+                          'Publicado por',
+                          style: TextStyle(color: colorScheme.onSurfaceVariant),
                         ),
                         SizedBox(width: 4),
-                        Icon(Icons.person_outline_rounded,
-                            size: 20.0, color: colorScheme.primary),
+                        Expanded(
+                          child: Text(
+                            authorName,
+                            style: TextStyle(fontWeight: FontWeight.w500),
+                          ),
+                        ),
+                        SizedBox(width: 4),
+                        Icon(
+                          Icons.person_outline_rounded,
+                          size: 20.0,
+                          color: colorScheme.primary,
+                        ),
                       ],
                     ),
                     // [Divider] es una línea horizontal que separa visualmente el contenido.
                     Divider(height: 20.0),
                     // [Text] muestra texto en la pantalla.
-                    Text(
-                      content,
-                      style: Theme.of(context).textTheme.bodyLarge,
-                    ),
+                    Text(content, style: Theme.of(context).textTheme.bodyLarge),
                     SizedBox(height: 16.0),
                     // [if (hasAttachment) ...] es una forma condicional de añadir widgets a la lista.
                     // Si [hasAttachment] es true, los widgets dentro de los corchetes se añaden.
                     if (hasAttachment) ...[
-                      Text('Archivo adjunto',
-                          style: Theme.of(context).textTheme.titleMedium),
+                      Text(
+                        'Archivo adjunto',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
                       SizedBox(height: 12.0),
                       // Llama a la función [_buildAttachmentDisplay] para mostrar el display del adjunto.
                       _buildAttachmentDisplay(context, attachmentUrl),
@@ -256,15 +260,17 @@ class NoticeDetail extends StatelessWidget {
     // Si no hay URL de adjunto, aún así mostramos un placeholder con el nombre fijo.
     // Esto es diferente a OpportunitiesDetail donde no se mostraba nada si no había URL.
     final String displayFileName = 'Archivo_importante.pdf';
-    final IconData fileIcon =
-        _getFileIcon(displayFileName); // Usamos el nombre fijo para el icono
+    final IconData fileIcon = _getFileIcon(
+      displayFileName,
+    ); // Usamos el nombre fijo para el icono
 
     return InkWell(
       onTap: () async {
         if (attachmentUrl == null || attachmentUrl.isEmpty) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-                content: Text('No hay URL de archivo adjunto para abrir.')),
+              content: Text('No hay URL de archivo adjunto para abrir.'),
+            ),
           );
           return;
         }
@@ -278,8 +284,10 @@ class NoticeDetail extends StatelessWidget {
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                  content: Text(
-                      'No se pudo abrir el archivo adjunto. Verifique la URL.')),
+                content: Text(
+                  'No se pudo abrir el archivo adjunto. Verifique la URL.',
+                ),
+              ),
             );
           }
         } catch (e) {
@@ -305,8 +313,11 @@ class NoticeDetail extends StatelessWidget {
                       TextOverflow.ellipsis, // Para manejar nombres largos
                 ),
               ),
-              Icon(Icons.open_in_new_rounded,
-                  size: 18, color: colorScheme.primary),
+              Icon(
+                Icons.open_in_new_rounded,
+                size: 18,
+                color: colorScheme.primary,
+              ),
             ],
           ),
         ),

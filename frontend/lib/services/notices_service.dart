@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../models/notice_model.dart';
 import 'api_service.dart';
 import 'auth_service.dart';
@@ -38,7 +39,8 @@ class NoticesService {
   }) async {
     try {
       await Future.delayed(
-          Duration(milliseconds: 800)); // Simulate network delay
+        Duration(milliseconds: 800),
+      ); // Simulate network delay
 
       // Temporarily store the notice in memory
       final mockNotice = {
@@ -80,16 +82,19 @@ class NoticesService {
     List<Map<String, dynamic>> sorted = List.from(notices);
     if (sortOption == 'Más recientes') {
       sorted.sort(
-          (a, b) => (b['fecha'] as DateTime).compareTo(a['fecha'] as DateTime));
+        (a, b) => (b['fecha'] as DateTime).compareTo(a['fecha'] as DateTime),
+      );
     } else if (sortOption == 'Más antiguos') {
       sorted.sort(
-          (a, b) => (a['fecha'] as DateTime).compareTo(b['fecha'] as DateTime));
+        (a, b) => (a['fecha'] as DateTime).compareTo(b['fecha'] as DateTime),
+      );
     }
     return sorted;
   }
 
   static Future<List<Notice>> convertApiResponseToNotices(
-      dynamic apiResponse) async {
+    dynamic apiResponse,
+  ) async {
     try {
       if (apiResponse == null || !apiResponse.containsKey('data')) {
         return [];

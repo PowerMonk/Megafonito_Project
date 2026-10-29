@@ -22,8 +22,9 @@ void main() {
     expect(Theme.of(context).colorScheme.brightness, Brightness.light);
   });
 
-  testWidgets('shell preserves five destinations at compact and wide widths',
-      (tester) async {
+  testWidgets('shell preserves five destinations at compact and wide widths', (
+    tester,
+  ) async {
     _setLogicalSize(tester, const Size(390, 844));
     addTearDown(() => _resetLogicalSize(tester));
     await tester.pumpWidget(_shell());
@@ -47,6 +48,7 @@ void main() {
 
     await tester.tap(find.text('Procesos'));
     await tester.pumpAndSettle();
+    debugDumpApp();
     expect(find.text('Procesos escolares'), findsOneWidget);
 
     await tester.tap(find.text('Cuenta'));
@@ -74,8 +76,9 @@ void main() {
     await tester.pump();
   });
 
-  testWidgets('notice card uses supplied metadata and remains tappable',
-      (tester) async {
+  testWidgets('notice card uses supplied metadata and remains tappable', (
+    tester,
+  ) async {
     _setLogicalSize(tester, const Size(320, 720));
     addTearDown(() => _resetLogicalSize(tester));
     var opened = false;
@@ -94,10 +97,7 @@ void main() {
           body: ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              NoticeCard(
-                anuncio: notice,
-                onTap: (_) => opened = true,
-              ),
+              NoticeCard(anuncio: notice, onTap: (_) => opened = true),
             ],
           ),
         ),
@@ -112,8 +112,9 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('category chips notify selection and can be cleared',
-      (tester) async {
+  testWidgets('category chips notify selection and can be cleared', (
+    tester,
+  ) async {
     final selected = <String>[];
 
     await tester.pumpWidget(
@@ -138,33 +139,36 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('contacts fit a narrow, large-text layout and expose copy labels',
-      (tester) async {
-    _setLogicalSize(tester, const Size(320, 720));
-    addTearDown(() => _resetLogicalSize(tester));
+  testWidgets(
+    'contacts fit a narrow, large-text layout and expose copy labels',
+    (tester) async {
+      _setLogicalSize(tester, const Size(320, 720));
+      addTearDown(() => _resetLogicalSize(tester));
 
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: AppTheme.light,
-        home: MediaQuery(
-          data: const MediaQueryData(textScaler: TextScaler.linear(1.35)),
-          child: const Scaffold(body: ContactosEscolaresScreen()),
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light,
+          home: MediaQuery(
+            data: const MediaQueryData(textScaler: TextScaler.linear(1.35)),
+            child: const Scaffold(body: ContactosEscolaresScreen()),
+          ),
         ),
-      ),
-    );
-    await tester.pump();
+      );
+      await tester.pump();
 
-    expect(find.text('Directorio escolar'), findsOneWidget);
-    final copyPhoneButton = find.byTooltip('Copiar Teléfono').first;
-    expect(copyPhoneButton, findsOneWidget);
-    final targetSize = tester.getSize(copyPhoneButton);
-    expect(targetSize.width, greaterThanOrEqualTo(48));
-    expect(targetSize.height, greaterThanOrEqualTo(48));
-    expect(tester.takeException(), isNull);
-  });
+      expect(find.text('Directorio escolar'), findsOneWidget);
+      final copyPhoneButton = find.byTooltip('Copiar Teléfono').first;
+      expect(copyPhoneButton, findsOneWidget);
+      final targetSize = tester.getSize(copyPhoneButton);
+      expect(targetSize.width, greaterThanOrEqualTo(48));
+      expect(targetSize.height, greaterThanOrEqualTo(48));
+      expect(tester.takeException(), isNull);
+    },
+  );
 
-  testWidgets('notice composer scrolls within a narrow keyboard viewport',
-      (tester) async {
+  testWidgets('notice composer scrolls within a narrow keyboard viewport', (
+    tester,
+  ) async {
     _setLogicalSize(tester, const Size(360, 640));
     addTearDown(() => _resetLogicalSize(tester));
 
@@ -173,9 +177,8 @@ void main() {
         theme: AppTheme.light,
         builder: (context, child) {
           return MediaQuery(
-            data: MediaQuery.of(context).copyWith(
-              viewInsets: const EdgeInsets.only(bottom: 260),
-            ),
+            data: MediaQuery.of(context)
+                .copyWith(viewInsets: const EdgeInsets.only(bottom: 260)),
             child: child!,
           );
         },
@@ -189,19 +192,23 @@ void main() {
     expect(find.text('Nuevo anuncio'), findsOneWidget);
     expect(find.byType(TextField), findsNWidgets(3));
     expect(find.byType(Card), findsNothing);
-    for (final textField
-        in tester.widgetList<TextField>(find.byType(TextField))) {
+    for (final textField in tester.widgetList<TextField>(
+      find.byType(TextField),
+    )) {
       expect(textField.decoration?.filled, isFalse);
       expect(textField.decoration?.enabledBorder, InputBorder.none);
     }
     await tester.drag(
-        find.byType(SingleChildScrollView), const Offset(0, -220));
+      find.byType(SingleChildScrollView),
+      const Offset(0, -220),
+    );
     await tester.pump();
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('opportunity art is contained and the next card is previewed',
-      (tester) async {
+  testWidgets('opportunity art is contained and the next card is previewed', (
+    tester,
+  ) async {
     _setLogicalSize(tester, const Size(390, 844));
     addTearDown(() => _resetLogicalSize(tester));
 
@@ -227,44 +234,36 @@ void main() {
   testWidgets('expanded create actions have unique Hero tags', (tester) async {
     _setLogicalSize(tester, const Size(390, 844));
     addTearDown(() => _resetLogicalSize(tester));
+    final semantics = tester.ensureSemantics();
 
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: AppTheme.light,
-        home: Scaffold(
-          body: Stack(
-            children: [
-              ActionButtons(
-                isSuperUser: true,
-                showExtraFabs: true,
-                onShowExtraFabs: () {},
-                onCreateNotice: () {},
-                onDismissBlur: () {},
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-    await tester.pump();
+    await tester.pumpWidget(_ActionMenuHarness());
+    await tester.tap(find.bySemanticsLabel('Más acciones de creación'));
+    await tester.pumpAndSettle();
 
     expect(find.byTooltip('Crear nueva oportunidad'), findsOneWidget);
     expect(find.byTooltip('Crear nuevo mensaje'), findsOneWidget);
     expect(find.byTooltip('Crear nuevo anuncio'), findsOneWidget);
     expect(tester.takeException(), isNull);
+    semantics.dispose();
   });
 
-  testWidgets('create actions transition smoothly without backdrop blur',
-      (tester) async {
+  testWidgets('create actions transition smoothly without backdrop blur', (
+    tester,
+  ) async {
     _setLogicalSize(tester, const Size(390, 844));
     addTearDown(() => _resetLogicalSize(tester));
     final semantics = tester.ensureSemantics();
+    var homeBuildCount = 0;
 
-    await tester.pumpWidget(const _ActionMenuHarness());
+    await tester.pumpWidget(
+      _ActionMenuHarness(onHomeBuild: () => homeBuildCount++),
+    );
+    final buildsBeforeOpening = homeBuildCount;
     expect(find.bySemanticsLabel('Más acciones de creación'), findsOneWidget);
 
     await tester.tap(find.bySemanticsLabel('Más acciones de creación'));
     await tester.pump(const Duration(milliseconds: 60));
+    expect(homeBuildCount, buildsBeforeOpening);
     await tester.pumpAndSettle();
 
     expect(find.byTooltip('Crear nueva oportunidad'), findsOneWidget);
@@ -300,31 +299,25 @@ void _ignoreCreatedNotice(
   String? fileKey,
 ) {}
 
-class _ActionMenuHarness extends StatefulWidget {
-  const _ActionMenuHarness();
+class _ActionMenuHarness extends StatelessWidget {
+  final VoidCallback? onHomeBuild;
 
-  @override
-  State<_ActionMenuHarness> createState() => _ActionMenuHarnessState();
-}
-
-class _ActionMenuHarnessState extends State<_ActionMenuHarness> {
-  bool _isExpanded = false;
+  const _ActionMenuHarness({this.onHomeBuild});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: AppTheme.light,
       home: Scaffold(
-        body: Stack(
-          children: [
-            ActionButtons(
-              isSuperUser: true,
-              showExtraFabs: _isExpanded,
-              onShowExtraFabs: () => setState(() => _isExpanded = true),
-              onCreateNotice: () {},
-              onDismissBlur: () => setState(() => _isExpanded = false),
-            ),
-          ],
+        body: StatefulBuilder(
+          builder: (context, setState) {
+            onHomeBuild?.call();
+            return Stack(
+              children: [
+                ActionButtons(isSuperUser: true, onCreateNotice: () {}),
+              ],
+            );
+          },
         ),
       ),
     );

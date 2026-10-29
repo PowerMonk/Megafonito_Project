@@ -83,18 +83,17 @@ class _SplashScreenState extends State<SplashScreen> {
                   Text(
                     'MEGAFONITO',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          color: AppDesign.navy,
-                          letterSpacing: 2.4,
-                          fontWeight: FontWeight.w800,
-                        ),
+                      color: AppDesign.navy,
+                      letterSpacing: 2.4,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'La información importante, en un solo lugar.',
                     textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
+                    style: Theme.of(context).textTheme.bodyMedium
+                        ?.copyWith(color: colorScheme.onSurfaceVariant),
                   ),
                   const SizedBox(height: 34),
                   ClipRRect(
@@ -109,9 +108,8 @@ class _SplashScreenState extends State<SplashScreen> {
                   const SizedBox(height: 12),
                   Text(
                     'Preparando tu espacio escolar',
-                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
+                    style: Theme.of(context).textTheme.labelMedium
+                        ?.copyWith(color: colorScheme.onSurfaceVariant),
                   ),
                 ],
               ),

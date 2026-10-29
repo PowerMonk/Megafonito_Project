@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+
 import '../services/storage_service.dart';
 
 class NuevoMensajeScreen extends StatefulWidget {
   final Function(String, String, String, bool, String?, String?)?
-      onMensajeCreado;
+  onMensajeCreado;
 
   const NuevoMensajeScreen({super.key, this.onMensajeCreado});
 
@@ -42,16 +43,13 @@ class _NuevoMensajeScreenState extends State<NuevoMensajeScreen> {
     if (asunto.isNotEmpty && texto.isNotEmpty) {
       if (widget.onMensajeCreado != null) {
         widget.onMensajeCreado!(
-            asunto,
-            texto,
-            _grupoSeleccionado,
-            _tieneArchivos,
-            _archivosAdjuntos.isNotEmpty
-                ? _archivosAdjuntos[0]['fileUrl']
-                : null,
-            _archivosAdjuntos.isNotEmpty
-                ? _archivosAdjuntos[0]['fileKey']
-                : null);
+          asunto,
+          texto,
+          _grupoSeleccionado,
+          _tieneArchivos,
+          _archivosAdjuntos.isNotEmpty ? _archivosAdjuntos[0]['fileUrl'] : null,
+          _archivosAdjuntos.isNotEmpty ? _archivosAdjuntos[0]['fileKey'] : null,
+        );
       }
       Navigator.pop(context);
     } else {
@@ -82,7 +80,8 @@ class _NuevoMensajeScreenState extends State<NuevoMensajeScreen> {
         });
 
         debugPrint(
-            'File uploaded successfully: URL=${result['fileUrl']}, Key=${result['fileKey']}');
+          'File uploaded successfully: URL=${result['fileUrl']}, Key=${result['fileKey']}',
+        );
       } else {
         setState(() {
           _isUploading = false;
@@ -118,153 +117,168 @@ class _NuevoMensajeScreenState extends State<NuevoMensajeScreen> {
           // Removed the more options icon and its functionality
         ],
       ),
-      body: LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints viewportConstraints) {
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Center(
+      body: Theme(
+        data: Theme.of(context).copyWith(
+          inputDecorationTheme: Theme.of(context).inputDecorationTheme.copyWith(
+            filled: false,
+            fillColor: Colors.transparent,
+            border: InputBorder.none,
+            enabledBorder: InputBorder.none,
+            focusedBorder: InputBorder.none,
+            contentPadding: const EdgeInsets.symmetric(vertical: 12),
+          ),
+        ),
+        child: LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints viewportConstraints) {
+            return SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
               child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 900),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight: viewportConstraints.maxHeight,
-                  ),
-                  child: Card(
-                    margin: EdgeInsets.zero,
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (_isUploading) const LinearProgressIndicator(),
-                          if (_isUploading) const SizedBox(height: 12),
-                          Row(
-                            children: [
-                              Text(
-                                "Autor: ",
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w700,
-                                    color: Colors.black,
-                                    fontSize: 16.0),
-                              ),
-                              Expanded(
-                                child: Text(
-                                  "mgfdev@itsuruapan.edu.mx",
-                                  style: TextStyle(
-                                      color: Colors.black, fontSize: 14.0),
-                                ),
-                              ),
-                              Icon(Icons.person_outline_outlined,
-                                  color: Colors.black),
-                            ],
+                constraints: BoxConstraints(
+                  minHeight: viewportConstraints.maxHeight - 32,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (_isUploading) const LinearProgressIndicator(),
+                    if (_isUploading) const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Text(
+                          "Autor: ",
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            color: Colors.black,
+                            fontSize: 16.0,
                           ),
-                          Divider(color: Colors.grey),
-                          Row(
-                            children: [
-                              Text(
-                                "Para: ",
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w700,
-                                    color: Colors.black,
-                                    fontSize: 16),
-                              ),
-                              Expanded(
-                                child: DropdownButton<String>(
-                                  value: _grupoSeleccionado,
-                                  onChanged: (String? newValue) {
-                                    setState(() {
-                                      _grupoSeleccionado = newValue!;
-                                    });
-                                  },
-                                  items: _grupos.map((String group) {
-                                    return DropdownMenuItem<String>(
-                                      value: group,
-                                      child: Text(
-                                        group,
-                                        style: TextStyle(
-                                            color: Colors.black,
-                                            fontSize: 14.0,
-                                            fontWeight: FontWeight.normal),
-                                      ),
-                                    );
-                                  }).toList(),
-                                  isExpanded: true,
-                                  underline: Container(height: 0),
-                                  icon: Icon(Icons.arrow_drop_down,
-                                      color: Colors.black),
-                                ),
-                              ),
-                            ],
-                          ),
-                          Divider(color: Colors.grey),
-                          Row(
-                            children: [
-                              Text(
-                                "Asunto: ",
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w700,
-                                    color: Colors.black,
-                                    fontSize: 16),
-                              ),
-                              Expanded(
-                                child: TextField(
-                                  controller: _asuntoController,
-                                  decoration: InputDecoration(
-                                    border: InputBorder.none,
-                                    hintText: "Escribe tu asunto",
-                                    hintStyle: TextStyle(
-                                        color: Colors.grey, fontSize: 15.0),
-                                  ),
-                                  style: TextStyle(
-                                      color: Colors.black, fontSize: 14.5),
-                                ),
-                              ),
-                            ],
-                          ),
-                          Divider(color: Colors.grey),
-                          // "Categoría" section has been removed
-                          TextField(
-                            controller: _textoController,
-                            decoration: InputDecoration(
-                              hintText: "Redacta tu mensaje",
-                              hintStyle:
-                                  TextStyle(color: Colors.grey, fontSize: 14.0),
-                              border: InputBorder.none,
+                        ),
+                        Expanded(
+                          child: Text(
+                            "mgfdev@itsuruapan.edu.mx",
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 14.0,
                             ),
-                            style:
-                                TextStyle(color: Colors.black, fontSize: 14.0),
-                            maxLines:
-                                null, // Permite que el TextField se expanda
-                            keyboardType: TextInputType.multiline,
                           ),
-                          if (_archivosAdjuntos.isNotEmpty)
-                            SizedBox(
-                              height: 200,
-                              child: ListView.builder(
-                                scrollDirection: Axis.horizontal,
-                                itemCount: _archivosAdjuntos.length,
-                                itemBuilder: (context, index) {
-                                  return Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Image.network(
-                                      _archivosAdjuntos[index]['fileUrl']!,
-                                      width: 100,
-                                      height: 100,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                        ],
-                      ),
+                        ),
+                        Icon(
+                          Icons.person_outline_outlined,
+                          color: Colors.black,
+                        ),
+                      ],
                     ),
-                  ),
+                    const Divider(),
+                    Row(
+                      children: [
+                        Text(
+                          "Para: ",
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            color: Colors.black,
+                            fontSize: 16,
+                          ),
+                        ),
+                        Expanded(
+                          child: DropdownButton<String>(
+                            value: _grupoSeleccionado,
+                            onChanged: (String? newValue) {
+                              setState(() {
+                                _grupoSeleccionado = newValue!;
+                              });
+                            },
+                            items: _grupos.map((String group) {
+                              return DropdownMenuItem<String>(
+                                value: group,
+                                child: Text(
+                                  group,
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 14.0,
+                                    fontWeight: FontWeight.normal,
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                            isExpanded: true,
+                            underline: Container(height: 0),
+                            icon: Icon(
+                              Icons.arrow_drop_down,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Divider(),
+                    Row(
+                      children: [
+                        Text(
+                          "Asunto: ",
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            color: Colors.black,
+                            fontSize: 16,
+                          ),
+                        ),
+                        Expanded(
+                          child: TextField(
+                            controller: _asuntoController,
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              hintText: "Escribe tu asunto",
+                              hintStyle: TextStyle(
+                                color: Colors.grey,
+                                fontSize: 15.0,
+                              ),
+                            ),
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 14.5,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Divider(),
+                    // "Categoría" section has been removed
+                    TextField(
+                      controller: _textoController,
+                      decoration: InputDecoration(
+                        hintText: "Redacta tu mensaje",
+                        hintStyle: TextStyle(
+                          color: Colors.grey,
+                          fontSize: 14.0,
+                        ),
+                        border: InputBorder.none,
+                      ),
+                      style: TextStyle(color: Colors.black, fontSize: 14.0),
+                      maxLines: null, // Permite que el TextField se expanda
+                      keyboardType: TextInputType.multiline,
+                    ),
+                    if (_archivosAdjuntos.isNotEmpty)
+                      SizedBox(
+                        height: 200,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: _archivosAdjuntos.length,
+                          itemBuilder: (context, index) {
+                            return Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Image.network(
+                                _archivosAdjuntos[index]['fileUrl']!,
+                                width: 100,
+                                height: 100,
+                                fit: BoxFit.cover,
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                  ],
                 ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }

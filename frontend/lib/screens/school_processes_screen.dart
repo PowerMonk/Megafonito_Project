@@ -31,9 +31,8 @@ class SchoolProcessesScreen extends StatelessWidget {
               const SizedBox(height: 6),
               Text(
                 'Consulta fechas importantes y respuestas rápidas.',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
+                style: Theme.of(context).textTheme.bodyMedium
+                    ?.copyWith(color: colorScheme.onSurfaceVariant),
               ),
               const SizedBox(height: 20),
               Card(
@@ -77,9 +76,7 @@ class SchoolProcessesScreen extends StatelessWidget {
                               const SizedBox(height: 4),
                               Text(
                                 'Revisa periodos y fechas clave',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyMedium
+                                style: Theme.of(context).textTheme.bodyMedium
                                     ?.copyWith(
                                       color: colorScheme.onSurfaceVariant,
                                     ),
@@ -87,8 +84,10 @@ class SchoolProcessesScreen extends StatelessWidget {
                             ],
                           ),
                         ),
-                        Icon(Icons.chevron_right_rounded,
-                            color: colorScheme.onSurfaceVariant),
+                        Icon(
+                          Icons.chevron_right_rounded,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
                       ],
                     ),
                   ),
@@ -155,8 +154,7 @@ class SchoolProcessesScreen extends StatelessWidget {
   }
 
   void _showPlaceholder(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 }

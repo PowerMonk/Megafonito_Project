@@ -4,7 +4,7 @@ This README will guide you through the frontend setup for the Megafonito app.
 
 ## Requisites
 
-- Flutter 3.19.5+ ([VSCode install recommended](https://docs.flutter.dev/get-started/install/windows/mobile))
+- Flutter 3.44.0+ ([VSCode install recommended](https://docs.flutter.dev/get-started/install/windows/mobile))
 - Android Studio ([Android Studio Website](https://developer.android.com/studio?_gl=1*kl6r1q*_up*MQ..&gclid=Cj0KCQiAhvK8BhDfARIsABsPy4gjQp6afGZmRLe9BfikRuGRt5FtpKKo2xQ2O24Q-PfzddGL0Q_3YTwaAj_4EALw_wcB&gclsrc=aw.ds))
 - Java JDK 17 - LTS ([Temurin by Adoption](https://adoptium.net/es/temurin/archive/?version=17) version recommmended)
 - Docker ([Desktop version for Windows and Mac users](https://www.docker.com/products/docker-desktop/))

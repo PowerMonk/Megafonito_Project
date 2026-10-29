@@ -5,12 +5,13 @@ import 'package:file_picker/file_picker.dart';
 /// Uses temporary file handling for UI development
 class StorageService {
   static Future<Map<String, String>?> pickAndUploadFile(
-      BuildContext context) async {
+    BuildContext context,
+  ) async {
     try {
       // Pick file
-      FilePickerResult? result = await FilePicker.platform.pickFiles();
+      final file = await FilePicker.pickFile();
 
-      if (result == null || result.files.isEmpty) {
+      if (file == null) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('No se seleccionó ningún archivo')),
@@ -20,10 +21,10 @@ class StorageService {
       }
 
       // Get file details
-      String fileName = result.files.single.name;
+      final fileName = file.name;
 
       // Simulate upload delay
-      await Future.delayed(Duration(milliseconds: 1500));
+      await Future.delayed(const Duration(milliseconds: 1500));
 
       // Generate mock S3 details
       final timestamp = DateTime.now().millisecondsSinceEpoch;
@@ -41,16 +42,13 @@ class StorageService {
       }
 
       // Return mock file details
-      return {
-        'fileUrl': mockFileUrl,
-        'fileKey': mockFileKey,
-      };
+      return {'fileUrl': mockFileUrl, 'fileKey': mockFileKey};
     } catch (e) {
       debugPrint('File upload error: $e');
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al subir archivo: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error al subir archivo: $e')));
       }
       return null;
     }
@@ -58,7 +56,7 @@ class StorageService {
 
   static Future<void> deleteFile(String fileKey) async {
     // Mock file deletion
-    await Future.delayed(Duration(milliseconds: 800));
+    await Future.delayed(const Duration(milliseconds: 800));
     debugPrint('File deleted (mock): $fileKey');
     return;
   }

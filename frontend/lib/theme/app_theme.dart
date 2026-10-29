@@ -7,8 +7,9 @@ abstract final class AppDesign {
   static const Color page = Color(0xFFF6F7FB);
   static const Color ink = Color(0xFF182230);
   static const double pagePadding = 20;
-  static const double cardRadius = 20;
-  static const double controlRadius = 14;
+  static const double cardRadius = 24;
+  static const double controlRadius = 18;
+  static const double pillRadius = 32;
 }
 
 abstract final class AppTheme {
@@ -37,15 +38,20 @@ abstract final class AppTheme {
         height: 1.4,
       ),
     );
-    final colorScheme = ColorScheme.fromSeed(
-      seedColor: AppDesign.navy,
-      brightness: Brightness.light,
-    ).copyWith(
-      secondary: AppDesign.amber,
-      onSecondary: AppDesign.navy,
-      surface: Colors.white,
-      error: const Color(0xFFBA1A1A),
-    );
+    final colorScheme =
+        ColorScheme.fromSeed(
+          seedColor: AppDesign.navy,
+          brightness: Brightness.light,
+        ).copyWith(
+          secondary: AppDesign.amber,
+          onSecondary: AppDesign.navy,
+          secondaryContainer: const Color(0xFFFFEBCB),
+          onSecondaryContainer: AppDesign.navy,
+          tertiaryContainer: const Color(0xFFEAF2FC),
+          onTertiaryContainer: AppDesign.navy,
+          surface: Colors.white,
+          error: const Color(0xFFBA1A1A),
+        );
 
     return ThemeData.from(
       colorScheme: colorScheme,
@@ -58,34 +64,52 @@ abstract final class AppTheme {
       appBarTheme: AppBarTheme(
         backgroundColor: AppDesign.page,
         foregroundColor: AppDesign.navy,
+        toolbarHeight: 68,
+        titleSpacing: 20,
         elevation: 0,
-        scrolledUnderElevation: 1,
+        scrolledUnderElevation: 0,
         titleTextStyle: textTheme.titleLarge,
         iconTheme: const IconThemeData(color: AppDesign.navy),
         actionsIconTheme: const IconThemeData(color: AppDesign.navy),
       ),
       navigationBarTheme: NavigationBarThemeData(
-        height: 76,
-        backgroundColor: Colors.white,
+        height: 70,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         indicatorColor: colorScheme.secondaryContainer,
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          return textTheme.labelSmall?.copyWith(
+            fontSize: 11,
+            fontWeight: states.contains(WidgetState.selected)
+                ? FontWeight.w700
+                : FontWeight.w500,
+          );
+        }),
       ),
       navigationRailTheme: NavigationRailThemeData(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         indicatorColor: colorScheme.secondaryContainer,
         selectedIconTheme: const IconThemeData(color: AppDesign.navy),
         unselectedIconTheme: IconThemeData(color: colorScheme.onSurfaceVariant),
       ),
       iconButtonTheme: IconButtonThemeData(
-        style: IconButton.styleFrom(minimumSize: const Size(48, 48)),
+        style: IconButton.styleFrom(
+          minimumSize: const Size(48, 48),
+          foregroundColor: AppDesign.navy,
+          backgroundColor: Colors.white,
+          side: BorderSide(color: colorScheme.outlineVariant),
+          shape: const CircleBorder(),
+        ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: Colors.white,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 15,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppDesign.controlRadius),
           borderSide: BorderSide(color: colorScheme.outlineVariant),
@@ -124,6 +148,17 @@ abstract final class AppTheme {
           ),
         ),
       ),
+      cardTheme: CardThemeData(
+        color: Colors.white,
+        elevation: 0,
+        margin: const EdgeInsets.all(4),
+        surfaceTintColor: Colors.transparent,
+        shadowColor: const Color(0x0A14213D),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppDesign.cardRadius),
+          side: BorderSide(color: colorScheme.outlineVariant),
+        ),
+      ),
       chipTheme: base.chipTheme.copyWith(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(24),
@@ -156,7 +191,9 @@ abstract final class AppTheme {
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: AppDesign.amber,
         foregroundColor: AppDesign.navy,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppDesign.pillRadius),
+        ),
       ),
     );
   }

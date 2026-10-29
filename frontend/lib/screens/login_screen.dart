@@ -35,7 +35,8 @@ class _LoginScreenState extends State<LoginScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content: Text('No se pudo iniciar el modo de desarrollo: $error')),
+          content: Text('No se pudo iniciar el modo de desarrollo: $error'),
+        ),
       );
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -77,18 +78,15 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 22),
                   Text(
                     'Megafonito',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          color: AppDesign.navy,
-                          letterSpacing: 0.8,
-                        ),
+                    style: Theme.of(context).textTheme.headlineSmall
+                        ?.copyWith(color: AppDesign.navy, letterSpacing: 0.8),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Avisos oficiales y novedades de tu comunidad escolar.',
                     textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
+                    style: Theme.of(context).textTheme.bodyLarge
+                        ?.copyWith(color: colorScheme.onSurfaceVariant),
                   ),
                   const SizedBox(height: 28),
                   Card(
@@ -138,12 +136,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           const SizedBox(height: 6),
                           Text(
                             'Este acceso rápido no valida credenciales ni representa una sesión real.',
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
-                                ?.copyWith(
-                                  color: colorScheme.onSurfaceVariant,
-                                ),
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(color: colorScheme.onSurfaceVariant),
                           ),
                           const SizedBox(height: 20),
                           FilledButton.icon(
@@ -167,12 +161,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           Text(
                             'La autenticación y los datos todavía son de prueba.',
                             textAlign: TextAlign.center,
-                            style: Theme.of(context)
-                                .textTheme
-                                .labelMedium
-                                ?.copyWith(
-                                  color: colorScheme.onSurfaceVariant,
-                                ),
+                            style: Theme.of(context).textTheme.labelMedium
+                                ?.copyWith(color: colorScheme.onSurfaceVariant),
                           ),
                         ],
                       ),

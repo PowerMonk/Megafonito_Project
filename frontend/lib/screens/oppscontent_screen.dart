@@ -66,10 +66,7 @@ class _OpportunityContentScreenState extends State<OpportunityContentScreen> {
     );
   }
 
-  Widget _buildCategorySection(
-    String title,
-    List<Map<String, String>> items,
-  ) {
+  Widget _buildCategorySection(String title, List<Map<String, String>> items) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -103,13 +100,13 @@ class _OpportunityContentScreenState extends State<OpportunityContentScreen> {
                                 fit: BoxFit.contain,
                                 errorBuilder: (context, error, stackTrace) =>
                                     ColoredBox(
-                                  color: AppDesign.page,
-                                  child: const Center(
-                                    child: Icon(
-                                      Icons.image_not_supported_outlined,
+                                      color: AppDesign.page,
+                                      child: const Center(
+                                        child: Icon(
+                                          Icons.image_not_supported_outlined,
+                                        ),
+                                      ),
                                     ),
-                                  ),
-                                ),
                               ),
                             ),
                           ),

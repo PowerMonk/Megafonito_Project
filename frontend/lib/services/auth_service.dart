@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../models/user_model.dart';
 import 'api_service.dart';
 
@@ -18,7 +19,8 @@ class AuthService {
   static Future<User> login(BuildContext context, String username) async {
     try {
       await Future.delayed(
-          Duration(milliseconds: 800)); // Simulate network delay
+        Duration(milliseconds: 800),
+      ); // Simulate network delay
 
       // Create a mock user
       _currentUser = User(
@@ -31,9 +33,8 @@ class AuthService {
       return _currentUser!;
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Mock login error: $e')),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Mock login error: $e')));
       }
       rethrow;
     }
@@ -41,25 +42,25 @@ class AuthService {
 
   // Mock registration that always succeeds
   static Future<User> register(
-      BuildContext context, String name, String email, String password) async {
+    BuildContext context,
+    String name,
+    String email,
+    String password,
+  ) async {
     try {
       await Future.delayed(
-          Duration(milliseconds: 800)); // Simulate network delay
+        Duration(milliseconds: 800),
+      ); // Simulate network delay
 
       // Create a mock user
-      final user = User(
-        name: name,
-        email: email,
-        role: 'Student',
-        id: 2,
-      );
+      final user = User(name: name, email: email, role: 'Student', id: 2);
 
       return user;
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Mock registration error: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Mock registration error: $e')));
       }
       rethrow;
     }
