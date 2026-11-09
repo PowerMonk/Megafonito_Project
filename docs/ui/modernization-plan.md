@@ -97,7 +97,7 @@ Verification on local Flutter 3.47.7 / Dart 3.13.5:
 | --- | --- |
 | `dart format` on changed Dart files | Passed. |
 | `flutter analyze --no-pub` | Passed: no issues found. |
-| `flutter pub get --enforce-lockfile --offline` | Passed with the file_picker 13.3.0 update and unused Cronet adapter removal. |
+| `flutter pub get --enforce-lockfile --offline` | Passed with the file_picker 13.3.2 update and unused Cronet adapter removal. |
 | `flutter test --no-pub` | Passed: 9 UI/widget tests. SVG parser emitted non-fatal warnings for embedded font/style/metadata tags. |
 | `flutter build apk --debug --no-pub` | Passed with Gradle 9.3.1, AGP 9.1.0, and built-in Kotlin. |
 | `flutter build apk --release --no-pub` | Passed with the same Android toolchain; the previous version-support warnings are gone. |

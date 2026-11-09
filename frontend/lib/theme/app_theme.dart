@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 abstract final class AppDesign {
   static const Color navy = Color(0xFF14213D);
   static const Color amber = Color(0xFFFCA311);
-  static const Color page = Color(0xFFF6F7FB);
+  static const Color page = Color(0xFFFCFCFD);
   static const Color ink = Color(0xFF182230);
   static const double pagePadding = 20;
   static const double cardRadius = 24;
@@ -45,10 +45,14 @@ abstract final class AppTheme {
         ).copyWith(
           secondary: AppDesign.amber,
           onSecondary: AppDesign.navy,
-          secondaryContainer: const Color(0xFFFFEBCB),
+          primaryContainer: const Color(0xFFD8E3F5),
+          onPrimaryContainer: AppDesign.navy,
+          secondaryContainer: const Color(0xFFFFD166),
           onSecondaryContainer: AppDesign.navy,
-          tertiaryContainer: const Color(0xFFEAF2FC),
+          tertiaryContainer: const Color(0xFFD3E4FD),
           onTertiaryContainer: AppDesign.navy,
+          outline: const Color(0xFFA8AFBD),
+          outlineVariant: const Color(0xFFD6DBE4),
           surface: Colors.white,
           error: const Color(0xFFBA1A1A),
         );
@@ -80,7 +84,8 @@ abstract final class AppTheme {
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           return textTheme.labelSmall?.copyWith(
-            fontSize: 11,
+            fontSize: 10,
+            letterSpacing: -0.2,
             fontWeight: states.contains(WidgetState.selected)
                 ? FontWeight.w700
                 : FontWeight.w500,
