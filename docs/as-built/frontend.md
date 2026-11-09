@@ -4,7 +4,7 @@
 
 `frontend/lib/main.dart` creates `MyApp`, a `MaterialApp`, and opens `SplashScreen`. The app now uses a shared light Material 3 theme from `frontend/lib/theme/app_theme.dart`; the previous theme was minimal (black scaffold/background defaults and a small text override), while screens independently set many colors, dimensions, and component styles. The dependency list includes Flutter Material, SVG, file picker, Firebase/Google Sign-In, networking, URL launching, and platform HTTP packages; their presence does not mean the active app flow uses them.
 
-The current coded shell is the source of truth for behavior: Home (`AnunciosScreen`), Contacts, Opportunities, Processes, and Account. Support is opened from the app bar, not a bottom destination. The pages are retained in an `IndexedStack` for the non-feed sections. Compact windows use a Material 3 `NavigationBar`; windows at least 600 logical pixels wide use a `NavigationRail`, with the same destinations and index state.
+The current coded shell is the source of truth for behavior: Home (`AnunciosScreen`), Contacts, Opportunities, Processes, and Account. Support is opened from the app bar, not a bottom destination. The pages are retained in an `IndexedStack` for the non-feed sections. Compact windows use a custom floating `AppNavBar` with Material-style selection animation; windows at least 600 logical pixels wide use a `NavigationRail`, with the same destinations and index state.
 
 ## Screen inventory and behavior
 

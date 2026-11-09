@@ -6,7 +6,7 @@
 
 ## Frontend baseline and current result
 
-Local Flutter at inspection time: **3.47.7 stable** with **Dart 3.13.5**. The SDK floor is Flutter 3.44 / Dart 3.13, matching the checked-in lockfile and file_picker 13.3.0. The unused `cronet_http` adapter was removed after it caused duplicate Android namespaces; `StorageService` now uses file_picker's `FilePicker.pickFile()` single-file API. `flutter pub get --enforce-lockfile --offline` succeeds.
+Local Flutter at inspection time: **3.47.7 stable** with **Dart 3.13.5**. The SDK floor is Flutter 3.44 / Dart 3.13, matching the checked-in lockfile and file_picker 13.3.2. The unused `cronet_http` adapter was removed after it caused duplicate Android namespaces; `StorageService` now uses file_picker's `FilePicker.pickFile()` single-file API. `flutter pub get --enforce-lockfile --offline` succeeds.
 
 Baseline `flutter analyze` before the UI work reported **116 diagnostics**. Those lint and async-context issues were addressed during the update; current `flutter analyze --no-pub` reports **no issues**.
 

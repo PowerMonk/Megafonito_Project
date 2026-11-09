@@ -34,17 +34,18 @@ class AppNavBar extends StatelessWidget {
                 ),
                 clipBehavior: Clip.antiAlias,
                 child: SizedBox(
-                  width: double.infinity,
-                  child: NavigationBar(
-                    selectedIndex: currentIndex,
-                    onDestinationSelected: onTap,
-                    destinations: _navigationItems.map((item) {
-                      return NavigationDestination(
-                        icon: _icon(item.asset, colorScheme.onSurfaceVariant),
-                        selectedIcon: _icon(item.asset, AppDesign.navy),
-                        label: item.label,
-                      );
-                    }).toList(),
+                  height: 70,
+                  child: Row(
+                    children: [
+                      for (var i = 0; i < _navigationItems.length; i++)
+                        Expanded(
+                          child: _NavDestinationItem(
+                            item: _navigationItems[i],
+                            selected: currentIndex == i,
+                            onTap: () => onTap(i),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
               ),
@@ -88,8 +89,8 @@ class AppNavigationRail extends StatelessWidget {
           groupAlignment: 0,
           destinations: _navigationItems.map((item) {
             return NavigationRailDestination(
-              icon: _icon(item.asset, colorScheme.onSurfaceVariant),
-              selectedIcon: _icon(item.asset, AppDesign.navy),
+              icon: _icon(item.asset, colorScheme.onSurfaceVariant, size: 24),
+              selectedIcon: _icon(item.asset, AppDesign.navy, size: 24),
               label: Text(item.label),
             );
           }).toList(),
@@ -99,11 +100,98 @@ class AppNavigationRail extends StatelessWidget {
   }
 }
 
-Widget _icon(String asset, Color color) {
+class _NavDestinationItem extends StatelessWidget {
+  final _NavigationItem item;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _NavDestinationItem({
+    required this.item,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final color = selected ? AppDesign.navy : colorScheme.onSurfaceVariant;
+
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: item.label,
+      child: Tooltip(
+        message: item.label,
+        child: InkResponse(
+          onTap: onTap,
+          containedInkWell: true,
+          highlightShape: BoxShape.rectangle,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 160),
+                  curve: Curves.easeOut,
+                  width: 44,
+                  height: 28,
+                  decoration: BoxDecoration(
+                    color: selected
+                        ? colorScheme.secondaryContainer
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Center(
+                    child: TweenAnimationBuilder<Color?>(
+                      tween: ColorTween(end: color),
+                      duration: const Duration(milliseconds: 160),
+                      curve: Curves.easeOut,
+                      builder: (context, animatedColor, _) {
+                        return _icon(
+                          item.asset,
+                          animatedColor ?? color,
+                          size: 21,
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                SizedBox(
+                  height: 13,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      item.label,
+                      maxLines: 1,
+                      softWrap: false,
+                      style: TextStyle(
+                        fontSize: item.label == 'Oportunidades' ? 9.5 : 10.5,
+                        height: 1.1,
+                        letterSpacing: -0.2,
+                        color: color,
+                        fontWeight: selected
+                            ? FontWeight.w700
+                            : FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+Widget _icon(String asset, Color color, {double size = 21}) {
   return SvgPicture.asset(
     asset,
-    height: 24,
-    width: 24,
+    height: size,
+    width: size,
     colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
     excludeFromSemantics: true,
   );

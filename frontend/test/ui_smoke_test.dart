@@ -29,13 +29,16 @@ void main() {
     addTearDown(() => _resetLogicalSize(tester));
     await tester.pumpWidget(_shell());
 
-    expect(find.byType(NavigationBar), findsOneWidget);
+    expect(find.byType(AppNavBar), findsOneWidget);
     expect(find.byType(AppNavigationRail), findsNothing);
     expect(find.text('Inicio'), findsOneWidget);
     expect(find.text('Oportunidades'), findsOneWidget);
     expect(find.text('Procesos'), findsOneWidget);
     expect(find.text('Cuenta'), findsOneWidget);
     expect(find.byTooltip('Soporte'), findsOneWidget);
+
+    final oportunidadesLabel = tester.getSize(find.text('Oportunidades'));
+    expect(oportunidadesLabel.height, lessThan(20));
 
     await tester.tap(find.text('Contactos'));
     await tester.pumpAndSettle();
@@ -48,7 +51,6 @@ void main() {
 
     await tester.tap(find.text('Procesos'));
     await tester.pumpAndSettle();
-    debugDumpApp();
     expect(find.text('Procesos escolares'), findsOneWidget);
 
     await tester.tap(find.text('Cuenta'));
@@ -66,7 +68,7 @@ void main() {
     await tester.pump();
 
     expect(find.byType(AppNavigationRail), findsOneWidget);
-    expect(find.byType(NavigationBar), findsNothing);
+    expect(find.byType(AppNavBar), findsNothing);
     expect(find.text('Contactos'), findsOneWidget);
     await tester.tap(find.text('Procesos'));
     await tester.pumpAndSettle();
