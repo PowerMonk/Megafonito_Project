@@ -1,0 +1,316 @@
+---
+import '../styles/global.css';
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Servidor local de Megafonito para la demostración académica."
+    />
+    <title>Megafonito · Servidor de demostración</title>
+    <link rel="icon" type="image/png" href="/logo.png" />
+  </head>
+  <body>
+    <div class="shell">
+      <header class="topbar">
+        <div class="brand">
+          <img class="brand__mark" src="/logo.png" alt="Logo de Megafonito" />
+          <div class="brand__text">
+            <span class="brand__name">Megafonito</span>
+            <span class="brand__tag">Servidor local · Demo</span>
+          </div>
+        </div>
+        <div class="topbar__meta">
+          <span class="pill pill--amber">Sin nube</span>
+          <span class="status" id="server-status" data-state="loading">
+            <span class="status__dot"></span>
+            <span id="server-status-text">Comprobando servidor…</span>
+          </span>
+        </div>
+      </header>
+
+      <main>
+        <section class="hero">
+          <div class="hero__copy">
+            <span class="eyebrow">Demostración académica</span>
+            <h1>Tu red. Tu demo. <em>Sin nube.</em></h1>
+            <p class="hero__lead">
+              Megafonito corre en esta laptop, guarda todo en SQLite y entrega
+              los anuncios en tiempo real por WebSocket. Conecta la tablet y el
+              teléfono al mismo hotspot y escanea un QR para empezar.
+            </p>
+            <div class="hero__actions">
+              <a class="button button--primary" href="#conectar">
+                Conectar dispositivos
+              </a>
+              <a class="button button--ghost" href="#cuentas">
+                Ver cuentas demo
+              </a>
+            </div>
+          </div>
+
+          <aside class="hero__panel">
+            <div>
+              <span class="hero__panel-label">Flujo de la demo</span>
+            </div>
+            <ol class="hero__steps">
+              <li>Enciende el hotspot y conecta la tablet y el teléfono.</li>
+              <li>Escanea el QR principal desde la app de cada dispositivo.</li>
+              <li>Entra como <strong>admin</strong> en la tablet.</li>
+              <li>Publica un anuncio para Sistemas y otro para Mecánica.</li>
+              <li>Cambia de alumno en el teléfono y comprueba el aislamiento.</li>
+            </ol>
+          </aside>
+        </section>
+
+        <section class="section" id="conectar">
+          <div class="section__head">
+            <div>
+              <h2 class="section__title">Conecta tus dispositivos</h2>
+              <p class="section__hint">
+                Usa el QR del hotspot de Windows para la tablet y el teléfono.
+                La URL también se puede escribir manualmente en la app.
+              </p>
+            </div>
+            <span class="pill">Misma red · sin internet</span>
+          </div>
+          <div class="url-grid" id="url-grid">
+            <div class="skeleton"></div>
+          </div>
+        </section>
+
+        <section class="section" id="cuentas">
+          <div class="section__head">
+            <div>
+              <h2 class="section__title">Cuentas de demostración</h2>
+              <p class="section__hint">
+                Las contraseñas son intencionalmente simples. La app también
+                incluye botones de acceso rápido para no escribirlas.
+              </p>
+            </div>
+          </div>
+          <div class="accounts" id="account-table">
+            <div class="account-row account-row--head">
+              <strong>Usuario</strong>
+              <strong>Contraseña</strong>
+              <strong>Rol</strong>
+              <strong>Grupo / perfil</strong>
+            </div>
+            <div class="account-row">
+              <span>Cargando cuentas…</span>
+            </div>
+          </div>
+
+          <div class="danger-zone">
+            <div>
+              <h3>Zona de ensayo</h3>
+              <p>
+                Borra todos los anuncios y deja las cuentas listas para el
+                siguiente ensayo. No elimina usuarios ni sesiones activas.
+              </p>
+            </div>
+            <button class="button button--danger" id="reset-demo" type="button">
+              Reiniciar datos demo
+            </button>
+          </div>
+        </section>
+      </main>
+
+      <footer class="footer">
+        <span><strong>Megafonito</strong> · Demo local, sin servicios externos.</span>
+        <span id="footer-status">SQLite · Bun · WebSocket</span>
+      </footer>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script>
+      const statusEl = document.getElementById('server-status');
+      const statusTextEl = document.getElementById('server-status-text');
+      const urlGrid = document.getElementById('url-grid');
+      const accountTable = document.getElementById('account-table');
+      const resetButton = document.getElementById('reset-demo');
+      const toastEl = document.getElementById('toast');
+
+      let infoLoaded = false;
+      let toastTimer = 0;
+
+      function escapeHtml(value) {
+        return String(value ?? '')
+          .replaceAll('&', '&amp;')
+          .replaceAll('<', '&lt;')
+          .replaceAll('>', '&gt;')
+          .replaceAll('"', '&quot;')
+          .replaceAll("'", '&#039;');
+      }
+
+      function setStatus(state, text, detail = '') {
+        statusEl.dataset.state = state;
+        statusTextEl.textContent = text;
+        statusEl.title = detail;
+      }
+
+      function showToast(message) {
+        toastEl.textContent = message;
+        toastEl.dataset.visible = 'true';
+        window.clearTimeout(toastTimer);
+        toastTimer = window.setTimeout(() => {
+          toastEl.dataset.visible = 'false';
+        }, 2600);
+      }
+
+      async function copyText(text) {
+        try {
+          await navigator.clipboard.writeText(text);
+        } catch {
+          const area = document.createElement('textarea');
+          area.value = text;
+          area.style.position = 'fixed';
+          area.style.opacity = '0';
+          document.body.appendChild(area);
+          area.select();
+          document.execCommand('copy');
+          area.remove();
+        }
+        showToast('URL copiada');
+      }
+
+      function renderUrls(urls) {
+        if (!Array.isArray(urls) || urls.length === 0) {
+          urlGrid.innerHTML =
+            '<div class="url-card"><span class="url-card__label">Sin direcciones LAN</span><p class="section__hint">Revisa que el hotspot o la red estén activos.</p></div>';
+          return;
+        }
+
+        urlGrid.innerHTML = urls
+          .map((entry) => {
+            const primary = entry.primary ? ' url-card--primary' : '';
+            const badge = entry.primary
+              ? '<span class="url-card__badge">Principal</span>'
+              : '';
+            return `
+              <article class="url-card${primary}">
+                <div class="url-card__head">
+                  <span class="url-card__label">${escapeHtml(entry.label)}</span>
+                  ${badge}
+                </div>
+                <div class="qr-frame">
+                  <img src="${escapeHtml(entry.qrSvg)}" alt="Código QR para ${escapeHtml(entry.url)}" />
+                </div>
+                <code class="url-card__url">${escapeHtml(entry.url)}</code>
+                <div class="url-card__actions">
+                  <button class="button button--ghost" type="button" data-copy="${escapeHtml(entry.url)}">
+                    Copiar URL
+                  </button>
+                </div>
+              </article>
+            `;
+          })
+          .join('');
+      }
+
+      function renderAccounts(accounts) {
+        if (!Array.isArray(accounts) || accounts.length === 0) {
+          accountTable.innerHTML =
+            '<div class="account-row"><span>No hay cuentas demo.</span></div>';
+          return;
+        }
+
+        const head = `
+          <div class="account-row account-row--head">
+            <strong>Usuario</strong>
+            <strong>Contraseña</strong>
+            <strong>Rol</strong>
+            <strong>Grupo / perfil</strong>
+          </div>
+        `;
+
+        const rows = accounts
+          .map((account) => {
+            const roleClass =
+              account.role === 'admin' ? 'role role--admin' : 'role';
+            const roleLabel = account.role === 'admin' ? 'admin' : 'alumno';
+            return `
+              <div class="account-row">
+                <span class="credentials"><code>${escapeHtml(account.username)}</code></span>
+                <span class="credentials"><code>${escapeHtml(account.password)}</code></span>
+                <span class="${roleClass}">${roleLabel}</span>
+                <span>${escapeHtml(account.group ?? account.label)}</span>
+              </div>
+            `;
+          })
+          .join('');
+
+        accountTable.innerHTML = head + rows;
+      }
+
+      async function loadServerInfo() {
+        try {
+          const response = await fetch('/api/server-info', { cache: 'no-store' });
+          if (!response.ok) throw new Error('server-info failed');
+          const info = await response.json();
+          renderUrls(info.urls);
+          renderAccounts(info.accounts);
+          infoLoaded = true;
+          setStatus(
+            'online',
+            `Servidor en línea${info.online?.length ? ` · ${info.online.length} conectado(s)` : ''}`,
+            info.online?.join(', ') ?? '',
+          );
+        } catch {
+          infoLoaded = false;
+          setStatus('offline', 'Servidor sin conexión');
+        }
+      }
+
+      async function pollHealth() {
+        try {
+          const response = await fetch('/api/health', { cache: 'no-store' });
+          if (!response.ok) throw new Error('health failed');
+          const health = await response.json();
+          setStatus(
+            'online',
+            `Servidor en línea${health.online?.length ? ` · ${health.online.length} conectado(s)` : ''}`,
+            health.online?.join(', ') ?? '',
+          );
+          if (!infoLoaded) await loadServerInfo();
+        } catch {
+          setStatus('offline', 'Servidor sin conexión');
+        }
+      }
+
+      document.addEventListener('click', (event) => {
+        if (!(event.target instanceof Element)) return;
+        const target = event.target.closest('[data-copy]');
+        if (!target) return;
+        copyText(target.getAttribute('data-copy'));
+      });
+
+      resetButton.addEventListener('click', async () => {
+        const confirmed = window.confirm(
+          '¿Borrar todos los anuncios de la demostración?',
+        );
+        if (!confirmed) return;
+
+        resetButton.disabled = true;
+        try {
+          const response = await fetch('/api/demo/reset', { method: 'POST' });
+          if (!response.ok) throw new Error('reset failed');
+          showToast('Datos de demostración reiniciados');
+          await loadServerInfo();
+        } catch {
+          showToast('No se pudo reiniciar; revisa el servidor');
+        } finally {
+          resetButton.disabled = false;
+        }
+      });
+
+      pollHealth();
+      window.setInterval(pollHealth, 5000);
+    </script>
+  </body>
+</html>

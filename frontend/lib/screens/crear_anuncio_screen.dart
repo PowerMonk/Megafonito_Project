@@ -1,14 +1,21 @@
 import 'package:flutter/material.dart';
 
-import '../services/storage_service.dart';
-
-// Random comment for pipeline testing
+import '../models/user_model.dart';
+import '../services/api_client.dart';
+import '../services/notices_service.dart';
+import '../theme/app_theme.dart';
 
 class CrearNuevoAnuncioScreen extends StatefulWidget {
-  final Function(String, String, Color, String, bool, String?, String?)
-  onAnuncioCreado;
+  final User author;
+  final NoticesService noticesService;
+  final Future<void> Function(AnnouncementDraft draft) onPublish;
 
-  const CrearNuevoAnuncioScreen({super.key, required this.onAnuncioCreado});
+  const CrearNuevoAnuncioScreen({
+    super.key,
+    required this.author,
+    required this.noticesService,
+    required this.onPublish,
+  });
 
   @override
   State<CrearNuevoAnuncioScreen> createState() =>
@@ -16,25 +23,13 @@ class CrearNuevoAnuncioScreen extends StatefulWidget {
 }
 
 class _CrearNuevoAnuncioScreenState extends State<CrearNuevoAnuncioScreen> {
-  final TextEditingController _tituloController = TextEditingController();
-  final TextEditingController _textoController = TextEditingController();
-  String _categoriaSeleccionada = 'Materias';
-  String _grupoSeleccionado = 'Ingeniería en Sistemas Computacionales';
-  bool _tieneArchivos = false;
-  bool _isUploading = false;
+  static const List<String> _fallbackGroups = [
+    'Ingeniería en Sistemas Computacionales',
+    'Ingeniería Mecánica',
+  ];
 
-  // Store uploaded file details
-  final List<Map<String, String?>> _archivosAdjuntos = [];
-
-  @override
-  void dispose() {
-    _tituloController.dispose();
-    _textoController.dispose();
-    super.dispose();
-  }
-
-  // Lista de categorías (misma que en NoticesFilter)
-  final List<String> _categorias = [
+  static const List<String> _categories = [
+    'General',
     'Materias',
     'Convocatorias',
     'Eventos',
@@ -43,432 +38,335 @@ class _CrearNuevoAnuncioScreenState extends State<CrearNuevoAnuncioScreen> {
     'Comunidad',
   ];
 
-  // Lista de grupos académicos
-  final List<String> _grupos = [
-    'Ingeniería en Sistemas Computacionales',
-    'Ingeniería Civil',
-    'Ingeniería Electrónica',
-  ];
+  final _titleController = TextEditingController();
+  final _contentController = TextEditingController();
 
-  void _crearAnuncio() {
-    final String titulo = _tituloController.text;
-    final String texto = _textoController.text;
-    final Color color = Color(0xFFFFFFFF); // Color blanco por defecto
+  String _category = 'General';
+  String _audience = 'all';
+  List<String> _groups = _fallbackGroups;
+  bool _publishing = false;
 
-    if (titulo.isNotEmpty && texto.isNotEmpty) {
-      widget.onAnuncioCreado(
-        titulo,
-        texto,
-        color,
-        _categoriaSeleccionada,
-        _tieneArchivos,
-        _archivosAdjuntos.isNotEmpty ? _archivosAdjuntos[0]['fileUrl'] : null,
-        _archivosAdjuntos.isNotEmpty ? _archivosAdjuntos[0]['fileKey'] : null,
-      );
-      Navigator.pop(context);
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Por favor, completa todos los campos.')),
-      );
-    }
+  @override
+  void initState() {
+    super.initState();
+    _loadGroups();
   }
 
-  void _agregarArchivo() async {
-    setState(() {
-      _isUploading = true;
-    });
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _contentController.dispose();
+    super.dispose();
+  }
 
+  Future<void> _loadGroups() async {
     try {
-      final result = await StorageService.pickAndUploadFile(context);
+      final groups = await widget.noticesService.loadGroups();
       if (!mounted) return;
-
-      if (result != null) {
-        setState(() {
-          _tieneArchivos = true;
-          _archivosAdjuntos.add({
-            'fileUrl': result['fileUrl'],
-            'fileKey': result['fileKey'],
-            'fileName': result['fileUrl']?.split('/').last,
-          });
-          _isUploading = false;
-        });
-
-        debugPrint(
-          'File uploaded successfully: URL=${result['fileUrl']}, Key=${result['fileKey']}',
-        );
-      } else {
-        setState(() {
-          _isUploading = false;
-        });
+      if (groups.isNotEmpty) {
+        setState(() => _groups = groups);
       }
-    } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _isUploading = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al subir archivo: ${e.toString()}')),
-      );
+    } catch (_) {
+      // The fallback list matches the seeded demo groups.
     }
   }
 
-  void _mostrarMenuOpciones(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      builder: (BuildContext context) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            ListTile(
-              leading: Icon(Icons.schedule),
-              title: Text('Programar envío'),
-              onTap: () {
-                Navigator.pop(context);
-                // Implementar la lógica para programar el envío
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.poll),
-              title: Text('Agregar encuesta'),
-              onTap: () {
-                Navigator.pop(context);
-                // Implementar la lógica para agregar una encuesta
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.delete_sweep),
-              title: Text('Eliminar archivos adjuntos'),
-              onTap: () {
-                Navigator.pop(context);
-                setState(() {
-                  _archivosAdjuntos.clear();
-                  _tieneArchivos = false;
-                });
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.save),
-              title: Text('Guardar borrador'),
-              onTap: () {
-                Navigator.pop(context);
-                // Implementar la lógica para guardar el borrador
-              },
-            ),
-          ],
-        );
-      },
-    );
+  String get _audienceLabel {
+    if (_audience == 'all') return 'Todos los estudiantes';
+    return _audience;
   }
 
-  // void _mostrarMenuOpciones(BuildContext context) {
-  //   showMenu(
-  //     context: context,
-  //     position: RelativeRect.fromLTRB(MediaQuery.of(context).size.width - 100,
-  //         56, 10, 0), // Ajusta la posición según sea necesario
-  //     items: [
-  //       PopupMenuItem(
-  //         value: 'programar_envio',
-  //         child: ListTile(
-  //           leading: Icon(Icons.schedule_outlined),
-  //           contentPadding: EdgeInsetsDirectional.only(start: 5),
-  //           title: Text('Programar envío'),
-  //         ),
-  //       ),
-  //       PopupMenuItem(
-  //         value: 'agregar_encuesta',
-  //         child: ListTile(
-  //           leading: Icon(Icons.poll_outlined),
-  //           contentPadding: EdgeInsetsDirectional.only(start: 5),
-  //           title: Text('Agregar encuesta'),
-  //         ),
-  //       ),
-  //       PopupMenuItem(
-  //         value: 'eliminar_archivos',
-  //         child: ListTile(
-  //           leading: Icon(Icons.delete_sweep_outlined),
-  //           contentPadding: EdgeInsetsDirectional.only(start: 5),
-  //           title: Text('Eliminar archivos adjuntos'),
-  //         ),
-  //       ),
-  //       PopupMenuItem(
-  //         value: 'guardar_borrador',
-  //         child: ListTile(
-  //           leading: Icon(Icons.save_outlined),
-  //           contentPadding: EdgeInsetsDirectional.only(start: 5),
-  //           title: Text('Guardar borrador'),
-  //         ),
-  //       ),
-  //     ],
-  //   ).then((value) {
-  //     if (value != null) {
-  //       switch (value) {
-  //         case 'programar_envio':
-  //           // Implementar la lógica para programar el envío
-  //           break;
-  //         case 'agregar_encuesta':
-  //           // Implementar la lógica para agregar una encuesta
-  //           break;
-  //         case 'eliminar_archivos':
-  //           setState(() {
-  //             _archivosAdjuntos.clear();
-  //             _tieneArchivos = false;
-  //           });
-  //           break;
-  //         case 'guardar_borrador':
-  //           // Implementar la lógica para guardar el borrador
-  //           break;
-  //       }
-  //     }
-  //   });
-  // }
+  Future<void> _publish() async {
+    final title = _titleController.text.trim();
+    final content = _contentController.text.trim();
+
+    if (title.isEmpty || content.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Escribe un título y el contenido.')),
+      );
+      return;
+    }
+
+    setState(() => _publishing = true);
+    try {
+      await widget.onPublish(
+        AnnouncementDraft(
+          title: title,
+          content: content,
+          category: _category,
+          audience: _audience == 'all' ? 'all' : 'groups',
+          group: _audience == 'all' ? null : _audience,
+        ),
+      );
+      if (!mounted) return;
+      Navigator.of(context).pop();
+    } on UnauthorizedException catch (error) {
+      _showError(error.message);
+    } on ApiException catch (error) {
+      _showError(error.message);
+    } catch (_) {
+      _showError('No se pudo publicar el anuncio. Intenta de nuevo.');
+    } finally {
+      if (mounted) setState(() => _publishing = false);
+    }
+  }
+
+  void _showError(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
+  }
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Nuevo anuncio'),
         actions: [
           IconButton(
-            tooltip: 'Adjuntar archivo',
-            icon: const Icon(Icons.attach_file_rounded),
-            onPressed: _isUploading ? null : _agregarArchivo,
-          ),
-          IconButton(
             tooltip: 'Publicar anuncio',
-            icon: const Icon(Icons.send_rounded),
-            onPressed: _isUploading ? null : _crearAnuncio,
-          ),
-          IconButton(
-            tooltip: 'Más opciones',
-            icon: const Icon(Icons.more_vert_rounded),
-            onPressed: () => _mostrarMenuOpciones(context),
+            onPressed: _publishing ? null : _publish,
+            icon: _publishing
+                ? const SizedBox.square(
+                    dimension: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.send_rounded),
           ),
         ],
       ),
-      body: LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints viewportConstraints) {
-          return SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 760),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
             child: ConstrainedBox(
               constraints: BoxConstraints(
-                minHeight: viewportConstraints.maxHeight - 32,
+                minHeight: constraints.maxHeight - 32,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (_isUploading) const LinearProgressIndicator(),
-                  if (_isUploading) const SizedBox(height: 12),
+                  if (_publishing) ...[
+                    const LinearProgressIndicator(),
+                    const SizedBox(height: 12),
+                  ],
                   Row(
                     children: [
-                      Text(
-                        "Autor: ",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                          fontSize: 18.0,
+                      CircleAvatar(
+                        radius: 21,
+                        backgroundColor: colorScheme.primaryContainer,
+                        foregroundColor: colorScheme.onPrimaryContainer,
+                        child: const Icon(
+                          Icons.campaign_outlined,
+                          size: 22,
                         ),
                       ),
+                      const SizedBox(width: 12),
                       Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              widget.author.name,
+                              style: Theme.of(context).textTheme.titleSmall,
+                            ),
+                            Text(
+                              widget.author.email,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Divider(height: 28),
+                  _DropdownRow<String>(
+                    label: 'Para',
+                    value: _audience,
+                    items: [
+                      const DropdownMenuItem(
+                        value: 'all',
                         child: Text(
-                          "mgfdev@itsuruapan.edu.mx",
-                          style: TextStyle(color: Colors.black, fontSize: 14.0),
+                          'Todos los estudiantes',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      Icon(Icons.person_outline_outlined, color: Colors.black),
-                    ],
-                  ),
-                  const Divider(),
-                  Row(
-                    children: [
-                      Text(
-                        "Para: ",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                          fontSize: 16,
-                        ),
-                      ),
-                      Expanded(
-                        child: DropdownButton<String>(
-                          value: _grupoSeleccionado,
-                          onChanged: (String? newValue) {
-                            setState(() {
-                              _grupoSeleccionado = newValue!;
-                            });
-                          },
-                          items: _grupos.map((String group) {
-                            return DropdownMenuItem<String>(
-                              value: group,
-                              child: Text(
-                                group,
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 14.0,
-                                  fontWeight: FontWeight.normal,
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                          isExpanded: true,
-                          underline: Container(height: 0),
-                          icon: Icon(
-                            Icons.arrow_drop_down,
-                            color: Colors.black,
+                      for (final group in _groups)
+                        DropdownMenuItem(
+                          value: group,
+                          child: Text(
+                            group,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                      ),
                     ],
+                    onChanged: (value) {
+                      if (value == null) return;
+                      setState(() => _audience = value);
+                    },
                   ),
-                  const Divider(),
-                  Row(
-                    children: [
-                      Text(
-                        "Categoría: ",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                          fontSize: 16,
+                  const Divider(height: 20),
+                  _DropdownRow<String>(
+                    label: 'Categoría',
+                    value: _category,
+                    items: [
+                      for (final category in _categories)
+                        DropdownMenuItem(
+                          value: category,
+                          child: Text(category),
                         ),
-                      ),
-                      Expanded(
-                        child: DropdownButton<String>(
-                          value: _categoriaSeleccionada,
-                          onChanged: (String? newValue) {
-                            setState(() {
-                              _categoriaSeleccionada = newValue!;
-                            });
-                          },
-                          items: _categorias.map((String category) {
-                            return DropdownMenuItem<String>(
-                              value: category,
-                              child: Text(
-                                category,
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 14.5,
-                                  fontWeight: FontWeight.normal,
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                          isExpanded: true,
-                          underline: Container(height: 0),
-                          icon: Icon(
-                            Icons.arrow_drop_down,
-                            color: Colors.black,
-                          ),
-                        ),
-                      ),
                     ],
+                    onChanged: (value) {
+                      if (value == null) return;
+                      setState(() => _category = value);
+                    },
                   ),
-                  const Divider(),
-                  Row(
-                    children: [
-                      Text(
-                        "Título: ",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                          fontSize: 16,
-                        ),
-                      ),
-                      Expanded(
-                        child: TextField(
-                          controller: _tituloController,
-                          decoration: InputDecoration(
-                            border: InputBorder.none,
-                            enabledBorder: InputBorder.none,
-                            focusedBorder: InputBorder.none,
-                            filled: false,
-                            contentPadding: const EdgeInsets.symmetric(
-                              vertical: 12,
-                            ),
-                            hintText: "Escribe un título",
-                            hintStyle: TextStyle(
-                              color: Colors.grey,
-                              fontSize: 15.0,
-                            ),
-                          ),
-                          style: TextStyle(color: Colors.black, fontSize: 14.5),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const Divider(),
-                  Row(
-                    children: [
-                      Text(
-                        "Link: ",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                          fontSize: 16,
-                        ),
-                      ),
-                      Expanded(
-                        child: TextField(
-                          controller: _tituloController,
-                          decoration: InputDecoration(
-                            border: InputBorder.none,
-                            enabledBorder: InputBorder.none,
-                            focusedBorder: InputBorder.none,
-                            filled: false,
-                            contentPadding: const EdgeInsets.symmetric(
-                              vertical: 12,
-                            ),
-                            hintText: "Agrega un enlace (opcional)",
-                            hintStyle: TextStyle(
-                              color: Colors.grey,
-                              fontSize: 15.0,
-                            ),
-                          ),
-                          style: TextStyle(color: Colors.black, fontSize: 14.5),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const Divider(),
+                  const Divider(height: 20),
                   TextField(
-                    controller: _textoController,
-                    decoration: InputDecoration(
-                      hintText: "Redacta un anuncio",
+                    controller: _titleController,
+                    textCapitalization: TextCapitalization.sentences,
+                    maxLength: 160,
+                    decoration: const InputDecoration(
+                      labelText: 'Título',
+                      hintText: 'Escribe un título breve',
                       filled: false,
+                      border: InputBorder.none,
                       enabledBorder: InputBorder.none,
                       focusedBorder: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(vertical: 12),
-                      hintStyle: TextStyle(color: Colors.grey, fontSize: 14.0),
-                      border: InputBorder.none,
+                      counterText: '',
+                      contentPadding: EdgeInsets.symmetric(vertical: 12),
                     ),
-                    style: TextStyle(color: Colors.black, fontSize: 14.0),
-                    maxLines: null, // Permite que el TextField se expanda
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const Divider(height: 20),
+                  TextField(
+                    controller: _contentController,
+                    textCapitalization: TextCapitalization.sentences,
+                    decoration: const InputDecoration(
+                      labelText: 'Contenido',
+                      hintText: 'Redacta el anuncio',
+                      filled: false,
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    style: Theme.of(context).textTheme.bodyLarge,
+                    minLines: 5,
+                    maxLines: null,
                     keyboardType: TextInputType.multiline,
                   ),
-                  if (_archivosAdjuntos.isNotEmpty)
-                    SizedBox(
-                      height: 200,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: _archivosAdjuntos.length,
-                        itemBuilder: (context, index) {
-                          return Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Image.network(
-                              _archivosAdjuntos[index]['fileUrl']!,
-                              width: 100,
-                              height: 100,
-                              fit: BoxFit.cover,
-                            ),
-                          );
-                        },
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: colorScheme.secondaryContainer.withValues(
+                        alpha: 0.5,
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          Icons.groups_2_outlined,
+                          size: 20,
+                          color: colorScheme.onSecondaryContainer,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            'Este anuncio se enviará a: $_audienceLabel.\n'
+                            'Los alumnos solo verán los anuncios de su grupo.',
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: colorScheme.onSecondaryContainer,
+                                  height: 1.45,
+                                ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 22),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.icon(
+                      onPressed: _publishing ? null : _publish,
+                      icon: const Icon(Icons.send_rounded),
+                      label: Text(
+                        _publishing ? 'Publicando…' : 'Publicar anuncio',
                       ),
                     ),
+                  ),
                 ],
               ),
             ),
-          );
-        },
+              );
+            },
+          ),
+        ),
       ),
+    );
+  }
+}
+
+class _DropdownRow<T> extends StatelessWidget {
+  final String label;
+  final T value;
+  final List<DropdownMenuItem<T>> items;
+  final ValueChanged<T?> onChanged;
+
+  const _DropdownRow({
+    required this.label,
+    required this.value,
+    required this.items,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Row(
+      children: [
+        SizedBox(
+          width: 86,
+          child: Text(
+            label,
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+        Expanded(
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<T>(
+              value: value,
+              items: items,
+              onChanged: onChanged,
+              isExpanded: true,
+              borderRadius: BorderRadius.circular(AppDesign.controlRadius),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurface,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

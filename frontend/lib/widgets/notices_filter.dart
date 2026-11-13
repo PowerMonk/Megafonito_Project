@@ -93,7 +93,6 @@ class _NoticesFilterState extends State<NoticesFilter> {
             itemBuilder: (context) => [
               _menuItem('Más recientes'),
               _menuItem('Más antiguos'),
-              _menuItem('Con archivos'),
             ],
             color: colorScheme.surface,
             shape: RoundedRectangleBorder(

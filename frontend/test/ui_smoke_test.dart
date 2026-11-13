@@ -1,15 +1,29 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_megafonito/main.dart';
+import 'package:flutter_megafonito/models/user_model.dart';
 import 'package:flutter_megafonito/screens/anuncios_screen.dart';
 import 'package:flutter_megafonito/screens/contact_screen.dart';
 import 'package:flutter_megafonito/screens/crear_anuncio_screen.dart';
 import 'package:flutter_megafonito/screens/oppscontent_screen.dart';
+import 'package:flutter_megafonito/services/notices_service.dart';
+import 'package:flutter_megafonito/services/realtime_service.dart';
 import 'package:flutter_megafonito/theme/app_theme.dart';
 import 'package:flutter_megafonito/widgets/actions_buttons.dart';
 import 'package:flutter_megafonito/widgets/navbar.dart';
 import 'package:flutter_megafonito/widgets/notice_card.dart';
 import 'package:flutter_megafonito/widgets/notices_filter.dart';
+
+const _testUser = User(
+  id: 1,
+  username: 'demo',
+  name: 'Demo User',
+  email: 'demo@example.test',
+  role: 'admin',
+  groupName: 'Administración',
+);
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -184,15 +198,17 @@ void main() {
             child: child!,
           );
         },
-        home: const CrearNuevoAnuncioScreen(
-          onAnuncioCreado: _ignoreCreatedNotice,
+        home: CrearNuevoAnuncioScreen(
+          author: _testUser,
+          noticesService: _FakeNoticesService(),
+          onPublish: (_) async {},
         ),
       ),
     );
     await tester.pump();
 
     expect(find.text('Nuevo anuncio'), findsOneWidget);
-    expect(find.byType(TextField), findsNWidgets(3));
+    expect(find.byType(TextField), findsNWidgets(2));
     expect(find.byType(Card), findsNothing);
     for (final textField in tester.widgetList<TextField>(
       find.byType(TextField),
@@ -284,22 +300,53 @@ Widget _shell({Key? key}) {
   return MaterialApp(
     key: key,
     theme: AppTheme.light,
-    home: const AnunciosScreen(
-      userName: 'Demo User',
-      userEmail: 'demo@example.test',
+    home: AnunciosScreen(
+      user: _testUser,
+      noticesService: _FakeNoticesService(),
+      realtimeService: _FakeRealtimeService(),
     ),
   );
 }
 
-void _ignoreCreatedNotice(
-  String title,
-  String content,
-  Color color,
-  String category,
-  bool hasAttachment,
-  String? fileUrl,
-  String? fileKey,
-) {}
+class _FakeNoticesService extends NoticesService {
+  @override
+  Future<Map<String, dynamic>> loadNotices({
+    int page = 1,
+    int limit = 5,
+    String? category,
+    String? sort,
+  }) async {
+    return {
+      'data': <dynamic>[],
+      'pagination': {
+        'currentPage': 1,
+        'pageSize': limit,
+        'totalItems': 0,
+        'totalPages': 0,
+      },
+    };
+  }
+
+  @override
+  Future<List<String>> loadGroups() async => const [];
+
+  @override
+  Future<void> createNotice(AnnouncementDraft draft) async {}
+}
+
+class _FakeRealtimeService extends RealtimeService {
+  @override
+  Stream<RealtimeEvent> get events => const Stream<RealtimeEvent>.empty();
+
+  @override
+  Future<void> connect(String token) async {}
+
+  @override
+  Future<void> disconnect() async {}
+
+  @override
+  Future<void> dispose() async {}
+}
 
 class _ActionMenuHarness extends StatelessWidget {
   final VoidCallback? onHomeBuild;
