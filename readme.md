@@ -5,12 +5,42 @@ A simple school announcements/notices app that makes communication easier betwee
 ## 🛠️ Tech Stack
 
 - **Frontend**: Flutter (Android focused)
-- **Backend**: Deno + Oak framework
-- **Database**: PostgreSQL
-- **Authentication**: JWT tokens
-- **File Storage**: AWS S3
+- **Demo backend**: Bun + SQLite + WebSocket (`server/`)
+- **Demo landing**: Astro (`server/web/`)
+- **Legacy backend**: Deno + Oak + PostgreSQL (`backend/`, not used by the demo)
+- **Demo authentication**: opaque session tokens, no JWT
+- **Cloud services**: none for the demo
 
-## 🚀 Quick Start
+## Demo local (Bun + SQLite)
+
+Esta es la ruta pensada para la presentación académica: sin Supabase, sin
+Firebase, sin Docker y sin internet.
+
+```bash
+cd server
+bun install
+bun run start
+```
+
+Abre `http://localhost:8787` en la laptop. La landing muestra las URLs LAN, los
+QR para conectar la tablet y el teléfono, las cuentas demo y un botón para
+reiniciar los datos.
+
+Cuentas:
+
+| Usuario | Contraseña | Rol |
+| --- | --- | --- |
+| `admin` | `admin123` | administrador |
+| `student1` | `1234` | alumno de Sistemas |
+| `student2` | `1234` | alumno de Mecánica |
+
+Guía completa: [`server/README.md`](server/README.md) y
+[`docs/demo-day.md`](docs/demo-day.md).
+
+## 🚀 Legacy backend quick start (not used by the demo)
+
+> The commands below belong to the old Deno + PostgreSQL backend. For the
+> academic demo use the `server/` folder above.
 
 ### Prerequisites
 - [Flutter](https://flutter.dev/docs/get-started/install) installed

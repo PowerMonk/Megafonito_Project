@@ -1,110 +1,79 @@
-import 'package:flutter/material.dart';
+import 'api_client.dart';
 
-import '../models/notice_model.dart';
-import 'api_service.dart';
-import 'auth_service.dart';
+class AnnouncementDraft {
+  final String title;
+  final String content;
+  final String category;
+  final String audience;
+  final String? group;
 
-/// Mock notices service with no real backend connections
-/// Uses in-memory storage for temporary notices data
+  const AnnouncementDraft({
+    required this.title,
+    required this.content,
+    required this.category,
+    required this.audience,
+    this.group,
+  });
+
+  Map<String, dynamic> toBody() {
+    return {
+      'title': title,
+      'content': content,
+      'category': category,
+      'audience': audience,
+      'groups': audience == 'groups' && group != null ? [group] : <String>[],
+    };
+  }
+
+  String get audienceLabel {
+    if (audience == 'all' || group == null) return 'Todos los estudiantes';
+    return group!;
+  }
+}
+
 class NoticesService {
-  // Notice loading logic (using mock data)
-  static Future<Map<String, dynamic>> loadNotices({
+  Future<Map<String, dynamic>> loadNotices({
     int page = 1,
     int limit = 5,
     String? category,
-    bool? hasFiles,
+    String? sort,
   }) async {
-    try {
-      return await ApiService.getNotices(
-        page: page,
-        limit: limit,
-        category: category,
-        hasFiles: hasFiles,
-      );
-    } catch (e) {
-      debugPrint('Error loading notices: $e');
-      rethrow;
+    final query = <String, String>{
+      'page': '$page',
+      'limit': '$limit',
+      if (category != null && category.isNotEmpty) 'category': category,
+      if (sort != null && sort.isNotEmpty) 'sort': sort,
+    };
+
+    final response = await ApiClient.get('/api/announcements', query: query);
+    if (response is! Map<String, dynamic>) {
+      throw const ApiException(500, 'Respuesta inesperada del servidor.');
     }
+    return response;
   }
 
-  // Notice creation logic (using mock data)
-  static Future<void> createNotice(
-    BuildContext context, {
-    required String title,
-    required String content,
-    required String category,
-    required bool hasFile,
-    String? fileUrl,
-    String? fileKey,
-  }) async {
-    try {
-      await Future.delayed(
-        Duration(milliseconds: 800),
-      ); // Simulate network delay
-
-      // Temporarily store the notice in memory
-      final mockNotice = {
-        'id': DateTime.now().millisecondsSinceEpoch,
-        'title': title,
-        'content': content,
-        'category': category,
-        'author_name': AuthService.currentUser?.name ?? 'Anonymous',
-        'created_at': DateTime.now().toIso8601String(),
-        'has_attachment': hasFile,
-        'attachment_url': fileUrl,
-        'attachment_key': fileKey,
-      };
-
-      // Update the mock data at the beginning of the list
-      final notices = ApiService.getMockNotices();
-      (notices['data'] as List).insert(0, mockNotice);
-
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Anuncio creado con éxito (modo desarrollo)'),
-          ),
-        );
-      }
-
-      return;
-    } catch (e) {
-      debugPrint('Error creating announcement: $e');
-      rethrow;
+  Future<List<String>> loadGroups() async {
+    final response = await ApiClient.get('/api/groups');
+    if (response is! Map<String, dynamic>) {
+      throw const ApiException(500, 'Respuesta inesperada del servidor.');
     }
+    final groups = response['groups'];
+    if (groups is! List) return [];
+    return groups
+        .whereType<String>()
+        .where((group) => group.trim().isNotEmpty)
+        .toList();
   }
 
-  // Sorting function
-  static List<Map<String, dynamic>> sortNotices(
-    List<Map<String, dynamic>> notices,
-    String? sortOption,
-  ) {
-    List<Map<String, dynamic>> sorted = List.from(notices);
-    if (sortOption == 'Más recientes') {
-      sorted.sort(
-        (a, b) => (b['fecha'] as DateTime).compareTo(a['fecha'] as DateTime),
-      );
-    } else if (sortOption == 'Más antiguos') {
-      sorted.sort(
-        (a, b) => (a['fecha'] as DateTime).compareTo(b['fecha'] as DateTime),
-      );
-    }
-    return sorted;
+  Future<void> createNotice(AnnouncementDraft draft) async {
+    await ApiClient.post('/api/announcements', draft.toBody());
   }
 
-  static Future<List<Notice>> convertApiResponseToNotices(
-    dynamic apiResponse,
-  ) async {
-    try {
-      if (apiResponse == null || !apiResponse.containsKey('data')) {
-        return [];
-      }
+  Future<void> updateNotice(int id, AnnouncementDraft draft) async {
+    await ApiClient.put('/api/announcements/$id', draft.toBody());
+  }
 
-      List<dynamic> noticesData = apiResponse['data'];
-      return noticesData.map((data) => Notice.fromJson(data)).toList();
-    } catch (e) {
-      debugPrint('Error converting API response to notices: $e');
-      return [];
-    }
+  Future<void> deleteNotice(int id) async {
+    await ApiClient.delete('/api/announcements/$id');
   }
 }

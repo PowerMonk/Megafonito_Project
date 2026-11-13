@@ -18,6 +18,7 @@ class NoticeCard extends StatelessWidget {
     final hasAttachment =
         anuncio['has_attachment'] == true || anuncio['has_attachment'] == 1;
     final createdAt = _formatCreatedAt(anuncio['created_at']);
+    final audienceLabel = anuncio['audience_label']?.toString();
 
     return Card(
       margin: const EdgeInsets.only(bottom: 14),
@@ -52,7 +53,11 @@ class NoticeCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          'Anuncio escolar',
+                          audienceLabel == null || audienceLabel.isEmpty
+                              ? 'Anuncio escolar'
+                              : 'Para: $audienceLabel',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(color: colorScheme.onSurfaceVariant),
                         ),

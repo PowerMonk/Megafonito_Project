@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../models/user_model.dart';
 import '../theme/app_theme.dart';
-import 'login_screen.dart';
+import '../widgets/server_connection_card.dart';
 
 class UserInfoScreen extends StatelessWidget {
-  const UserInfoScreen({super.key});
+  final User user;
+  final VoidCallback onLogout;
 
-  // Development example data; this is not loaded from the active mock login.
-  static const String _name = 'Karol Rubén Quiroz Mora';
-  static const String _email = 'qumk051105@itsuruapan.edu.mx';
-  static const String _controlNumber = '23040061';
-  static const String _career = 'Ing. en Sistemas Computacionales';
-  static const String _semester = '4';
+  const UserInfoScreen({
+    super.key,
+    required this.user,
+    required this.onLogout,
+  });
 
   Future<void> _copy(BuildContext context, String text) async {
     await Clipboard.setData(ClipboardData(text: text));
@@ -24,8 +25,14 @@ class UserInfoScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final allInfo =
-        'Nombre: $_name\nNo. control: $_controlNumber\nCarrera: $_career\nSemestre: $_semester\nEmail: $_email';
+    final allInfo = [
+      'Nombre: ${user.name}',
+      if (user.controlNumber != null) 'No. control: ${user.controlNumber}',
+      'Grupo: ${user.groupLabel}',
+      if (user.semester != null) 'Semestre: ${user.semester}',
+      'Email: ${user.email}',
+      'Rol: ${user.roleLabel}',
+    ].join('\n');
 
     return Container(
       color: AppDesign.page,
@@ -47,7 +54,12 @@ class UserInfoScreen extends StatelessWidget {
                             radius: 28,
                             backgroundColor: colorScheme.primaryContainer,
                             foregroundColor: colorScheme.onPrimaryContainer,
-                            child: const Icon(Icons.person_rounded, size: 30),
+                            child: Icon(
+                              user.isAdmin
+                                  ? Icons.admin_panel_settings_outlined
+                                  : Icons.person_rounded,
+                              size: 30,
+                            ),
                           ),
                           const SizedBox(width: 14),
                           Expanded(
@@ -55,18 +67,40 @@ class UserInfoScreen extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  _name,
+                                  user.name,
                                   style: Theme.of(context).textTheme.titleLarge,
                                 ),
                                 const SizedBox(height: 3),
                                 Text(
-                                  'Información de usuario',
+                                  '@${user.username}',
                                   style: Theme.of(context).textTheme.bodyMedium
                                       ?.copyWith(
                                         color: colorScheme.onSurfaceVariant,
                                       ),
                                 ),
                               ],
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 11,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: user.isAdmin
+                                  ? colorScheme.secondaryContainer
+                                  : colorScheme.primaryContainer,
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                            child: Text(
+                              user.roleLabel,
+                              style: Theme.of(context).textTheme.labelSmall
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                    color: user.isAdmin
+                                        ? colorScheme.onSecondaryContainer
+                                        : colorScheme.onPrimaryContainer,
+                                  ),
                             ),
                           ),
                         ],
@@ -81,14 +115,24 @@ class UserInfoScreen extends StatelessWidget {
                         ),
                       ),
                       const Divider(height: 20),
+                      if (user.controlNumber != null)
+                        _buildInfoRow(
+                          context,
+                          'Número de control',
+                          user.controlNumber!,
+                        ),
+                      _buildInfoRow(context, 'Grupo / perfil', user.groupLabel),
+                      if (user.semester != null)
+                        _buildInfoRow(
+                          context,
+                          'Semestre',
+                          '${user.semester}',
+                        ),
                       _buildInfoRow(
                         context,
-                        'Número de control',
-                        _controlNumber,
+                        'Correo electrónico',
+                        user.email,
                       ),
-                      _buildInfoRow(context, 'Carrera', _career),
-                      _buildInfoRow(context, 'Semestre', _semester),
-                      _buildInfoRow(context, 'Correo electrónico', _email),
                     ],
                   ),
                 ),
@@ -121,14 +165,24 @@ class UserInfoScreen extends StatelessWidget {
                   ),
                 ),
               ),
+              const SizedBox(height: 18),
+              ServerConnectionCard(
+                showDisconnect: true,
+                onChanged: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Servidor actualizado. Inicia sesión de nuevo.',
+                      ),
+                    ),
+                  );
+                  onLogout();
+                },
+                onDisconnect: onLogout,
+              ),
               const SizedBox(height: 28),
               OutlinedButton.icon(
-                onPressed: () {
-                  Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(builder: (context) => LoginScreen()),
-                    (route) => false,
-                  );
-                },
+                onPressed: onLogout,
                 icon: const Icon(Icons.logout_rounded),
                 label: const Text('Cerrar sesión'),
                 style: OutlinedButton.styleFrom(
@@ -157,8 +211,9 @@ class UserInfoScreen extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: Theme.of(context).textTheme.labelLarge
-                      ?.copyWith(color: colorScheme.onSurfaceVariant),
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
                 ),
                 const SizedBox(height: 3),
                 SelectableText(
